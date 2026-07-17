@@ -6,7 +6,7 @@
 <title>bienvenue chez NA1N🚂</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap">
 <script>
-const SUPABASE_URL="https://yudbfuqudtqkdddjnaad.supabase.co";
+const SUPABASE_URL="https://kmbefvfxujfdipsbqyla.supabase.co";
 const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttYmVmdmZ4dWpmZGlwc2JxeWxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyNzczOTksImV4cCI6MjA5OTg1MzM5OX0.zop6DDlF49ms1-4a12WKWbU_X-ccPLG_D97r0Yya0Bs";
 </script>
 <script
@@ -709,7 +709,7 @@ body.mobile .toast{bottom:74px}
 <title>bienvenue chez NA1N🚂</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap">
 <script>
-const SUPABASE_URL="https://yudbfuqudtqkdddjnaad.supabase.co";
+const SUPABASE_URL="https://kmbefvfxujfdipsbqyla.supabase.co";
 const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttYmVmdmZ4dWpmZGlwc2JxeWxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyNzczOTksImV4cCI6MjA5OTg1MzM5OX0.zop6DDlF49ms1-4a12WKWbU_X-ccPLG_D97r0Yya0Bs";
 </script>
 <script

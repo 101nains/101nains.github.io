@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap">
 <script>
 const SUPABASE_URL="https://yudbfuqudtqkdddjnaad.supabase.co";
-const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1ZGJmdXF1ZHRxa2RkZGpuYWFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2OTA0MjQsImV4cCI6MjA5NDI2NjQyNH0.G-wFqBVSp05P3HfiDMgaGxufm3n3gWWaKECOVTzPeEA";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttYmVmdmZ4dWpmZGlwc2JxeWxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyNzczOTksImV4cCI6MjA5OTg1MzM5OX0.zop6DDlF49ms1-4a12WKWbU_X-ccPLG_D97r0Yya0Bs";
 </script>
 <script
   src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"
@@ -710,7 +710,7 @@ body.mobile .toast{bottom:74px}
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap">
 <script>
 const SUPABASE_URL="https://yudbfuqudtqkdddjnaad.supabase.co";
-const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1ZGJmdXF1ZHRxa2RkZGpuYWFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2OTA0MjQsImV4cCI6MjA5NDI2NjQyNH0.G-wFqBVSp05P3HfiDMgaGxufm3n3gWWaKECOVTzPeEA";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttYmVmdmZ4dWpmZGlwc2JxeWxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyNzczOTksImV4cCI6MjA5OTg1MzM5OX0.zop6DDlF49ms1-4a12WKWbU_X-ccPLG_D97r0Yya0Bs";
 </script>
 <script
   src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"

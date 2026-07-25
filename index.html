@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>bienvenue chez 101 NA1NS🚂</title>
+<title>bienvenue chez NA1N🚂</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap">
 <script>
 const SUPABASE_URL="https://kmbefvfxujfdipsbqyla.supabase.co";
@@ -706,7 +706,7 @@ body.mobile .toast{bottom:74px}
 </style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>bienvenue chez 101 NA1NS🚂</title>
+<title>bienvenue chez NA1N🚂</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap">
 <script>
 const SUPABASE_URL="https://kmbefvfxujfdipsbqyla.supabase.co";
@@ -1456,7 +1456,7 @@ body.light .replace-player-btn{background:rgba(0,0,0,.03);border:1px solid var(-
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-logo">🚂</div>
-    <div class="login-title">bienvenue chez 101 NA1NS</div>
+    <div class="login-title">bienvenue chez NA1N</div>
     <div class="login-sub">Connecte-toi pour accéder à l'application</div>
     <div class="login-field">
       <label>Identifiant</label>
@@ -1481,7 +1481,7 @@ body.light .replace-player-btn{background:rgba(0,0,0,.03);border:1px solid var(-
 <div id="mobTopbar">
   <span class="mob-topbar-logo">🚂</span>
   <div class="mob-topbar-title">
-    101 NA1NS
+    NA1N
     <span class="mob-status" id="mobStatusDot"></span>
   </div>
   <div class="mob-topbar-actions">
@@ -1519,7 +1519,7 @@ body.light .replace-player-btn{background:rgba(0,0,0,.03);border:1px solid var(-
 <div class="page">
 
   <header>
-    <h1><span class="logo-emoji">🚂</span> bienvenue chez 101 NA1NS</h1>
+    <h1><span class="logo-emoji">🚂</span> bienvenue chez NA1N</h1>
     <p>
       <span class="status-dot" id="statusDot"></span>
       <span id="statusTxt">Connexion…</span>&nbsp;
@@ -1702,6 +1702,7 @@ body.light .replace-player-btn{background:rgba(0,0,0,.03);border:1px solid var(-
           <button class="btn" onclick="loadAll()">↻ Actualiser</button>
           <button class="btn" onclick="exportPlayersXlsx()" title="Exporter la liste des joueurs en Excel">📥 Export Excel</button>
           <button class="btn" onclick="openRepairModal()" title="Réparer l'historique d'un joueur renommé" style="display:none" id="btnRepairHistory">🔧 Réparer historique</button>
+          <button class="btn" onclick="recalcDrawStats()" title="Recalculer les stats de tirage depuis l'historique" style="display:none" id="btnRecalcStats">🔄 Recalculer stats</button>
           <button class="btn btn-gold" id="archiveWeekParticipantsBtn" onclick="archiveWeekFromParticipants()" style="display:none">📅 Archiver la semaine</button>
         </div>
       </div>
@@ -1879,6 +1880,39 @@ body.light .replace-player-btn{background:rgba(0,0,0,.03);border:1px solid var(-
         </div>
 
     <!-- À PROPOS (admin only) -->
+    <div class="section" id="logsSection" style="display:none">
+      <div class="section-header" onclick="toggleSection('logsSection')">
+        <span class="section-title">📋 Logs & Présence</span>
+        <span class="section-toggle collapsed" id="logsSectionToggle" style="font-size:18px;color:var(--text3);transition:transform .3s">▸</span>
+      </div>
+      <div class="section-body collapsed" id="logsBody" style="max-height:0">
+        <div style="padding:16px">
+
+          <!-- Qui est en ligne -->
+          <div style="margin-bottom:20px">
+            <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px">🟢 En ligne actuellement</div>
+            <div id="presenceList" style="display:flex;flex-wrap:wrap;gap:8px">
+              <span style="font-size:12px;color:var(--text3);font-style:italic">Chargement…</span>
+            </div>
+          </div>
+
+          <!-- Filtres logs -->
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+            <span style="font-size:11px;font-weight:700;color:var(--text3)">Filtrer</span>
+            <button class="log-filter-btn active" data-filter="all"     onclick="setLogFilter('all',this)">Tout</button>
+            <button class="log-filter-btn"        data-filter="login"   onclick="setLogFilter('login',this)">🔑 Connexions</button>
+            <button class="log-filter-btn"        data-filter="draw"    onclick="setLogFilter('draw',this)">🎲 Tirages</button>
+            <button class="log-filter-btn"        data-filter="replace" onclick="setLogFilter('replace',this)">🔄 Remplacements</button>
+            <button class="log-filter-btn"        data-filter="archive" onclick="setLogFilter('archive',this)">📦 Archives</button>
+            <button class="log-filter-btn"        data-filter="player"  onclick="setLogFilter('player',this)">👤 Joueurs</button>
+            <button class="log-filter-btn"        style="margin-left:auto;color:var(--red);border-color:rgba(255,107,107,0.3)" onclick="clearLogs()">🗑️ Vider</button>
+          </div>
+
+          <div id="logsList" style="display:flex;flex-direction:column;gap:4px;max-height:500px;overflow-y:auto"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="section" id="aboutSection" style="display:none">
       <div class="section-header">
         <div class="section-header-left" onclick="toggleSection('aboutBody','aboutToggle')">
@@ -2044,6 +2078,7 @@ const PERM_SECTIONS=[
   {id:'sectionStats',   label:'Statistiques',  icon:'📊'},
   {id:'secEvents',      label:'Événements',    icon:'⚔️'},
   {id:'secArchive',     label:'Archives',      icon:'📦'},
+  {id:'logsSection',    label:'Logs',          icon:'📋'},
   {id:'aboutSection',   label:'À propos',      icon:'ℹ️'},
 ];
 
@@ -2057,7 +2092,8 @@ let permTableExists=true;
 function canSeeSection(secId){
   if(!currentUser)return false;
   const role=currentUser.role;
-  if(secId==='aboutSection') return role==='admin'; // À propos = admin uniquement
+  if(secId==='aboutSection') return role==='admin';
+  if(secId==='logsSection')   return role==='admin'; // À propos = admin uniquement
   if(role==='admin')return true;
   const p=role==='staff'?permConfig.staff:permConfig.member;
   return p[secId]!==false;
@@ -2701,15 +2737,25 @@ async function confirmReplace(newPlayerName){
     }
   }
 
-  // Mettre à jour le compteur du remplaçant
+  const countField = sanctionRole==='driver' ? 'driver_count' : 'vip_count';
+
+  // Décrémenter le compteur de l'absent (A n'a pas joué)
+  const absent = participants.find(x=>x.name===sanctionPlayerName);
+  if(absent && (absent[countField]||0) > 0){
+    const newCount = (absent[countField]||0) - 1;
+    await sb.from('participants').update({[countField]: newCount}).eq('id', absent.id);
+    absent[countField] = newCount;
+  }
+
+  // Incrémenter le compteur du remplaçant (B a joué à la place)
   const p = participants.find(x=>x.name===newPlayerName);
   if(p){
-    const countField = sanctionRole==='driver' ? 'driver_count' : 'vip_count';
     await sb.from('participants').update({[countField]:(p[countField]||0)+1}).eq('id',p.id);
     p[countField]=(p[countField]||0)+1;
   }
   closeAbsentModal();
   await loadWeeklyDraws();
+  writeLog('replace', `a remplacé ${sanctionPlayerName} par ${newPlayerName}`);
   toast(`${newPlayerName} remplace ${sanctionPlayerName} ✅`);
 }
 // ────────────────────────────────────────────────────────────────────────────
@@ -2746,6 +2792,8 @@ async function doLogin(){
     if(remember){localStorage.setItem(SESSION_KEY,JSON.stringify(session));sessionStorage.removeItem(SESSION_KEY);}
     else{sessionStorage.setItem(SESSION_KEY,JSON.stringify(session));localStorage.removeItem(SESSION_KEY);}
     showApp();
+    writeLog('login', 's\'est connecté');
+    startPresence();
   }catch(e){
     errEl.textContent='Erreur : '+e.message;
     btn.disabled=false;btn.innerHTML='Se connecter';
@@ -2753,6 +2801,8 @@ async function doLogin(){
 }
 
 function doLogout(){
+  writeLog('logout', 's\'est déconnecté');
+  stopPresence();
   currentUser=null;localStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_KEY);
   document.getElementById('appScreen').style.display='none';
   document.getElementById('loginScreen').style.display='flex';
@@ -2809,6 +2859,7 @@ function showApp(){
   const archiveBtn=document.getElementById('archiveWeekParticipantsBtn');
   if(archiveBtn)archiveBtn.style.display=isAdminOrStaff()?'inline-flex':'none';
   const repairBtn=document.getElementById('btnRepairHistory');if(repairBtn)repairBtn.style.display=isAdmin()?'':'none';
+  const recalcBtn=document.getElementById('btnRecalcStats');if(recalcBtn)recalcBtn.style.display=isAdmin()?'':'none';
   const priorityWrap=document.getElementById('priorityToggleWrap');if(priorityWrap)priorityWrap.style.display=isAdmin()?'flex':'none';
   if(isAdmin())loadUsers();
   loadPermConfig();
@@ -2817,6 +2868,7 @@ function showApp(){
   subscribeRT();
   loadWeeklyDraws();
   subscribeWeeklyDraws();
+  if(isAdmin()) subscribeLogsRT();
 }
 
 async function loadUsers(){
@@ -3181,6 +3233,7 @@ async function archiveWeek(){
 
 async function archiveWeekFromParticipants(){
   if(!isAdminOrStaff())return;
+  writeLog('archive', 'a archivé la semaine');
   const eligible=participants.filter(p=>isEligible(p));
   if(!confirm(`Archiver la semaine ?\n\n${eligible.length}/${participants.length} joueur(s) éligibles.\nLes coffres seront réinitialisés pour tout le monde.\n\nCette action est irréversible.`))return;
   setBusy(true);
@@ -3432,6 +3485,7 @@ async function doWeeklyDraws(){
   if(updateOps.length)await Promise.all(updateOps);
   window._currentWeeklyDraws={draws,weekStart};
   document.getElementById('showWeeklyDrawsBtn').style.display='flex';
+  writeLog('draw', 'a effectué le tirage hebdomadaire (7 jours)');
   toast(bufferActive?'7 tirages effectués avec les stats de la semaine passée ! 📦🎲':'7 tirages effectués pour la semaine ! 🎲');
 }
 
@@ -3884,9 +3938,10 @@ function renderStats(){
   }
   const totalDraws=history.length;
   const eligCount=participants.filter(p=>isEligible(p)).length;
-  const pwP=participants.filter(p=>p.power_t1);
+  const pwP=participants.filter(p=>p.power_t1).sort((a,b)=>a.power_t1-b.power_t1);
   const avgPower=pwP.length?Math.round(pwP.reduce((s,p)=>s+(p.power_t1||0),0)/pwP.length):0;
   const totalPower=participants.reduce((s,p)=>s+(p.power_t1||0),0);
+  const medianPower=pwP.length?pwP[Math.floor(pwP.length/2)].power_t1:0;
   const totalWeeksArchived=new Set(weeksHistory.map(w=>w.archived_at?w.archived_at.slice(0,10):'')).size;
   const withRate=participants.map(p=>{const w=getPlayerWeeks(p);return w.length?Math.round(w.filter(x=>x.validated).length/w.length*100):null;}).filter(x=>x!==null);
   const avgRate=withRate.length?Math.round(withRate.reduce((s,v)=>s+v,0)/withRate.length):null;
@@ -3895,6 +3950,7 @@ function renderStats(){
     {val:eligCount,lbl:'Éligibles 🏆'},
     {val:totalWeeksArchived||'—',lbl:'Semaines archivées'},
     {val:avgPower?avgPower.toLocaleString('fr-FR'):'—',lbl:'Puissance moy.'},
+    {val:medianPower?medianPower.toLocaleString('fr-FR'):'—',lbl:'Puissance médiane'},
     {val:totalPower?totalPower.toLocaleString('fr-FR'):'—',lbl:'Puissance totale'},
     {val:avgRate!==null?avgRate+'%':'—',lbl:'Taux valid. moy.'},
   ].map(({val,lbl})=>`<div class="stats-global-card"><div class="stats-global-val">${val}</div><div class="stats-global-lbl">${lbl}</div></div>`).join('');
@@ -4732,6 +4788,187 @@ function renderHistFiltered(){
 /* ── Feat 5 : Badge ⭐ sur les lignes du planning ── */
 // (voir rendu dans renderWeeklyPlanning — driverIsStaff/vipIsStaff déjà injectés)
 
+
+/* ══════════════════════════════════════════════════════
+   PRÉSENCE TEMPS RÉEL + JOURNAL DE LOGS
+   ══════════════════════════════════════════════════════ */
+
+let _logFilter = 'all';
+let _presenceInterval = null;
+let _logsRealtime = null;
+
+const LOG_ICONS = {
+  login:   '🔑', logout:  '🚪', draw:    '🎲',
+  replace: '🔄', archive: '📦', player:  '👤', system: '⚙️'
+};
+
+// ── Enregistrer un log ────────────────────────────────────────────────────
+async function writeLog(type, detail){
+  if(!sb || !currentUser) return;
+  try{
+    await sb.from('logs').insert({
+      username:   currentUser.username,
+      action:     type,
+      detail:     detail,
+      created_at: new Date().toISOString()
+    });
+  }catch(e){ console.warn('Log error:', e); }
+}
+
+// ── Présence : heartbeat toutes les 30s ───────────────────────────────────
+async function updatePresence(){
+  if(!sb || !currentUser) return;
+  try{
+    await sb.from('presence').upsert({
+      username:  currentUser.username,
+      role:      currentUser.role,
+      last_seen: new Date().toISOString()
+    }, {onConflict: 'username'});
+  }catch(e){}
+}
+
+async function loadPresence(){
+  if(!sb) return;
+  try{
+    // Considérer en ligne = vu dans les 90 dernières secondes
+    const cutoff = new Date(Date.now() - 90000).toISOString();
+    const {data} = await sb.from('presence').select('*').gte('last_seen', cutoff);
+    const el = document.getElementById('presenceList');
+    if(!el) return;
+    if(!data || !data.length){
+      el.innerHTML = '<span style="font-size:12px;color:var(--text3);font-style:italic">Personne en ligne</span>';
+      return;
+    }
+    el.innerHTML = data.map(u=>`
+      <div class="presence-chip">
+        <span class="presence-dot"></span>
+        <span>${u.username}</span>
+        <span style="font-size:10px;color:var(--text3);margin-left:2px">(${u.role})</span>
+      </div>`).join('');
+  }catch(e){}
+}
+
+function startPresence(){
+  updatePresence();
+  loadPresence();
+  _presenceInterval = setInterval(()=>{
+    updatePresence();
+    loadPresence();
+  }, 30000);
+}
+
+function stopPresence(){
+  if(_presenceInterval){ clearInterval(_presenceInterval); _presenceInterval=null; }
+  // Supprimer la présence à la déconnexion
+  if(sb && currentUser){
+    sb.from('presence').delete().eq('username', currentUser.username).then(()=>{});
+  }
+}
+
+// ── Affichage des logs ────────────────────────────────────────────────────
+function setLogFilter(filter, btn){
+  _logFilter = filter;
+  document.querySelectorAll('.log-filter-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderLogs();
+}
+
+async function renderLogs(){
+  const el = document.getElementById('logsList');
+  if(!el || !sb) return;
+  try{
+    let q = sb.from('logs').select('*').order('created_at', {ascending: false}).limit(200);
+    if(_logFilter !== 'all') q = q.eq('action', _logFilter);
+    const {data, error} = await q;
+    if(error || !data || !data.length){
+      el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:12px;font-style:italic">Aucun log enregistré.</div>';
+      return;
+    }
+    el.innerHTML = data.map(log=>{
+      const icon = LOG_ICONS[log.action] || '⚙️';
+      const time = new Date(log.created_at).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+      return `<div class="log-entry">
+        <span class="log-entry-icon">${icon}</span>
+        <span class="log-entry-text"><span class="log-entry-user">${log.username}</span> ${log.detail}</span>
+        <span class="log-entry-time">${time}</span>
+      </div>`;
+    }).join('');
+  }catch(e){
+    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3)">Erreur chargement logs.</div>';
+  }
+}
+
+async function clearLogs(){
+  if(!isAdmin()) return;
+  if(!confirm('Vider tout le journal de logs ?')) return;
+  await sb.from('logs').delete().neq('id', 0);
+  renderLogs();
+  toast('Journal vidé');
+}
+
+// ── Abonnement realtime sur logs ─────────────────────────────────────────
+function subscribeLogsRT(){
+  if(_logsRealtime) return;
+  _logsRealtime = sb.channel('logs-rt')
+    .on('postgres_changes', {event:'INSERT', schema:'public', table:'logs'}, ()=>{
+      const el = document.getElementById('logsList');
+      if(el && el.closest('#logsSection')?.style.display !== 'none') renderLogs();
+    })
+    .subscribe();
+}
+
+
+async function recalcDrawStats(){
+  if(!isAdmin()) return;
+  if(!confirm('Recalculer les stats de tirage (driver_count / vip_count) de tous les joueurs depuis l\'historique ?\n\nCela corrige les compteurs si des remplacements ont créé des incohérences.\nOpération irréversible.')) return;
+  if(!sb) return;
+  setBusy(true);
+
+  // Compter depuis historique (is_weekly = true uniquement = tirages officiels)
+  const {data: hist, error} = await sb.from('historique')
+    .select('driver, vip')
+    .eq('is_weekly', true);
+
+  if(error || !hist){
+    setBusy(false);
+    toast('Erreur lors du chargement de l\'historique ❌');
+    return;
+  }
+
+  // Compter driver_count et vip_count par joueur
+  const driverCounts = {};
+  const vipCounts = {};
+  hist.forEach(h => {
+    if(h.driver) driverCounts[h.driver] = (driverCounts[h.driver]||0) + 1;
+    if(h.vip)    vipCounts[h.vip]       = (vipCounts[h.vip]||0)       + 1;
+  });
+
+  // Mettre à jour chaque participant
+  const updates = participants.map(p => ({
+    id:           p.id,
+    driver_count: driverCounts[p.name] || 0,
+    vip_count:    vipCounts[p.name]    || 0,
+  }));
+
+  // Appliquer en batch
+  let errors = 0;
+  for(const u of updates){
+    const {error: e} = await sb.from('participants')
+      .update({driver_count: u.driver_count, vip_count: u.vip_count})
+      .eq('id', u.id);
+    if(e) errors++;
+    // Mettre à jour localement
+    const p = participants.find(x=>x.id===u.id);
+    if(p){ p.driver_count=u.driver_count; p.vip_count=u.vip_count; }
+  }
+
+  await loadAll();
+  setBusy(false);
+  writeLog('system', `a recalculé les stats de tirage depuis l'historique`);
+  if(errors) toast(`⚠️ ${errors} erreur(s) lors de la mise à jour`);
+  else toast(`✅ Stats de tirage recalculées pour ${updates.length} joueurs`);
+}
+
 function onSearch(){searchFilter=document.getElementById('searchInput').value.toLowerCase();document.getElementById('searchClear').classList.toggle('show',searchFilter.length>0);render();}
 function clearSearch(){document.getElementById('searchInput').value='';searchFilter='';document.getElementById('searchClear').classList.remove('show');render();}
 async function toggleSortAlpha(){
@@ -4871,11 +5108,14 @@ async function addName(){
   setBusy(true);
   const pos=participants.length;
   const{error}=await sb.from('participants').insert({name,position:pos,driver_count:0,vip_count:0,weeks_validated:0,coffres_days:JSON.stringify([false,false,false,false,false])});
+  if(!error) writeLog('player', `a ajouté le joueur ${name}`);
   if(error){toast('Erreur : '+error.message);setBusy(false);return;}
   inp.value='';setBusy(false);
 }
 
 async function removeName(id){
+  const p = participants.find(x=>x.id===id);
+  if(p) writeLog('player', `a supprimé le joueur ${p.name}`);
   if(!confirm('Supprimer ce participant ?'))return;
   setBusy(true);await sb.from('participants').delete().eq('id',id);setBusy(false);
 }
@@ -5207,10 +5447,20 @@ async function balanceTeams(){
     const fmtPow = v => v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'k':v;
     toast(`⚡ A : ${groupA.length} joueurs (${fmtPow(powA)}) · B : ${groupB.length} joueurs (${fmtPow(powB)})`);
   } else {
-    const allPlayers=[...starters,...subs.slice(0,Math.max(0,TOTAL_STARTERS-starters.length))];
-    const subsOnly=subs.slice(Math.max(0,TOTAL_STARTERS-starters.length));
-    const[groupA,groupB]=splitBalanced(allPlayers);const[subA,subB]=splitBalanced(subsOnly);
-    evTeams={A:buildOneTeam(groupA,subA,true),B:buildOneTeam(groupB,subB,true)};
+    // Tous les joueurs sélectionnés (starters + subs) triés par puissance
+    const all = [...starters, ...subs].sort((a,b)=>(b.power_t1||0)-(a.power_t1||0));
+    // Répartition équilibrée par puissance
+    const [groupA, groupB] = splitBalanced(all);
+    // Les 20 premiers de chaque groupe = titulaires, le reste = remplaçants
+    const STARTER_SLOTS = CATEGORIES.filter(c=>c.key!=='SUB').reduce((s,c)=>s+c.size, 0);
+    const titA = groupA.slice(0, STARTER_SLOTS);
+    const subA = groupA.slice(STARTER_SLOTS);
+    const titB = groupB.slice(0, STARTER_SLOTS);
+    const subB = groupB.slice(STARTER_SLOTS);
+    evTeams={A:buildOneTeam(titA, subA), B:buildOneTeam(titB, subB)};
+    const powA=teamTotalPower(evTeams.A), powB=teamTotalPower(evTeams.B);
+    const fmtPow=v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'k':v;
+    toast(`⚖️ A : ${groupA.length} joueurs (${fmtPow(powA)}) · B : ${groupB.length} joueurs (${fmtPow(powB)})`);
   }
   await saveEvTeamsToDB();
   if(!evAsymMode) toast('⚖️ Équipes sauvegardées !');

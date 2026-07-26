@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>bienvenue chez 101NAINS🚂</title>
+<title>bienvenue chez 101NA1NS🚂</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap">
 <script>
 const SUPABASE_URL="https://kmbefvfxujfdipsbqyla.supabase.co";
@@ -706,7 +706,7 @@ body.mobile .toast{bottom:74px}
 </style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>bienvenue chez 101NAINS🚂</title>
+<title>bienvenue chez 101NA1NS🚂</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap">
 <script>
 const SUPABASE_URL="https://kmbefvfxujfdipsbqyla.supabase.co";
@@ -1456,7 +1456,7 @@ body.light .replace-player-btn{background:rgba(0,0,0,.03);border:1px solid var(-
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-logo">🚂</div>
-    <div class="login-title">bienvenue chez 101NAINS</div>
+    <div class="login-title">bienvenue chez 101NA1NS</div>
     <div class="login-sub">Connecte-toi pour accéder à l'application</div>
     <div class="login-field">
       <label>Identifiant</label>
@@ -1847,6 +1847,12 @@ body.light .replace-player-btn{background:rgba(0,0,0,.03);border:1px solid var(-
           <div id="evPlayersList"></div>
           <div style="display:flex;gap:10px;align-items:center;margin:1rem 0;flex-wrap:wrap">
             <button class="btn btn-primary" id="balanceBtn" onclick="balanceTeams()">⚖️ Équilibrer et sauvegarder</button>
+            <div style="display:flex;align-items:center;gap:8px;padding:0 10px;background:rgba(255,184,77,0.06);border:1px solid rgba(255,184,77,0.15);border-radius:var(--radius-lg);height:34px">
+              <span style="font-size:11px;font-weight:700;color:var(--amber)">⚡ EL en priorité</span>
+              <button id="elPriorityBtn" onclick="toggleElPriority()" style="width:38px;height:20px;border-radius:99px;border:none;cursor:pointer;background:var(--border2);padding:2px;transition:background .2s">
+                <span id="elPriorityThumb" style="display:block;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;transform:translateX(0px)"></span>
+              </button>
+            </div>
             <div id="asymControls" style="display:none;align-items:center;gap:8px;padding:6px 12px;background:rgba(255,184,77,0.06);border:1px solid rgba(255,184,77,0.2);border-radius:var(--radius-lg)">
               <span style="font-size:11px;font-weight:700;color:var(--amber)">Équipe A :</span>
               <input type="range" id="asymSlider" min="15" max="35" step="1" value="25"
@@ -2060,6 +2066,7 @@ let currentUser=null;
 let evNbTeams=1,evRoles={},evTeams=null,evDragSrc=null,evTeamsLoaded=false;
 let evAsymMode=false;   // mode asymétrique (grosse équipe A + petite équipe B)
 let evAsymSizeA=25;     // nombre de joueurs dans la grosse équipe A
+let evElPriority=false; // les joueurs les plus forts vont en Électrons libres en premier
 let weeklyDrawsData=[];
 let drawBuffer=null; // Mémoire tampon 48h post-archivage (coffres_snapshot de la semaine passée)
 const DAYS=['Lu','Ma','Me','Je','Ve'];
@@ -5312,6 +5319,15 @@ async function resetTeams(){
   toast('Rôles et équipes réinitialisés ↺');
 }
 
+function toggleElPriority(){
+  evElPriority = !evElPriority;
+  const btn = document.getElementById('elPriorityBtn');
+  const thumb = document.getElementById('elPriorityThumb');
+  if(btn) btn.style.background = evElPriority ? 'var(--amber)' : 'var(--border2)';
+  if(thumb) thumb.style.transform = evElPriority ? 'translateX(18px)' : 'translateX(0px)';
+  toast(evElPriority ? '⚡ EL priorité ON — les plus forts iront en Électrons libres' : 'EL priorité OFF');
+}
+
 async function setNbTeams(n){
   if(n==='asym'){
     evAsymMode=true; evNbTeams=2;
@@ -5475,9 +5491,26 @@ function splitBalanced(players){
 }
 
 function buildOneTeam(starters,subs){
-  const team=makeEmptyTeam();const pool=[...starters];const subPool=[...subs];
-  const starterCats=CATEGORIES.filter(c=>c.key!=='SUB');let filled=true;
-  while(filled&&pool.length>0){filled=false;for(const cat of starterCats){if(team[cat.key].length<cat.size&&pool.length>0){team[cat.key].push(pool.shift());filled=true;}}}
+  const team=makeEmptyTeam();const subPool=[...subs];
+  // Trier starters par puissance décroissante
+  const sorted=[...starters].sort((a,b)=>(b.power_t1||0)-(a.power_t1||0));
+  let pool;
+  if(evElPriority){
+    // Les plus forts vont en EL en premier, le reste remplit H1-R2
+    const elCat=CATEGORIES.find(c=>c.key==='EL');
+    const elSize=elCat?elCat.size:4;
+    const elPlayers=sorted.slice(0,elSize);
+    const restPlayers=sorted.slice(elSize);
+    team['EL']=[...elPlayers];
+    pool=[...restPlayers];
+    const nonElCats=CATEGORIES.filter(c=>c.key!=='SUB'&&c.key!=='EL');
+    let filled=true;
+    while(filled&&pool.length>0){filled=false;for(const cat of nonElCats){if(team[cat.key].length<cat.size&&pool.length>0){team[cat.key].push(pool.shift());filled=true;}}}
+  } else {
+    pool=[...sorted];
+    const starterCats=CATEGORIES.filter(c=>c.key!=='SUB');let filled=true;
+    while(filled&&pool.length>0){filled=false;for(const cat of starterCats){if(team[cat.key].length<cat.size&&pool.length>0){team[cat.key].push(pool.shift());filled=true;}}}
+  }
   for(const cat of starterCats){while(team[cat.key].length<cat.size&&subPool.length>0){team[cat.key].push(subPool.shift());}}
   team['SUB']=subPool.slice(0,TOTAL_SUBS);return team;
 }
@@ -5573,6 +5606,8 @@ function applyLayout(mode){
       b.style.pointerEvents = '';
       b.style.marginTop = '';
     });
+    // Réappliquer les permissions pour re-cacher les sections non autorisées
+    applyPermissions();
   }
 }
 

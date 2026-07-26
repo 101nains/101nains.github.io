@@ -5492,25 +5492,24 @@ function splitBalanced(players){
 
 function buildOneTeam(starters,subs){
   const team=makeEmptyTeam();const subPool=[...subs];
-  // Trier starters par puissance décroissante
   const sorted=[...starters].sort((a,b)=>(b.power_t1||0)-(a.power_t1||0));
+  const starterCats=CATEGORIES.filter(c=>c.key!=='SUB'); // toutes les cats titulaires
   let pool;
   if(evElPriority){
     // Les plus forts vont en EL en premier, le reste remplit H1-R2
     const elCat=CATEGORIES.find(c=>c.key==='EL');
     const elSize=elCat?elCat.size:4;
-    const elPlayers=sorted.slice(0,elSize);
-    const restPlayers=sorted.slice(elSize);
-    team['EL']=[...elPlayers];
-    pool=[...restPlayers];
-    const nonElCats=CATEGORIES.filter(c=>c.key!=='SUB'&&c.key!=='EL');
+    team['EL']=[...sorted.slice(0,elSize)];
+    pool=[...sorted.slice(elSize)];
+    const nonElCats=starterCats.filter(c=>c.key!=='EL');
     let filled=true;
     while(filled&&pool.length>0){filled=false;for(const cat of nonElCats){if(team[cat.key].length<cat.size&&pool.length>0){team[cat.key].push(pool.shift());filled=true;}}}
   } else {
     pool=[...sorted];
-    const starterCats=CATEGORIES.filter(c=>c.key!=='SUB');let filled=true;
+    let filled=true;
     while(filled&&pool.length>0){filled=false;for(const cat of starterCats){if(team[cat.key].length<cat.size&&pool.length>0){team[cat.key].push(pool.shift());filled=true;}}}
   }
+  // Compléter avec les subs si places vides
   for(const cat of starterCats){while(team[cat.key].length<cat.size&&subPool.length>0){team[cat.key].push(subPool.shift());}}
   team['SUB']=subPool.slice(0,TOTAL_SUBS);return team;
 }

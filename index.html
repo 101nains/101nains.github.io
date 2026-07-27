@@ -2065,6 +2065,7 @@ let searchFilter='',sortAlpha=false,statSort='name';
 let currentUser=null;
 let evNbTeams=1,evRoles={},evTeams=null,evDragSrc=null,evTeamsLoaded=false;
 let evAsymMode=false;   // mode asymétrique (grosse équipe A + petite équipe B)
+let _evSaving=false;    // true pendant saveEvTeamsToDB pour ignorer le realtime
 let evAsymSizeA=25;     // nombre de joueurs dans la grosse équipe A
 let evElPriority=false; // les joueurs les plus forts vont en Électrons libres en premier
 let weeklyDrawsData=[];
@@ -3005,6 +3006,7 @@ function subscribeRT(){
       initEvRoles();renderEventPlayers();updateEvBanner();
     })
     .on('postgres_changes',{event:'*',schema:'public',table:'event_teams'},async()=>{
+      if(_evSaving)return; // ignore pendant un save en cours
       const{data}=await sb.from('event_teams').select('*,participants(*)').order('position');
       if(data&&data.length>0){
         const teams={A:null,B:null};
@@ -5352,6 +5354,7 @@ function evClearSearch(){document.getElementById('evSearchInput').value='';docum
 
 async function saveEvTeamsToDB(){
   if(!sb||!evTeams)return;
+  _evSaving=true;
   await sb.from('event_teams').delete().neq('id',0);
   const rows=[];
   ['A','B'].forEach(tk=>{
@@ -5363,6 +5366,7 @@ async function saveEvTeamsToDB(){
   });
   if(rows.length)await sb.from('event_teams').insert(rows);
   evTeamsLoaded=true;
+  setTimeout(()=>{_evSaving=false;},500);
 }
 
 function renderEventPlayers(){

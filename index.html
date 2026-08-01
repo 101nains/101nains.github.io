@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>bienvenue chez NA1N🚂</title>
+<title>bienvenue chez 101NA1NS🚂</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap">
 <script>
 const SUPABASE_URL="https://kmbefvfxujfdipsbqyla.supabase.co";
@@ -706,7 +706,7 @@ body.mobile .toast{bottom:74px}
 </style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>bienvenue chez NA1N🚂</title>
+<title>bienvenue chez 101NA1NS🚂</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap">
 <script>
 const SUPABASE_URL="https://kmbefvfxujfdipsbqyla.supabase.co";
@@ -1456,7 +1456,7 @@ body.light .replace-player-btn{background:rgba(0,0,0,.03);border:1px solid var(-
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-logo">🚂</div>
-    <div class="login-title">bienvenue chez NA1N</div>
+    <div class="login-title">bienvenue chez 101NA1NS</div>
     <div class="login-sub">Connecte-toi pour accéder à l'application</div>
     <div class="login-field">
       <label>Identifiant</label>
@@ -1481,7 +1481,7 @@ body.light .replace-player-btn{background:rgba(0,0,0,.03);border:1px solid var(-
 <div id="mobTopbar">
   <span class="mob-topbar-logo">🚂</span>
   <div class="mob-topbar-title">
-    NA1N
+    101NA1NS
     <span class="mob-status" id="mobStatusDot"></span>
   </div>
   <div class="mob-topbar-actions">
@@ -1519,7 +1519,7 @@ body.light .replace-player-btn{background:rgba(0,0,0,.03);border:1px solid var(-
 <div class="page">
 
   <header>
-    <h1><span class="logo-emoji">🚂</span> bienvenue chez NA1N</h1>
+    <h1><span class="logo-emoji">🚂</span> bienvenue chez 101NA1NS</h1>
     <p>
       <span class="status-dot" id="statusDot"></span>
       <span id="statusTxt">Connexion…</span>&nbsp;
@@ -5480,20 +5480,30 @@ async function balanceTeams(){
     const fmtPow = v => v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'k':v;
     toast(`⚡ A : ${groupA.length} joueurs (${fmtPow(powA)}) · B : ${groupB.length} joueurs (${fmtPow(powB)})`);
   } else {
-    // Tous les joueurs sélectionnés (starters + subs) triés par puissance
-    const all = [...starters, ...subs].sort((a,b)=>(b.power_t1||0)-(a.power_t1||0));
-    // Répartition équilibrée par puissance
-    const [groupA, groupB] = splitBalanced(all);
-    // Les 20 premiers de chaque groupe = titulaires, le reste = remplaçants
+    // Répartir équitablement en RESPECTANT les rôles titulaire/remplaçant choisis
+    // Les starters restent titulaires, les subs restent remplaçants
+
+    // Répartir les titulaires équitablement par puissance entre les 2 équipes
+    const [startersA, startersB] = splitBalanced(starters);
+
+    // Si trop de titulaires pour les slots (20 par équipe), le surplus va en SUB
     const STARTER_SLOTS = CATEGORIES.filter(c=>c.key!=='SUB').reduce((s,c)=>s+c.size, 0);
-    const titA = groupA.slice(0, STARTER_SLOTS);
-    const subA = groupA.slice(STARTER_SLOTS);
-    const titB = groupB.slice(0, STARTER_SLOTS);
-    const subB = groupB.slice(STARTER_SLOTS);
-    evTeams={A:buildOneTeam(titA, subA), B:buildOneTeam(titB, subB)};
+    const titA   = startersA.slice(0, STARTER_SLOTS);
+    const overA  = startersA.slice(STARTER_SLOTS); // excédent de titulaires → SUB
+    const titB   = startersB.slice(0, STARTER_SLOTS);
+    const overB  = startersB.slice(STARTER_SLOTS);
+
+    // Répartir les remplaçants équitablement
+    const [subsA, subsB] = splitBalanced(subs);
+
+    // SUB = remplaçants + excédent de titulaires (limité à 10)
+    const subPoolA = [...overA, ...subsA].slice(0, TOTAL_SUBS);
+    const subPoolB = [...overB, ...subsB].slice(0, TOTAL_SUBS);
+
+    evTeams={A:buildOneTeam(titA, subPoolA), B:buildOneTeam(titB, subPoolB)};
     const powA=teamTotalPower(evTeams.A), powB=teamTotalPower(evTeams.B);
     const fmtPow=v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'k':v;
-    toast(`⚖️ A : ${groupA.length} joueurs (${fmtPow(powA)}) · B : ${groupB.length} joueurs (${fmtPow(powB)})`);
+    toast(`⚖️ A : ${startersA.length} tit. + ${subPoolA.length} rem. (${fmtPow(powA)}) · B : ${startersB.length} tit. + ${subPoolB.length} rem. (${fmtPow(powB)})`);
   }
   await saveEvTeamsToDB();
   if(!evAsymMode) toast('⚖️ Équipes sauvegardées !');

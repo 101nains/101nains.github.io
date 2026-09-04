@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>bienvenue chez NA1N🚂</title>
+<title>bienvenue chez 101🚂</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap">
 <script>
 const SUPABASE_URL="https://kmbefvfxujfdipsbqyla.supabase.co";
@@ -706,7 +706,7 @@ body.mobile .toast{bottom:74px}
 </style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>bienvenue chez NA1N🚂</title>
+<title>bienvenue chez 101🚂</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap">
 <script>
 const SUPABASE_URL="https://kmbefvfxujfdipsbqyla.supabase.co";
@@ -1456,7 +1456,7 @@ body.light .replace-player-btn{background:rgba(0,0,0,.03);border:1px solid var(-
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-logo">🚂</div>
-    <div class="login-title">bienvenue chez NA1N</div>
+    <div class="login-title">bienvenue chez 101</div>
     <div class="login-sub">Connecte-toi pour accéder à l'application</div>
     <div class="login-field">
       <label>Identifiant</label>
@@ -1481,7 +1481,7 @@ body.light .replace-player-btn{background:rgba(0,0,0,.03);border:1px solid var(-
 <div id="mobTopbar">
   <span class="mob-topbar-logo">🚂</span>
   <div class="mob-topbar-title">
-    NA1N
+    101
     <span class="mob-status" id="mobStatusDot"></span>
   </div>
   <div class="mob-topbar-actions">
@@ -1519,7 +1519,7 @@ body.light .replace-player-btn{background:rgba(0,0,0,.03);border:1px solid var(-
 <div class="page">
 
   <header>
-    <h1><span class="logo-emoji">🚂</span> bienvenue chez NA1N</h1>
+    <h1><span class="logo-emoji">🚂</span> bienvenue chez 101</h1>
     <p>
       <span class="status-dot" id="statusDot"></span>
       <span id="statusTxt">Connexion…</span>&nbsp;
@@ -1763,7 +1763,7 @@ body.light .replace-player-btn{background:rgba(0,0,0,.03);border:1px solid var(-
     <div class="section" id="secCanyon">
       <div class="section-header">
         <div class="section-header-left" onclick="toggleSection('canyonBody','canyonToggle')">
-          <span class="section-title">🏜️ Bataille du Canyon</span>
+          <span class="section-title">🏜️ Tempête du Canyon</span>
         </div>
         <span class="section-toggle collapsed" id="canyonToggle"
               onclick="toggleSection('canyonBody','canyonToggle')">▾</span>
@@ -5773,8 +5773,33 @@ function teamTotalPower(team){if(!team)return 0;return CATEGORIES.flatMap(c=>tea
 function catPower(arr){return arr.reduce((s,p)=>s+(p.power_t1||0),0);}
 
 let evDragSrcData=null;
-function evDragStart(e,team,catKey,idx){evDragSrcData={team,catKey,idx};e.dataTransfer.effectAllowed='move';setTimeout(()=>{const el=document.querySelector(`[data-ev-team="${team}"][data-ev-cat="${catKey}"][data-ev-idx="${idx}"]`);if(el)el.classList.add('dragging-team');},0);}
+function evDragStart(e,team,catKey,idx){
+  evDragSrcData={team,catKey,idx};
+  const player=evTeams&&evTeams[team]&&evTeams[team][catKey]?evTeams[team][catKey][idx]:null;
+  e.dataTransfer.effectAllowed='move';
+  e.dataTransfer.setData('text/plain',team+':'+catKey+':'+(player?player.id:0));
+  setTimeout(()=>{const el=document.querySelector(`[data-ev-team="${team}"][data-ev-cat="${catKey}"][data-ev-idx="${idx}"]`);if(el)el.classList.add('dragging-team');},0);
+}
 function evDragOver(e){e.preventDefault();document.querySelectorAll('.ev-team-player').forEach(el=>el.classList.remove('drag-over-team'));}
+
+function evDropZoneOver(event,teamKey,catKey){
+  event.preventDefault();
+  const fromUnplaced=!!_evDragUnplacedId;
+  const cat=evTeams&&evTeams[teamKey]?evTeams[teamKey][catKey]:null;
+  const catDef=CATEGORIES.find(c=>c.key===catKey);
+  const isFull=cat&&catDef&&cat.length>=catDef.size;
+  const z=event.currentTarget;
+  if(fromUnplaced&&isFull){z.style.background='rgba(255,107,107,0.1)';z.style.outline='2px dashed rgba(255,107,107,0.5)';}
+  else{z.style.background='rgba(124,159,255,0.08)';z.style.outline='2px dashed rgba(124,159,255,0.4)';}
+}
+function evDropZoneLeave(event){event.currentTarget.style.background='';event.currentTarget.style.outline='';}
+function evDropOnCatUniversal(event,teamKey,catKey){
+  event.preventDefault();
+  event.currentTarget.style.background='';event.currentTarget.style.outline='';
+  const raw=event.dataTransfer.getData('text/plain')||'';
+  if(raw.startsWith('unplaced:')||_evDragUnplacedId){evDropFromUnplaced(event,teamKey,catKey);}
+  else if(evDragSrcData){evDropOnCat(event,teamKey,catKey);}
+}
 async function evDropOnCat(e,toTeam,toCatKey){
   e.preventDefault();if(!evDragSrcData||!evTeams)return;
   const{team:fromTeam,catKey:fromCat,idx:fromIdx}=evDragSrcData;
@@ -5815,7 +5840,7 @@ function renderEventTeams(){
         const switchBtn=hasOtherTeam?`<button onclick="switchTeam('${teamKey}','${cat.key}',${i})" style="background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:6px;cursor:pointer;font-size:11px;padding:2px 8px;color:var(--text2);white-space:nowrap;flex-shrink:0;transition:all .15s">↔ ${otherTeam}</button>`:'';
         return `<div class="ev-team-player" data-ev-team="${teamKey}" data-ev-cat="${cat.key}" data-ev-idx="${i}" draggable="true" ondragstart="evDragStart(event,'${teamKey}','${cat.key}',${i})" ondragend="evDragEnd()"><span class="ev-pnum">${i+1}</span><span class="ev-pname">${p.name}</span>${switchBtn}<span style="font-size:11px;color:var(--text4);cursor:grab;flex-shrink:0">⠿</span></div>`;
       }).join('');
-      const dropZone=`<div class="ev-cat-drop" ondragover="evDragOver(event)" ondrop="evDropOnCat(event,'${teamKey}','${cat.key}')" style="min-height:${isEmpty?'38px':'4px'};display:flex;align-items:center;justify-content:center">${isEmpty?`<span style="font-size:11px;color:var(--text3);font-style:italic">Déposer ici</span>`:''}</div>`;
+      const isFull=players.length>=cat.size;const dropZone=`<div class="ev-cat-drop" ondragover="evDropZoneOver(event,'${teamKey}','${cat.key}')" ondragleave="evDropZoneLeave(event)" ondrop="evDropOnCatUniversal(event,'${teamKey}','${cat.key}')" style="min-height:${isEmpty?'38px':'4px'};display:flex;align-items:center;justify-content:center;border-radius:6px;transition:all .15s">${isEmpty?`<span style="font-size:11px;color:var(--text3);font-style:italic">${isFull?'Plein':'Déposer ici'}</span>`:''}</div>`;
       return `<div class="ev-cat-block" style="border-left:2px solid ${cat.color}"><div class="ev-cat-header" style="background:${cat.bg}"><span class="ev-cat-title" style="color:${cat.color}">${cat.label}</span><span class="ev-cat-info">${players.length}/${cat.size}</span></div>${playersHtml}${dropZone}</div>`;
     }).join('');
     return `<div class="ev-team-card"><div class="ev-team-header ${headerCls}"><span class="ev-team-title ${headerCls}">⚔️ ${label}</span><span class="ev-team-power">${stCount} tit. · ${subCount} rempl.</span></div><div class="ev-team-body">${catsHtml}</div><button class="ev-copy-btn" onclick="evCopyTeam('${teamKey}','${label}')">📋 Copier ${label}</button></div>`;
@@ -5965,7 +5990,7 @@ window.addEventListener('load',()=>{
 <div id="pollOverlay" style="display:none">
   <div class="poll-page">
     <div class="poll-logo">⚔️</div>
-    <div class="poll-guild">Les Nains de Mithril</div>
+    <div class="poll-guild">Les 101</div>
     <div class="poll-title">Tempête du Désert</div>
     <div class="poll-subtitle">Indique ta disponibilité pour l'événement.<br>Ta réponse s'applique immédiatement.</div>
 

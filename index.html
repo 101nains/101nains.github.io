@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>bienvenue chez 101🚂</title>
+<title>bienvenue chez 101</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap">
 <script>
 const SUPABASE_URL="https://kmbefvfxujfdipsbqyla.supabase.co";
@@ -334,7 +334,7 @@ body.light .planning-copy-btn:hover{background:rgba(26,63,196,0.08);color:#1a3fc
 .planning-role-wrap{position:relative}
 .planning-absent-btn{width:22px;height:22px;padding:0;border:1px solid transparent;border-radius:7px;background:transparent;color:var(--text3);font:600 15px/1 inherit;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all var(--transition)}
 .planning-absent-btn:hover{color:var(--red);background:var(--red-l);border-color:rgba(255,107,107,0.22);transform:scale(1.08)}
-.absent-inline-menu{position:absolute;z-index:1000;top:calc(100% + 8px);right:0;width:min(290px,calc(100vw - 24px));max-height:310px;overflow-y:auto;padding:10px;background:linear-gradient(145deg,var(--surface),var(--surface2));border:1px solid var(--border2);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);animation:fadeUp .16s ease-out}
+.absent-inline-menu{position:fixed;z-index:100000;top:0;left:0;width:min(290px,calc(100vw - 24px));max-height:min(310px,calc(100vh - 24px));overflow-y:auto;padding:10px;background:linear-gradient(145deg,var(--surface),var(--surface2));border:1px solid var(--border2);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);animation:fadeUp .16s ease-out}
 .absent-inline-menu::before{content:'';position:absolute;top:-5px;right:9px;width:9px;height:9px;background:var(--surface);border-top:1px solid var(--border2);border-left:1px solid var(--border2);transform:rotate(45deg)}
 .absent-inline-title{position:relative;z-index:1;display:flex;align-items:center;gap:6px;padding:2px 4px 9px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border);margin-bottom:7px}
 .replace-list{display:flex;flex-direction:column;gap:4px}
@@ -637,6 +637,140 @@ body.light .modal textarea{background:rgba(0,0,0,0.07);border:1px solid var(--bo
 .canyon-result-title.sub{color:var(--amber);background:rgba(255,184,77,.08)}
 .canyon-result-title span{opacity:.75}
 
+
+/* ══ OPTIMISATION MOBILE ══ */
+@media (max-width: 700px){
+  .page{max-width:none;padding:1.25rem .75rem 4rem}
+  header{margin-bottom:1.25rem}
+  header h1{font-size:23px;gap:9px;line-height:1.2;flex-wrap:wrap}
+  header p{font-size:11px;flex-wrap:wrap;gap:6px}
+  .user-bar{padding:9px 11px;margin-bottom:1rem;border-radius:18px;gap:8px}
+  .user-bar-left{gap:7px;font-size:12px;min-width:0}
+  .user-name{max-width:115px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .session-info{display:none}
+  .logout-btn{height:34px;padding:0 10px;font-size:11px}
+  .theme-toggle-btn{width:34px;height:34px}
+
+  .section{padding:13px;border-radius:18px;margin-bottom:.75rem}
+  .section-title{font-size:10px;letter-spacing:.08em}
+  .section-header-left{gap:7px;min-width:0}
+  .section-toggle{width:30px;height:30px;flex-shrink:0}
+
+  .legend-box{padding:11px 12px;margin-bottom:1.25rem;font-size:11px;line-height:1.5;gap:8px}
+  .draw-row{gap:7px}
+  .draw-row .btn,.draw-row .btn-purple,.draw-row .btn-draw{width:100%;min-height:40px}
+  .result-cards{grid-template-columns:1fr;gap:9px}
+  .rcard{padding:13px;border-radius:18px}
+  .res-name{font-size:22px;word-break:break-word}
+
+  .planning-section{padding:12px;margin-bottom:1.25rem;border-radius:18px}
+  .planning-header{align-items:stretch;gap:8px}
+  .planning-title{font-size:13px;flex-wrap:wrap}
+  .planning-header>div:last-child{width:100%;display:flex!important}
+  .planning-copy-btn{flex:1;min-width:0;padding:0 9px;font-size:11px}
+  .planning-day-card{display:block;padding:10px 11px}
+  .planning-day-name{min-width:0;margin-bottom:7px;font-size:11px}
+  .planning-roles{gap:7px 12px}
+  .planning-role{font-size:12px;flex-wrap:wrap}
+
+  .stats-view-tabs,.stats-sort-bar{gap:5px;overflow-x:auto;flex-wrap:nowrap;padding-bottom:3px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .stats-view-tabs::-webkit-scrollbar,.stats-sort-bar::-webkit-scrollbar{display:none}
+  .stats-view-tab,.stats-sort-btn{flex:0 0 auto;height:36px;padding:0 12px;font-size:11px}
+  .stats-search-wrap{min-width:180px!important;flex:0 0 180px!important}
+  .stats-grid{grid-template-columns:1fr;gap:9px}
+  .stat-card{padding:13px 14px;border-radius:18px}
+  .stat-card-header{gap:7px;align-items:flex-start}
+  .stat-card-name{font-size:14px;min-width:0}
+  .stat-row{font-size:11px;gap:6px}
+  .stat-row-label{min-width:105px}
+  .stats-podium-grid{grid-template-columns:1fr;gap:9px}
+  .podium-card{border-radius:18px}
+  .podium-card-header{padding:11px 12px}
+  .podium-place{grid-template-columns:28px minmax(0,1fr) auto;padding:7px 12px;font-size:11px}
+  .leaderboard-wrap{-webkit-overflow-scrolling:touch}
+  .leaderboard-table{min-width:680px;font-size:11px}
+  .leaderboard-table th,.leaderboard-table td{padding:8px 7px}
+
+  .stats-global{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .stats-global-card{padding:10px 8px}
+  .stats-global-val{font-size:21px}
+  .stats-global-lbl{font-size:9px}
+
+  .ev-config-row{display:block;margin-bottom:8px}
+  .ev-config-block{margin-left:0!important;margin-bottom:10px}
+  .ev-nb-btns{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+  .ev-nb-btn:last-child{grid-column:1/-1}
+  .ev-nb-btn{height:38px;padding:0 8px;font-size:11px}
+  .ev-search-bar{display:block;padding:7px 0}
+  .ev-search-bar .search-wrap{max-width:none!important;width:100%}
+  .ev-summary-counts{margin-top:7px;gap:5px}
+  .ev-count-pill{font-size:10px;padding:4px 9px}
+  .ev-player-row{padding:9px 9px;gap:7px;font-size:12px;flex-wrap:wrap}
+  .ev-player-row .ev-power-tag{margin-left:auto}
+  .ev-teams-grid.two{grid-template-columns:1fr}
+  .ev-team-header{padding:11px 12px}
+  .ev-team-title{font-size:14px}
+  .ev-team-player{padding:8px 10px;font-size:12px;gap:6px;min-height:42px}
+  .ev-team-player .ev-pnum{min-width:18px;font-size:9px}
+  .ev-team-player .ev-pname{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ev-team-player .ev-ppow{font-size:10px}
+  .ev-cat-header{padding:7px 10px}
+  .ev-cat-drop{padding:2px 10px}
+  .ev-copy-btn{height:42px;font-size:12px}
+  .tdd-replace-menu{min-width:0;width:min(330px,calc(100vw - 20px));max-height:min(60vh,360px)}
+  .tdd-replace-player,.tdd-replace-item{min-height:42px}
+
+  .canyon-toolbar,.canyon-actions{display:flex;flex-direction:column;align-items:stretch}
+  .canyon-toolbar .btn,.canyon-actions .btn{width:100%}
+  .canyon-search{min-width:0;width:100%}
+  .canyon-player-row{padding:9px 10px}
+  .canyon-players-list{max-height:42vh}
+
+  .weekly-draw-item{align-items:flex-start;padding:9px 10px;gap:7px;flex-wrap:wrap}
+  .weekly-draw-day{min-width:0;width:100%;font-size:10px}
+  .weekly-draw-names{gap:5px}
+  .hist-item{padding:9px 10px;font-size:12px;gap:7px;flex-wrap:wrap}
+  .hist-item .hpart{min-width:0;max-width:calc(50% - 15px)}
+
+  .users-grid{grid-template-columns:1fr;gap:8px}
+  .add-user-form{padding:12px}
+  .add-user-row{display:grid;grid-template-columns:1fr;gap:8px}
+  .add-user-field{min-width:0;width:100%}
+  .add-user-row .btn{width:100%}
+
+  .modal{width:calc(100vw - 20px);max-width:none;padding:16px;border-radius:20px;max-height:88vh}
+  .modal h3{font-size:16px}
+  .modal p{font-size:12px;line-height:1.55}
+  .modal-row{display:block}
+  .modal-row label{display:block;min-width:0;margin-bottom:6px;font-size:12px}
+  .modal-acts{display:grid;grid-template-columns:1fr 1fr}
+  .modal-acts .btn{width:100%}
+
+  input[type=text],select,.search-inp{font-size:16px}
+  button,.btn,.stats-view-tab,.stats-sort-btn,.ev-nb-btn,.planning-copy-btn{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .toast{max-width:calc(100vw - 28px);white-space:normal;text-align:center;padding:10px 15px;bottom:1rem;font-size:12px}
+}
+
+@media (max-width: 430px){
+  .page{padding-left:6px;padding-right:6px}
+  header h1{font-size:21px}
+  .user-bar{border-radius:15px}
+  .user-role-badge{display:none}
+  .section{padding:11px;border-radius:15px}
+  .stats-global{grid-template-columns:1fr 1fr}
+  .stat-row-label{min-width:92px}
+  .stat-row-val{min-width:31px}
+  .planning-header>div:last-child{display:grid!important;grid-template-columns:1fr 1fr;gap:5px}
+  .planning-copy-btn{width:100%}
+  .ev-nb-btns{grid-template-columns:1fr}
+  .ev-nb-btn:last-child{grid-column:auto}
+  .ev-player-row{align-items:center}
+  .ev-player-row .ev-power-tag{width:auto;max-width:100%}
+  .ev-teams-grid{gap:10px}
+  .tdd-replace-menu{width:calc(100vw - 12px);left:6px!important;right:auto!important}
+  .login-card{padding:2rem 1.25rem}
+}
+
 </style>
 <body>
 
@@ -700,48 +834,6 @@ body.light .modal textarea{background:rgba(0,0,0,0.07);border:1px solid var(--bo
     </div>
     <div class="section-body collapsed" id="tirageBody" style="max-height:0">
 
-      <div class="legend-box" style="margin-top:16px">
-        <span>🏆</span>
-        <div>
-          Par défaut, tous les jours sont validés ✓. Cochez ✗ uniquement les jours manqués.
-          Aucune case cochée = semaine complète = éligible 🏆.
-        </div>
-      </div>
-
-      <div class="draw-buffer-banner" id="drawBufferBanner"></div>
-      <div id="alertRegressionBanner" style="display:none;margin:12px 0 0;padding:10px 14px;background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.25);border-radius:var(--radius-lg)">
-        <div style="font-size:12px;font-weight:700;color:#FF6B6B;margin-bottom:6px">⚠️ Joueurs en régression (2 semaines sans valider)</div>
-        <div id="alertRegressionList" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-      </div>
-
-      <div class="draw-section">
-        <div class="draw-row">
-          <button class="btn btn-purple" id="drawPresBtn" onclick="draw(true)" disabled>🟣 Tirage présents</button>
-          <button class="btn" id="presModeBtn" onclick="togglePresentMode()">☐ Mode présents</button>
-          <button class="btn" onclick="openManual()">✏️ Saisie manuelle</button>
-        </div>
-      </div>
-
-      <div class="result-cards">
-        <div class="rcard" id="cardDrv">
-          <div class="role-hdr">
-            <div class="role-dot drv">T</div>
-            <span class="role-lbl">Chauffeur du train</span>
-          </div>
-          <div class="res-name" id="resDrv">—</div>
-          <div id="resDrvBadge"></div>
-        </div>
-        <div class="rcard" id="cardVip">
-          <div class="role-hdr">
-            <div class="role-dot vip">★</div>
-            <span class="role-lbl">VIP</span>
-          </div>
-          <div class="res-name" id="resVip">—</div>
-          <div id="resVipBadge"></div>
-        </div>
-      </div>
-      <div class="elig-info" id="eligInfo"></div>
-
       <!-- PLANNING SEMAINE -->
       <div class="planning-section" id="planningSection" style="margin-top:1rem">
         <div class="planning-header">
@@ -751,6 +843,7 @@ body.light .modal textarea{background:rgba(0,0,0,0.07);border:1px solid var(--bo
               <span class="planning-badge-rt">🔴 Live</span>
             </div>
             <span class="planning-week-label" id="planningWeekLabel"></span>
+            <div id="eligInfo" style="margin-top:6px"></div>
           </div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
             <button class="planning-copy-btn" onclick="copyPlanningText()">📋 Copier</button>
@@ -1808,8 +1901,6 @@ function openAbsentModal(evt, drawId, role, playerName){
   sanctionPlayerName = playerName;
 
   // La liste est attachée au bloc du pseudo : elle se déploie donc depuis la croix.
-  const anchor = trigger.closest('.planning-role-wrap') || trigger.parentElement;
-  anchor.style.position = 'relative';
   const menu = document.createElement('div');
   menu.id = 'absentInlineMenu';
   menu.dataset.drawId = drawId;
@@ -1822,9 +1913,26 @@ function openAbsentModal(evt, drawId, role, playerName){
   const list = document.createElement('div');
   list.className = 'replace-list';
   menu.append(title, list);
-  anchor.appendChild(menu);
+  document.body.appendChild(menu);
   activeAbsentMenu = menu;
   renderReplaceList(list);
+
+  // Positionnement intelligent : sous le bouton si possible, sinon au-dessus.
+  requestAnimationFrame(()=>{
+    if(activeAbsentMenu!==menu)return;
+    const r=trigger.getBoundingClientRect();
+    const gap=8;
+    const menuW=menu.offsetWidth;
+    const menuH=menu.offsetHeight;
+    let left=r.right-menuW;
+    let top=r.bottom+gap;
+    const margin=6;
+    if(top+menuH>window.innerHeight-margin) top=r.top-menuH-gap;
+    left=Math.max(margin,Math.min(left,window.innerWidth-menuW-margin));
+    top=Math.max(margin,Math.min(top,window.innerHeight-menuH-margin));
+    menu.style.left=left+'px';
+    menu.style.top=top+'px';
+  });
 
   // Laisser finir le clic en cours avant d'écouter les clics extérieurs.
   setTimeout(()=>document.addEventListener('pointerdown', closeAbsentMenuOnOutsideClick), 0);
@@ -2016,7 +2124,7 @@ function showApp(){
   if(archiveBtn)archiveBtn.style.display=isAdminOrStaff()?'inline-flex':'none';
   const repairBtn=document.getElementById('btnRepairHistory');if(repairBtn)repairBtn.style.display=isAdmin()?'':'none';
   const recalcBtn=document.getElementById('btnRecalcStats');if(recalcBtn)recalcBtn.style.display=isAdmin()?'':'none';
-  const priorityWrap=document.getElementById('priorityToggleWrap');if(priorityWrap)priorityWrap.style.display=isAdmin()?'flex':'none';
+  const priorityWrap=document.getElementById('priorityToggleWrap');if(priorityWrap)priorityWrap.style.display=isAdminOrStaff()?'flex':'none';
   if(isAdmin())loadUsers();
   loadPermConfig();
   loadPriorityConfig();
@@ -2126,13 +2234,18 @@ async function loadAll(){
   try{
     const[{data:pData,error:pErr},{data:hData,error:hErr},{data:wData},{data:erData},{data:etData}]=await Promise.all([
       sb.from('participants').select('*').order('position',{ascending:true}),
-      sb.from('historique').select('*').order('created_at',{ascending:false}).limit(60),
+      sb.from('historique').select('*').order('created_at',{ascending:false}),
       sb.from('weeks_history').select('*').order('archived_at',{ascending:false}),
       sb.from('event_roles').select('*'),
       sb.from('event_teams').select('*,participants(*)').order('position')
     ]);
     if(pErr||hErr)throw pErr||hErr;
     participants=pData||[];history=hData||[];weeksHistory=wData||[];
+    // Afficher immédiatement les historiques dès que les données sont chargées.
+    // Ainsi, une erreur dans une autre section (TDD, Canyon, etc.) ne peut plus
+    // laisser ces deux zones bloquées sur « Chargement… ».
+    renderHistFiltered();
+    renderArchiveList();
     await loadTddNonRetenus();
     evRoles={};
     if(erData){
@@ -2610,34 +2723,77 @@ async function doWeeklyDraws(){
   let localDriverTotal=totalDrivers;
   let localVipTotal=totalVips;
 
+  // Quand la priorité staff est active, on réserve au moins une journée
+  // à chaque membre du staff (dans la limite des 7 jours), en commençant
+  // par ceux qui ont le moins de tirages cumulés.
+  const staffWaiting = priorityModeActive
+    ? pool.filter(p=>p.is_priority).sort((a,b)=>{
+        const sa=(a.driver_count||0)+(a.vip_count||0);
+        const sb=(b.driver_count||0)+(b.vip_count||0);
+        if(sa!==sb)return sa-sb;
+        return (a.name||'').localeCompare(b.name||'');
+      })
+    : [];
+  const staffScheduled = new Set();
+
+  function pickForcedStaff(){
+    const candidates=staffWaiting.filter(p=>!staffScheduled.has(p.id)&&!usedAny.has(p.id));
+    return candidates.length ? candidates[0] : null;
+  }
+
   for(let day=0;day<7;day++){
+    const forcedStaff = pickForcedStaff();
 
     // ── Tirage du chauffeur ──
-    // Priorité 1 : pas encore tiré cette semaine (ni chauffeur ni VIP)
-    let dPool=pool.filter(p=>!usedAny.has(p.id));
-    // Priorité 2 : pas encore chauffeur cette semaine
-    if(dPool.length<1) dPool=pool.filter(p=>!usedDrivers.has(p.id));
-    // Priorité 3 : tout le pool
-    if(dPool.length<1) dPool=[...pool];
-    const driver=pickByDebt(dPool,'driver_count',localDriverTotal);
+    // Si un membre du staff doit encore être assuré cette semaine,
+    // on lui donne sa place dans le rôle où sa dette est la plus faible.
+    let driver;
+    if(forcedStaff){
+      const driverDebt=(forcedStaff.driver_count||0)/localDriverTotal;
+      const vipDebt=(forcedStaff.vip_count||0)/localVipTotal;
+      if(driverDebt<=vipDebt){
+        driver=forcedStaff;
+      }
+    }
+    if(!driver){
+      // Priorité 1 : pas encore tiré cette semaine (ni chauffeur ni VIP)
+      let dPool=pool.filter(p=>!usedAny.has(p.id));
+      // Priorité 2 : pas encore chauffeur cette semaine
+      if(dPool.length<1) dPool=pool.filter(p=>!usedDrivers.has(p.id));
+      // Priorité 3 : tout le pool
+      if(dPool.length<1) dPool=[...pool];
+      driver=pickByDebt(dPool,'driver_count',localDriverTotal);
+    }
 
     // ── Tirage du VIP ──
-    // Si priorité staff active et que le chauffeur est staff :
-    // exclure les autres membres staff du pool VIP (max 1 staff/jour)
-    const driverIsStaff = priorityModeActive && driver.is_priority;
-    const excludeStaff  = p => driverIsStaff && p.is_priority;
+    // Si un membre du staff doit être assuré et qu'il n'a pas été choisi
+    // comme chauffeur, on le force en VIP.
+    let forcedVip = forcedStaff && driver.id!==forcedStaff.id ? forcedStaff : null;
+    let vip;
+    if(forcedVip){
+      vip=forcedVip;
+    }else{
+      // Si le chauffeur est staff, on conserve la règle historique :
+      // éviter un second membre staff le même jour lorsque c'est possible.
+      const driverIsStaff = priorityModeActive && driver.is_priority;
+      const excludeStaff  = p => driverIsStaff && p.is_priority;
 
-    // Priorité 1 : pas encore tiré cette semaine, hors chauffeur du jour (+ règle staff)
-    let vPool=pool.filter(p=>p.id!==driver.id&&!usedAny.has(p.id)&&!excludeStaff(p));
-    // Si pas assez sans la contrainte staff, on la retire temporairement
-    if(vPool.length<1) vPool=pool.filter(p=>p.id!==driver.id&&!usedAny.has(p.id));
-    // Priorité 2 : pas encore VIP cette semaine
-    if(vPool.length<1) vPool=pool.filter(p=>p.id!==driver.id&&!usedVips.has(p.id)&&!excludeStaff(p));
-    if(vPool.length<1) vPool=pool.filter(p=>p.id!==driver.id&&!usedVips.has(p.id));
-    // Priorité 3 : tout le pool sauf chauffeur du jour
-    if(vPool.length<1) vPool=pool.filter(p=>p.id!==driver.id&&!excludeStaff(p));
-    if(vPool.length<1) vPool=pool.filter(p=>p.id!==driver.id);
-    const vip=pickByDebt(vPool,'vip_count',localVipTotal);
+      // Priorité 1 : pas encore tiré cette semaine, hors chauffeur du jour (+ règle staff)
+      let vPool=pool.filter(p=>p.id!==driver.id&&!usedAny.has(p.id)&&!excludeStaff(p));
+      // Si pas assez sans la contrainte staff, on la retire temporairement
+      if(vPool.length<1) vPool=pool.filter(p=>p.id!==driver.id&&!usedAny.has(p.id));
+      // Priorité 2 : pas encore VIP cette semaine
+      if(vPool.length<1) vPool=pool.filter(p=>p.id!==driver.id&&!usedVips.has(p.id)&&!excludeStaff(p));
+      if(vPool.length<1) vPool=pool.filter(p=>p.id!==driver.id&&!usedVips.has(p.id));
+      // Priorité 3 : tout le pool sauf chauffeur du jour
+      if(vPool.length<1) vPool=pool.filter(p=>p.id!==driver.id&&!excludeStaff(p));
+      if(vPool.length<1) vPool=pool.filter(p=>p.id!==driver.id);
+      vip=pickByDebt(vPool,'vip_count',localVipTotal);
+    }
+
+    if(forcedStaff) staffScheduled.add(forcedStaff.id);
+    if(priorityModeActive && driver.is_priority) staffScheduled.add(driver.id);
+    if(priorityModeActive && vip.is_priority) staffScheduled.add(vip.id);
 
     draws.push({driver:driver.name,vip:vip.name,day});
 
@@ -4600,6 +4756,7 @@ async function saveEvTeamsToDB(){
 
 function renderEventPlayers(){
   const list=document.getElementById('evPlayersList');
+  if(!list)return;
   if(!participants.length){list.innerHTML='<div style="padding:10px;font-size:13px;color:var(--text3)">Aucun participant.</div>';return;}
   const maxS=20;
   const maxSub=10;

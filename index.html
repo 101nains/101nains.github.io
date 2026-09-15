@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>bienvenue chez NA1N🚂</title>
+<title>bienvenue chez 101🚂</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap">
 <script>
 const SUPABASE_URL="https://kmbefvfxujfdipsbqyla.supabase.co";
@@ -391,6 +391,43 @@ body.light .hist-del:hover{color:#b82020;background:rgba(184,32,32,0.1)}
 .stat-streak{display:flex;gap:3px;flex-wrap:wrap;margin-top:6px}
 .stat-streak-dot{width:11px;height:11px;border-radius:3px;background:rgba(255,255,255,0.04)}
 .stat-streak-dot.ok{background:var(--gold)}.stat-streak-dot.ko{background:rgba(255,107,107,0.15)}
+/* Harmonisation Podium / Classement avec les autres vues statistiques */
+.stats-podium-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.podium-card{background:linear-gradient(145deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:var(--radius-xl);padding:0;box-shadow:var(--shadow);overflow:hidden;transition:all var(--transition)}
+.podium-card:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.podium-card-header{display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)}
+.podium-card-title{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+.podium-places{display:flex;flex-direction:column;gap:0;padding:4px 0}
+.podium-place{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:8px;min-height:46px;padding:7px 16px;border-bottom:1px solid var(--border);font-size:12px}
+.podium-place:last-child{border-bottom:none}
+.podium-place:hover{background:rgba(255,255,255,0.025)}
+.podium-medal{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;font-size:14px;font-weight:800}
+.podium-medal.m1{background:rgba(255,209,102,.12);border:1px solid rgba(255,209,102,.22)}
+.podium-medal.m2{background:rgba(255,255,255,.05);border:1px solid var(--border2)}
+.podium-medal.m3{background:rgba(255,184,77,.10);border:1px solid rgba(255,184,77,.20)}
+.podium-place-name{font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.podium-place-val{font-family:var(--font-mono);font-size:11px;font-weight:800;white-space:nowrap}
+.leaderboard-wrap{background:linear-gradient(145deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:var(--radius-xl);box-shadow:var(--shadow);overflow-x:auto}
+.leaderboard-table{width:100%;min-width:760px;border-collapse:collapse;font-size:12px}
+.leaderboard-table th{padding:11px 10px;text-align:left;color:var(--text3);font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap}
+.leaderboard-table th:first-child{padding-left:16px}
+.leaderboard-table td{padding:10px;border-bottom:1px solid var(--border);vertical-align:middle}
+.leaderboard-table tbody tr:last-child td{border-bottom:none}
+.leaderboard-table tbody tr:hover{background:rgba(255,255,255,.025)}
+.leaderboard-table .lb-name{font-weight:700;color:var(--text);white-space:nowrap}
+.leaderboard-table .lb-rank{font-family:var(--font-mono);font-weight:800;color:var(--text3);text-align:center}
+.leaderboard-table .lb-rank.r1{color:var(--gold)}
+.leaderboard-table .lb-rank.r2{color:var(--text2)}
+.leaderboard-table .lb-rank.r3{color:var(--amber)}
+.leaderboard-table .lb-val{font-family:var(--font-mono);font-weight:700;white-space:nowrap}
+.lb-arrow{display:inline-block;margin-left:5px;color:var(--text4);font-size:9px}
+.lb-sorted{color:var(--blue)!important}
+.lb-sorted .lb-arrow{color:var(--blue)}
+.lb-bar-wrap{display:inline-block;width:48px;height:4px;margin-left:7px;vertical-align:middle;background:rgba(255,255,255,.05);border-radius:99px;overflow:hidden}
+.lb-below-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--red);margin-left:5px;vertical-align:middle}
+body.light .podium-card,body.light .leaderboard-wrap{background:linear-gradient(145deg,var(--surface),var(--surface2));border-color:var(--border2);box-shadow:var(--shadow)}
+body.light .podium-card:hover,body.light .leaderboard-wrap:hover{border-color:var(--border3);box-shadow:var(--shadow-lg)}
+body.light .podium-card-header,.body.light .leaderboard-table th{background:rgba(0,0,0,.025)}
 .stats-global{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:18px}
 .stats-global-card{background:linear-gradient(145deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;text-align:center;box-shadow:var(--shadow);transition:all var(--transition)}
 .stats-global-card:hover{border-color:var(--border2);transform:translateY(-3px)}
@@ -3311,16 +3348,13 @@ const CHART_AXES = {
     {key:'players', label:'Joueurs', desc:'Un point par joueur'},
   ],
   y: [
-    {key:'coffres_rate', label:'Taux Coffres %', group:'Coffres'},
-    {key:'power_t1',     label:'Puissance T1',   group:'Puissance'},
+    {key:'power_t1', label:'Puissance T1', group:'Puissance'},
   ],
 };
 
 const CHART_TYPES = [
   {key:'bar',    label:'Barres',  icon:'▬'},
   {key:'hbar',   label:'Barres horizontales', icon:'▭'},
-  {key:'line',   label:'Courbe',  icon:'📈'},
-  {key:'donut',  label:'Donut',   icon:'⭕'},
 ];
 
 const CHART_FILTERS = [
@@ -3337,13 +3371,13 @@ const CHART_COLORS = [
 
 let _chartBuilderState = {
   xAxis:    'players',
-  yAxis:    'driver_count',
+  yAxis:    'power_t1',
   chartType:'bar',
   filter:   'all',
   sortBy:   'desc',
   topN:     0,       // 0 = tous, sinon limite N
   groupSim: false,   // regrouper les valeurs similaires
-  simPct:   10,      // seuil de similitude en %
+  simPct:   1,       // seuil de similitude en %
   chartInst: null,
 };
 
@@ -3362,10 +3396,6 @@ function getChartData(){
     pts = pts.map(p=>{
       let val = null;
       if(s.yAxis === 'total_draws')   val = (p.driver_count||0)+(p.vip_count||0);
-      else if(s.yAxis === 'coffres_rate'){
-        const w = getPlayerWeeks(p);
-        val = w.length ? Math.round(w.filter(x=>x.validated).length/w.length*100) : null;
-      }
       else if(s.yAxis === 'reliability') val = computeReliabilityScore(p);
       else if(s.yAxis === 'trend'){
         const d = computeReliabilityDetail(p);
@@ -4768,6 +4798,35 @@ async function evDropOnCat(e,toTeam,toCatKey){
 }
 function evDragEnd(){evDragSrcData=null;document.querySelectorAll('.ev-team-player').forEach(el=>{el.classList.remove('dragging-team');el.classList.remove('drag-over-team');});}
 
+async function replaceTeamPlayer(teamKey,catKey,idx){
+  if(!evTeams||!evTeams[teamKey]||!evTeams[teamKey][catKey])return;
+  const current=evTeams[teamKey][catKey][idx];
+  if(!current)return;
+  const placedIds=new Set();
+  ['A','B'].forEach(tk=>{
+    if(!evTeams[tk])return;
+    CATEGORIES.forEach(cat=>(evTeams[tk][cat.key]||[]).forEach(p=>placedIds.add(p.id)));
+  });
+  const candidates=sortTddPlayers(participants.filter(p=>!placedIds.has(p.id)&&evRoles[p.id]!=='none'));
+  if(!candidates.length){toast('Aucun joueur non placé disponible');return;}
+  const lines=candidates.map((p,n)=>{
+    const role=evRoles[p.id]==='starter'?'Titulaire':'Remplaçant';
+    const count=tddNonRetenus[p.id]||0;
+    const rot=count?` · 🔄 ×${count}`:'';
+    const pow=p.power_t1?` · ${Number(p.power_t1).toLocaleString('fr-FR')}`:'';
+    return `${n+1}. ${p.name} — ${role}${pow}${rot}`;
+  }).join('\n');
+  const answer=prompt(`Remplacer ${current.name} dans ${catKey} ?\n\nJoueurs non placés :\n${lines}\n\nEntre le numéro du joueur à faire entrer :`);
+  if(answer===null)return;
+  const n=parseInt(answer,10);
+  if(!Number.isInteger(n)||n<1||n>candidates.length){toast('Choix invalide');return;}
+  const replacement=candidates[n-1];
+  evTeams[teamKey][catKey][idx]=replacement;
+  await saveEvTeamsToDB();
+  renderEventTeams();
+  toast(`${replacement.name} remplace ${current.name} dans ${catKey} — Équipe ${teamKey}`);
+}
+
 async function switchTeam(fromTeam,fromCat,idx){
   if(!evTeams||!evTeams.B)return;const toTeam=fromTeam==='A'?'B':'A';
   const player=evTeams[fromTeam][fromCat].splice(idx,1)[0];
@@ -4797,7 +4856,10 @@ function renderEventTeams(){
       const players=team[cat.key]||[];const isEmpty=players.length===0;
       const playersHtml=players.map((p,i)=>{
         const switchBtn=hasOtherTeam?`<button onclick="switchTeam('${teamKey}','${cat.key}',${i})" style="background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:6px;cursor:pointer;font-size:11px;padding:2px 8px;color:var(--text2);white-space:nowrap;flex-shrink:0;transition:all .15s">↔ ${otherTeam}</button>`:'';
-        return `<div class="ev-team-player" data-ev-team="${teamKey}" data-ev-cat="${cat.key}" data-ev-idx="${i}" draggable="true" ondragstart="evDragStart(event,'${teamKey}','${cat.key}',${i})" ondragend="evDragEnd()"><span class="ev-pnum">${i+1}</span><span class="ev-pname">${p.name}</span>${switchBtn}<span style="font-size:11px;color:var(--text4);cursor:grab;flex-shrink:0">⠿</span></div>`;
+        const replaceBtn=`<button onclick="replaceTeamPlayer('${teamKey}','${cat.key}',${i})" title="Remplacer par un joueur non placé" style="background:rgba(124,159,255,0.07);border:1px solid rgba(124,159,255,0.2);border-radius:6px;cursor:pointer;font-size:11px;padding:2px 7px;color:var(--blue);white-space:nowrap;flex-shrink:0;transition:all .15s">⇄ Remplacer</button>`;
+        const roleLetter=evRoles[p.id]==='starter'?'T':evRoles[p.id]==='sub'?'R':'';
+        const roleBadge=roleLetter?`<span style="font-size:11px;font-weight:800;color:var(--text2);min-width:14px;text-align:center" title="${roleLetter==='T'?'Titulaire':'Remplaçant'}">${roleLetter}</span>`:'';
+        return `<div class="ev-team-player" data-ev-team="${teamKey}" data-ev-cat="${cat.key}" data-ev-idx="${i}" draggable="true" ondragstart="evDragStart(event,'${teamKey}','${cat.key}',${i})" ondragend="evDragEnd()"><span class="ev-pnum">${i+1}</span>${roleBadge}<span class="ev-pname">${p.name}</span>${replaceBtn}${switchBtn}<span style="font-size:11px;color:var(--text4);cursor:grab;flex-shrink:0">⠿</span></div>`;
       }).join('');
       const isFull=players.length>=cat.size;const dropZone=`<div class="ev-cat-drop" ondragover="evDropZoneOver(event,'${teamKey}','${cat.key}')" ondragleave="evDropZoneLeave(event)" ondrop="evDropOnCatUniversal(event,'${teamKey}','${cat.key}')" style="min-height:${isEmpty?'38px':'4px'};display:flex;align-items:center;justify-content:center;border-radius:6px;transition:all .15s">${isEmpty?`<span style="font-size:11px;color:var(--text3);font-style:italic">${isFull?'Plein':'Déposer ici'}</span>`:''}</div>`;
       return `<div class="ev-cat-block" style="border-left:2px solid ${cat.color}"><div class="ev-cat-header" style="background:${cat.bg}"><span class="ev-cat-title" style="color:${cat.color}">${cat.label}</span><span class="ev-cat-info">${players.length}/${cat.size}</span></div>${playersHtml}${dropZone}</div>`;
@@ -4871,7 +4933,7 @@ window.addEventListener('load',()=>{
 <div id="pollOverlay" style="display:none">
   <div class="poll-page">
     <div class="poll-logo">⚔️</div>
-    <div class="poll-guild">Les 101</div>
+    <div class="poll-guild">Les Nains de Mithril</div>
     <div class="poll-title">Tempête du Désert</div>
     <div class="poll-subtitle">Indique ta disponibilité pour l'événement.<br>Ta réponse s'applique immédiatement.</div>
 

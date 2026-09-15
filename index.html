@@ -852,11 +852,6 @@ body.light .modal textarea{background:rgba(0,0,0,0.07);border:1px solid var(--bo
             <div id="priorityToggleWrap" style="display:none;align-items:center;gap:8px;padding:0 10px;background:rgba(255,184,77,0.06);border:1px solid rgba(255,184,77,0.2);border-radius:var(--radius-lg);height:34px">
               <button id="priorityToggleBtn" onclick="togglePriorityMode()" title="Activer la priorité staff" style="background:none;border:none;cursor:pointer;font-size:18px;line-height:1;padding:0" >⭐</button>
               <span id="priorityToggleLabel" style="font-size:11px;font-weight:700;color:var(--text3)">Priorité staff OFF</span>
-              <select id="priorityMultSelect" onchange="setPriorityMult(this.value)" style="display:none;height:24px;padding:0 4px;border:1px solid rgba(255,184,77,0.3);border-radius:6px;background:var(--surface);color:var(--amber);font-size:11px;font-weight:700;cursor:pointer">
-                <option value="1.5">Faible</option>
-                <option value="2" selected>Moyen</option>
-                <option value="3">Élevé</option>
-              </select>
             </div>
             <span class="section-toggle collapsed" id="planningToggle" onclick="toggleSection('planningBody','planningToggle')">▾</span>
           </div>
@@ -1417,31 +1412,22 @@ function togglePriorityMode(){
   savePriorityConfig();
 }
 
-function setPriorityMult(val){
-  priorityMultiplier=parseFloat(val);
-  savePriorityConfig();
-  const labels={1.5:'Faible',2:'Moyen',3:'Élevé'};
-  if(priorityModeActive) toast(`Priorité staff : ${labels[priorityMultiplier]||'Moyen'}`);
-}
 
 function updatePriorityUI(){
   const btn=document.getElementById('priorityToggleBtn');
   const lbl=document.getElementById('priorityToggleLabel');
-  const sel=document.getElementById('priorityMultSelect');
   const wrap=document.getElementById('priorityToggleWrap');
   if(!btn)return;
   if(priorityModeActive){
     btn.style.opacity='1';
     lbl.textContent='Priorité staff ON';
     lbl.style.color='var(--amber)';
-    if(sel){sel.style.display='';sel.value=String(priorityMultiplier);}
     if(wrap)wrap.style.background='rgba(255,184,77,0.12)';
     if(wrap)wrap.style.borderColor='rgba(255,184,77,0.35)';
   }else{
     btn.style.opacity='0.4';
     lbl.textContent='Priorité staff OFF';
     lbl.style.color='var(--text3)';
-    if(sel)sel.style.display='none';
     if(wrap)wrap.style.background='rgba(255,184,77,0.04)';
     if(wrap)wrap.style.borderColor='rgba(255,184,77,0.15)';
   }
@@ -2448,7 +2434,7 @@ async function toggleCoffre(id,dayIdx){
 async function resetCoffres(id){await sb.from('participants').update({coffres_days:JSON.stringify([false,false,false,false,false])}).eq('id',id);}
 
 function renderEligInfo(){
-  const el=document.getElementById('eligInfo');if(!participants.length){el.innerHTML='';return;}
+  const el=document.getElementById('eligInfo');if(!el)return;if(!participants.length){el.innerHTML='';return;}
   const basePool=applyDrawBuffer(presentMode?participants.filter(p=>presentIds.has(p.id)):participants);
   const elig=basePool.filter(p=>isEligible(p));
   if(!elig.length)el.innerHTML='<span style="color:var(--text3);font-size:12px">Aucun joueur éligible 🏆</span>';
@@ -2473,12 +2459,16 @@ async function draw(presentOnly){
   const vip=vipUrn[Math.floor(Math.random()*vipUrn.length)];
   const badge=useEligFilter?'🏆 Éligibles':presentOnly?'🟣 Présents':'';
   const bCls=useEligFilter?' gold':'';
-  document.getElementById('resDrv').textContent=driver.name;
-  document.getElementById('resVip').textContent=vip.name;
-  document.getElementById('resDrvBadge').innerHTML=badge?`<span class="res-badge${bCls}">${badge}</span>`:'';
-  document.getElementById('resVipBadge').innerHTML=badge?`<span class="res-badge${bCls}">${badge}</span>`:'';
+  const resDrv=document.getElementById('resDrv');
+  const resVip=document.getElementById('resVip');
+  const resDrvBadge=document.getElementById('resDrvBadge');
+  const resVipBadge=document.getElementById('resVipBadge');
+  if(resDrv)resDrv.textContent=driver.name;
+  if(resVip)resVip.textContent=vip.name;
+  if(resDrvBadge)resDrvBadge.innerHTML=badge?`<span class="res-badge${bCls}">${badge}</span>`:'';
+  if(resVipBadge)resVipBadge.innerHTML=badge?`<span class="res-badge${bCls}">${badge}</span>`:'';
   ['cardDrv','cardVip'].forEach((id,i)=>{
-    const el=document.getElementById(id);
+    const el=document.getElementById(id);if(!el)return;
     const cls=useEligFilter?'fl-gold':i===0?'fl-blue':'fl-amber';
     el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),1000);
   });
@@ -2516,10 +2506,14 @@ async function doManual(){
   const driver=participants.find(p=>p.id===dId);
   const vip=participants.find(p=>p.id===vId);
   closeModal('manualModal');
-  document.getElementById('resDrv').textContent=driver.name;
-  document.getElementById('resVip').textContent=vip.name;
-  document.getElementById('resDrvBadge').innerHTML='<span class="res-badge">Tirage personnalisé</span>';
-  document.getElementById('resVipBadge').innerHTML='<span class="res-badge">Tirage personnalisé</span>';
+  const resDrv=document.getElementById('resDrv');
+  const resVip=document.getElementById('resVip');
+  const resDrvBadge=document.getElementById('resDrvBadge');
+  const resVipBadge=document.getElementById('resVipBadge');
+  if(resDrv)resDrv.textContent=driver.name;
+  if(resVip)resVip.textContent=vip.name;
+  if(resDrvBadge)resDrvBadge.innerHTML='<span class="res-badge">Tirage personnalisé</span>';
+  if(resVipBadge)resVipBadge.innerHTML='<span class="res-badge">Tirage personnalisé</span>';
   setBusy(true);
   const ops=[
     sb.from('participants').update({driver_count:driver.driver_count+1}).eq('id',dId),
@@ -4459,7 +4453,8 @@ function toggleSection(bodyId,toggleId){
 
 function updateDrawBtns(){
   const presPool=participants.filter(p=>presentIds.has(p.id));
-  document.getElementById('drawPresBtn').disabled=!presentMode||presPool.length<2||busy;
+  const drawPresBtn=document.getElementById('drawPresBtn');
+  if(drawPresBtn) drawPresBtn.disabled=!presentMode||presPool.length<2||busy;
 }
 
 
@@ -4497,11 +4492,16 @@ function render(){
     }
   if(presentMode)updatePresCount();updateDrawBtns();renderEligInfo();
   if(history.length){
-    document.getElementById('resDrv').textContent=history[0].driver;document.getElementById('resVip').textContent=history[0].vip;
+    const resDrv=document.getElementById('resDrv');
+    const resVip=document.getElementById('resVip');
+    const resDrvBadge=document.getElementById('resDrvBadge');
+    const resVipBadge=document.getElementById('resVipBadge');
+    if(resDrv)resDrv.textContent=history[0].driver;
+    if(resVip)resVip.textContent=history[0].vip;
     const bTxt=history[0].is_manual?'Tirage personnalisé':history[0].used_eligible?'🏆 Éligibles':history[0].is_present_draw?'🟣 Présents':'';
     const bCls=history[0].used_eligible?' gold':'';
-    document.getElementById('resDrvBadge').innerHTML=bTxt?`<span class="res-badge${bCls}">${bTxt}</span>`:'';
-    document.getElementById('resVipBadge').innerHTML=bTxt?`<span class="res-badge${bCls}">${bTxt}</span>`:'';
+    if(resDrvBadge)resDrvBadge.innerHTML=bTxt?`<span class="res-badge${bCls}">${bTxt}</span>`:'';
+    if(resVipBadge)resVipBadge.innerHTML=bTxt?`<span class="res-badge${bCls}">${bTxt}</span>`:'';
   }
   document.getElementById('histList').innerHTML=!history.length?'<span class="empty">Aucun tirage effectué.</span>':history.map((h,i)=>{
     return `<div class="hist-item"><span class="hnum">#${history.length-i}</span><span class="hpart"><span class="role-dot drv" style="width:16px;height:16px;font-size:9px">T</span>${h.driver}</span><span class="hsep">·</span><span class="hpart"><span class="role-dot vip" style="width:16px;height:16px;font-size:9px">★</span>${h.vip}</span><button class="hist-del" onclick="deleteHistoryEntry(${h.id})">×</button></div>`;
@@ -4597,8 +4597,8 @@ async function doImport(){
 function togglePresentMode(){
   presentMode=!presentMode;
   const btn=document.getElementById('presModeBtn');
-  btn.textContent=presentMode?'☑ Mode présents':'☐ Mode présents';
-  btn.classList.toggle('btn-primary',presentMode);
+  if(btn){btn.textContent=presentMode?'☑ Mode présents':'☐ Mode présents';
+  btn.classList.toggle('btn-primary',presentMode);}
   document.getElementById('presBanner').classList.toggle('on',presentMode);
   if(!presentMode)presentIds.clear();
   render();updateDrawBtns();

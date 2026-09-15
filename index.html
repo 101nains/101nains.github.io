@@ -526,6 +526,20 @@ body.light .archive-player-row.validated{border-left-color:#2a1c00;background:rg
 .ev-cat-drop{padding:2px 16px;transition:background var(--transition)}.ev-cat-drop:hover{background:rgba(80,232,152,0.05)}
 .ev-copy-btn{width:100%;height:40px;display:flex;align-items:center;justify-content:center;gap:6px;border:none;border-top:1px solid var(--border);background:rgba(255,255,255,0.02);color:var(--text3);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all var(--transition)}
 .ev-copy-btn:hover{background:rgba(124,159,255,0.08);color:var(--blue)}
+
+/* Menu de remplacement TDD — même charte que les cartes Tempête du désert */
+.tdd-replace-menu{position:fixed;z-index:99999;min-width:270px;max-width:min(360px,calc(100vw - 20px));max-height:360px;overflow:auto;background:linear-gradient(145deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);padding:6px}
+.tdd-replace-title{padding:10px 11px 9px;font-size:12px;font-weight:800;color:var(--blue);border-bottom:1px solid var(--border);margin-bottom:4px;background:linear-gradient(135deg,rgba(124,159,255,0.1),rgba(124,159,255,0.04));border-radius:var(--radius-lg)}
+.tdd-replace-item{width:100%;display:flex;align-items:center;gap:8px;text-align:left;background:transparent;border:1px solid transparent;border-radius:var(--radius);padding:8px 9px;color:var(--text);cursor:pointer;font-size:12px;transition:all var(--transition)}
+.tdd-replace-item:hover{background:rgba(124,159,255,0.08);border-color:rgba(124,159,255,0.18)}
+.tdd-replace-role{font-size:11px;font-weight:900;color:var(--text2);min-width:14px;text-align:center}
+.tdd-replace-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
+.tdd-replace-info{font-size:10px;color:var(--text3);white-space:nowrap}
+.tdd-replace-cancel{width:100%;margin-top:4px;background:linear-gradient(145deg,var(--surface),var(--surface2));border:1px solid var(--border2);border-radius:var(--radius);padding:7px;color:var(--text2);cursor:pointer;font-size:11px;font-weight:700}
+.tdd-replace-cancel:hover{background:rgba(124,159,255,0.08);color:var(--blue);border-color:rgba(124,159,255,0.25)}
+body.light .tdd-replace-title{background:linear-gradient(135deg,rgba(26,63,196,0.1),rgba(26,63,196,0.04));color:#1a3fc4}
+body.light .tdd-replace-item:hover{background:rgba(26,63,196,0.08);border-color:rgba(26,63,196,0.18)}
+body.light .tdd-replace-cancel{background:linear-gradient(145deg,var(--surface),var(--surface2));border-color:var(--border2);color:var(--text2)}
 body.light .ev-nb-btn{background:linear-gradient(145deg,var(--surface),var(--surface2));color:var(--text2);border:1px solid var(--border2);font-weight:700}
 body.light .ev-nb-btn.active{background:linear-gradient(135deg,#1230a8,#2a52e0);color:#fff;border-color:transparent}
 body.light .ev-role-btn{background:linear-gradient(145deg,var(--surface),var(--surface2));color:var(--text2);border:1px solid var(--border2);font-weight:600}
@@ -4798,10 +4812,19 @@ async function evDropOnCat(e,toTeam,toCatKey){
 }
 function evDragEnd(){evDragSrcData=null;document.querySelectorAll('.ev-team-player').forEach(el=>{el.classList.remove('dragging-team');el.classList.remove('drag-over-team');});}
 
-async function replaceTeamPlayer(teamKey,catKey,idx){
+function closeTddReplaceMenu(){
+  const menu=document.getElementById('tddReplaceMenu');
+  if(menu)menu.remove();
+}
+
+function openTddReplaceMenu(event,teamKey,catKey,idx){
+  event.preventDefault();
+  event.stopPropagation();
+  closeTddReplaceMenu();
   if(!evTeams||!evTeams[teamKey]||!evTeams[teamKey][catKey])return;
   const current=evTeams[teamKey][catKey][idx];
   if(!current)return;
+
   const placedIds=new Set();
   ['A','B'].forEach(tk=>{
     if(!evTeams[tk])return;
@@ -4809,22 +4832,99 @@ async function replaceTeamPlayer(teamKey,catKey,idx){
   });
   const candidates=sortTddPlayers(participants.filter(p=>!placedIds.has(p.id)&&evRoles[p.id]!=='none'));
   if(!candidates.length){toast('Aucun joueur non placé disponible');return;}
-  const lines=candidates.map((p,n)=>{
-    const role=evRoles[p.id]==='starter'?'Titulaire':'Remplaçant';
-    const count=tddNonRetenus[p.id]||0;
-    const rot=count?` · 🔄 ×${count}`:'';
-    const pow=p.power_t1?` · ${Number(p.power_t1).toLocaleString('fr-FR')}`:'';
-    return `${n+1}. ${p.name} — ${role}${pow}${rot}`;
-  }).join('\n');
-  const answer=prompt(`Remplacer ${current.name} dans ${catKey} ?\n\nJoueurs non placés :\n${lines}\n\nEntre le numéro du joueur à faire entrer :`);
-  if(answer===null)return;
-  const n=parseInt(answer,10);
-  if(!Number.isInteger(n)||n<1||n>candidates.length){toast('Choix invalide');return;}
-  const replacement=candidates[n-1];
+
+  const menu=document.createElement('div');
+  menu.id='tddReplaceMenu';
+  menu.className='tdd-replace-menu';
+  const title=document.createElement('div');
+  title.className='tdd-replace-title';
+  title.textContent=`Remplacer ${current.name} · ${catKey}`;
+  menu.appendChild(title);
+
+  candidates.forEach(p=>{
+    const role=evRoles[p.id]==='starter'?'T':'R';
+    const count=Number(tddNonRetenus[p.id])||0;
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='tdd-replace-item';
+    const roleSpan=document.createElement('span');
+    roleSpan.className='tdd-replace-role';
+    roleSpan.textContent=role;
+    const nameSpan=document.createElement('span');
+    nameSpan.className='tdd-replace-name';
+    nameSpan.textContent=p.name;
+    const infoSpan=document.createElement('span');
+    infoSpan.className='tdd-replace-info';
+    const bits=[];
+    if(p.power_t1)bits.push(Number(p.power_t1).toLocaleString('fr-FR'));
+    if(count>0)bits.push(`🔄 ×${count}`);
+    infoSpan.textContent=bits.join(' · ');
+    btn.append(roleSpan,nameSpan,infoSpan);
+    btn.addEventListener('click',async e=>{
+      e.stopPropagation();
+      closeTddReplaceMenu();
+      await applyTddReplacement(teamKey,catKey,idx,p.id);
+    });
+    menu.appendChild(btn);
+  });
+
+  const closeBtn=document.createElement('button');
+  closeBtn.type='button';
+  closeBtn.textContent='Annuler';
+  closeBtn.className='tdd-replace-cancel';
+  closeBtn.onclick=closeTddReplaceMenu;
+  menu.appendChild(closeBtn);
+  document.body.appendChild(menu);
+
+  const r=event.currentTarget.getBoundingClientRect();
+  const margin=8;
+  let left=r.left;
+  let top=r.bottom+margin;
+  if(left+menu.offsetWidth>window.innerWidth-margin)left=Math.max(margin,window.innerWidth-menu.offsetWidth-margin);
+  if(top+menu.offsetHeight>window.innerHeight-margin)top=Math.max(margin,r.top-menu.offsetHeight-margin);
+  menu.style.left=`${left}px`;
+  menu.style.top=`${top}px`;
+  setTimeout(()=>{
+    const onDocClick=e=>{
+      if(!menu.contains(e.target)&&e.target!==event.currentTarget){closeTddReplaceMenu();document.removeEventListener('click',onDocClick,true);}
+    };
+    document.addEventListener('click',onDocClick,true);
+  },0);
+}
+
+async function applyTddReplacement(teamKey,catKey,idx,replacementId){
+  if(!evTeams||!evTeams[teamKey]||!evTeams[teamKey][catKey])return;
+  const current=evTeams[teamKey][catKey][idx];
+  const replacement=participants.find(p=>String(p.id)===String(replacementId));
+  if(!current||!replacement)return;
+  const placedIds=new Set();
+  ['A','B'].forEach(tk=>{
+    if(!evTeams[tk])return;
+    CATEGORIES.forEach(cat=>(evTeams[tk][cat.key]||[]).forEach(p=>placedIds.add(p.id)));
+  });
+  if(placedIds.has(replacement.id)){toast('Ce joueur est déjà placé dans une équipe');return;}
+
   evTeams[teamKey][catKey][idx]=replacement;
+
+  // Une entrée manuelle consomme une rotation : x2 devient x1,
+  // x1 disparaît. Le joueur reste affiché dans la zone tant qu'il lui
+  // reste des rotations à effectuer.
+  if(Object.prototype.hasOwnProperty.call(tddNonRetenus,replacement.id)){
+    const count=Number(tddNonRetenus[replacement.id])||0;
+    if(count>1)tddNonRetenus[replacement.id]=count-1;
+    else delete tddNonRetenus[replacement.id];
+    await saveTddNonRetenus();
+  }
+
   await saveEvTeamsToDB();
   renderEventTeams();
+  renderTddNonRetenus();
   toast(`${replacement.name} remplace ${current.name} dans ${catKey} — Équipe ${teamKey}`);
+}
+
+function replaceTeamPlayer(teamKey,catKey,idx){
+  const button=event?.currentTarget;
+  if(button)openTddReplaceMenu(event,teamKey,catKey,idx);
 }
 
 async function switchTeam(fromTeam,fromCat,idx){
@@ -4856,7 +4956,7 @@ function renderEventTeams(){
       const players=team[cat.key]||[];const isEmpty=players.length===0;
       const playersHtml=players.map((p,i)=>{
         const switchBtn=hasOtherTeam?`<button onclick="switchTeam('${teamKey}','${cat.key}',${i})" style="background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:6px;cursor:pointer;font-size:11px;padding:2px 8px;color:var(--text2);white-space:nowrap;flex-shrink:0;transition:all .15s">↔ ${otherTeam}</button>`:'';
-        const replaceBtn=`<button onclick="replaceTeamPlayer('${teamKey}','${cat.key}',${i})" title="Remplacer par un joueur non placé" style="background:rgba(124,159,255,0.07);border:1px solid rgba(124,159,255,0.2);border-radius:6px;cursor:pointer;font-size:11px;padding:2px 7px;color:var(--blue);white-space:nowrap;flex-shrink:0;transition:all .15s">⇄ Remplacer</button>`;
+        const replaceBtn=`<button onclick="openTddReplaceMenu(event,'${teamKey}','${cat.key}',${i})" title="Remplacer par un joueur non placé" style="background:rgba(124,159,255,0.07);border:1px solid rgba(124,159,255,0.2);border-radius:6px;cursor:pointer;font-size:11px;padding:2px 7px;color:var(--blue);white-space:nowrap;flex-shrink:0;transition:all .15s">⇄ Remplacer</button>`;
         const roleLetter=evRoles[p.id]==='starter'?'T':evRoles[p.id]==='sub'?'R':'';
         const roleBadge=roleLetter?`<span style="font-size:11px;font-weight:800;color:var(--text2);min-width:14px;text-align:center" title="${roleLetter==='T'?'Titulaire':'Remplaçant'}">${roleLetter}</span>`:'';
         return `<div class="ev-team-player" data-ev-team="${teamKey}" data-ev-cat="${cat.key}" data-ev-idx="${i}" draggable="true" ondragstart="evDragStart(event,'${teamKey}','${cat.key}',${i})" ondragend="evDragEnd()"><span class="ev-pnum">${i+1}</span>${roleBadge}<span class="ev-pname">${p.name}</span>${replaceBtn}${switchBtn}<span style="font-size:11px;color:var(--text4);cursor:grab;flex-shrink:0">⠿</span></div>`;

@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>bienvenue chez 101</title>
+<title>bienvenue chez NA1N🚂</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;600&display=swap">
 <script>
-const SUPABASE_URL="https://kmbefvfxujfdipsbqyla.supabase.co";
-const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttYmVmdmZ4dWpmZGlwc2JxeWxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyNzczOTksImV4cCI6MjA5OTg1MzM5OX0.zop6DDlF49ms1-4a12WKWbU_X-ccPLG_D97r0Yya0Bs";
+const SUPABASE_URL="https://yudbfuqudtqkdddjnaad.supabase.co";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1ZGJmdXF1ZHRxa2RkZGpuYWFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2OTA0MjQsImV4cCI6MjA5NDI2NjQyNH0.G-wFqBVSp05P3HfiDMgaGxufm3n3gWWaKECOVTzPeEA";
 </script>
 <script
   src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"
@@ -778,7 +778,7 @@ body.light .modal textarea{background:rgba(0,0,0,0.07);border:1px solid var(--bo
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-logo">🚂</div>
-    <div class="login-title">bienvenue chez 101</div>
+    <div class="login-title">bienvenue chez NA1N</div>
     <div class="login-sub">Connecte-toi pour accéder à l'application</div>
     <div class="login-field">
       <label>Identifiant</label>
@@ -802,7 +802,7 @@ body.light .modal textarea{background:rgba(0,0,0,0.07);border:1px solid var(--bo
 <div class="page">
 
   <header>
-    <h1><span class="logo-emoji">🚂</span> bienvenue chez 101</h1>
+    <h1><span class="logo-emoji">🚂</span> bienvenue chez NA1N</h1>
     <p>
       <span class="status-dot" id="statusDot"></span>
       <span id="statusTxt">Connexion…</span>&nbsp;
@@ -1448,7 +1448,7 @@ function updatePriorityUI(){
 }
 
 async function togglePriority(playerId, checkbox){
-  if(!isAdmin())return;
+  if(!isAdminOrStaff())return;
   const val=checkbox.checked;
   await sb.from('participants').update({is_priority:val}).eq('id',playerId);
   const p=participants.find(x=>x.id===playerId);
@@ -4472,9 +4472,9 @@ function render(){
 
 
     head.style.display='';
-    const cols=`${showPres?'36px ':''}32px minmax(120px,1fr) 85px repeat(5,28px) 90px${isAdmin()?' 32px':''}`;
+    const cols=`${showPres?'36px ':''}32px minmax(120px,1fr) 85px repeat(5,28px) 90px${isAdminOrStaff()?' 32px':''}`;
     head.style.gridTemplateColumns=cols;
-    head.innerHTML=`${showPres?'<span style="text-align:center">✓</span>':''}<span style="font-size:9px;text-align:center">#</span><span class="h-name">Nom</span><span style="font-size:9px;color:var(--cyan);text-align:center">Puiss.</span>${DAYS.map(d=>`<span style="font-size:9px;text-align:center">${d}</span>`).join('')}<span style="font-size:9px;text-align:center">Élig.</span>${isAdmin()?'<span title="Priorité staff" style="font-size:9px;text-align:center">⭐</span>':''}`;
+    head.innerHTML=`${showPres?'<span style="text-align:center">✓</span>':''}<span style="font-size:9px;text-align:center">#</span><span class="h-name">Nom</span><span style="font-size:9px;color:var(--cyan);text-align:center">Puiss.</span>${DAYS.map(d=>`<span style="font-size:9px;text-align:center">${d}</span>`).join('')}<span style="font-size:9px;text-align:center">Élig.</span>${isAdminOrStaff()?'<span title="Priorité staff" style="font-size:9px;text-align:center">⭐</span>':''}`;
     if(!filtered.length){
       body.innerHTML=`<div style="padding:16px;font-size:13px;color:var(--text3);font-style:italic">${searchFilter?'Aucun résultat pour "'+searchFilter+'"':'Aucun participant.'}</div>`;
     }else{
@@ -4491,7 +4491,7 @@ function render(){
           <div class="power-cell"><span class="power-disp${!p.power_t1?' empty-val':''}" onclick="startEditPower(${realIdx})">${p.power_t1?Number(p.power_t1).toLocaleString('fr-FR'):'—'}</span><input class="power-inp" type="text" ondragstart="event.stopPropagation()" onblur="commitPower(${realIdx})" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape')render();"/></div>
           <div style="display:contents">${coffresBtns}</div>
           <div style="display:flex;align-items:center;justify-content:center;gap:4px"><span class="elig-btn ${elig?'yes':'no'}">${elig?'✓':'✗'}</span><button class="del-btn" onclick="removeName(${p.id})">×</button></div>
-          ${isAdmin()?`<div style="display:flex;align-items:center;justify-content:center"><input type="checkbox" title="Priorité staff ⭐" ${p.is_priority?'checked':''} onchange="togglePriority(${p.id},this)" ondragstart="event.stopPropagation()" style="width:15px;height:15px;accent-color:var(--amber);cursor:pointer"/></div>`:''}
+          ${isAdminOrStaff()?`<div style="display:flex;align-items:center;justify-content:center"><input type="checkbox" title="Priorité staff ⭐" ${p.is_priority?'checked':''} onchange="togglePriority(${p.id},this)" ondragstart="event.stopPropagation()" style="width:15px;height:15px;accent-color:var(--amber);cursor:pointer"/></div>`:''}
         </div>`;
       }).join('');
     }

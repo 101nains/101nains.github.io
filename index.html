@@ -852,6 +852,11 @@ body.light .modal textarea{background:rgba(0,0,0,0.07);border:1px solid var(--bo
             <div id="priorityToggleWrap" style="display:none;align-items:center;gap:8px;padding:0 10px;background:rgba(255,184,77,0.06);border:1px solid rgba(255,184,77,0.2);border-radius:var(--radius-lg);height:34px">
               <button id="priorityToggleBtn" onclick="togglePriorityMode()" title="Activer la priorité staff" style="background:none;border:none;cursor:pointer;font-size:18px;line-height:1;padding:0" >⭐</button>
               <span id="priorityToggleLabel" style="font-size:11px;font-weight:700;color:var(--text3)">Priorité staff OFF</span>
+              <select id="priorityMultSelect" onchange="setPriorityMult(this.value)" style="display:none;height:24px;padding:0 4px;border:1px solid rgba(255,184,77,0.3);border-radius:6px;background:var(--surface);color:var(--amber);font-size:11px;font-weight:700;cursor:pointer">
+                <option value="1.5">Faible</option>
+                <option value="2" selected>Moyen</option>
+                <option value="3">Élevé</option>
+              </select>
             </div>
             <span class="section-toggle collapsed" id="planningToggle" onclick="toggleSection('planningBody','planningToggle')">▾</span>
           </div>
@@ -1136,6 +1141,12 @@ body.light .modal textarea{background:rgba(0,0,0,0.07);border:1px solid var(--bo
                 <span id="elPriorityThumb" style="display:block;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;transform:translateX(0px)"></span>
               </button>
             </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:0 10px;background:rgba(80,232,152,0.06);border:1px solid rgba(80,232,152,0.15);border-radius:var(--radius-lg);height:34px">
+              <span style="font-size:11px;font-weight:700;color:var(--green,#50e898)">🔄 Rotation équitable</span>
+              <button id="tddFairRotationBtn" onclick="toggleTddFairRotation()" style="width:38px;height:20px;border-radius:99px;border:none;cursor:pointer;background:var(--border2);padding:2px;transition:background .2s">
+                <span id="tddFairRotationThumb" style="display:block;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;transform:translateX(0px)"></span>
+              </button>
+            </div>
             <div id="asymControls" style="display:none;align-items:center;gap:8px;padding:6px 12px;background:rgba(255,184,77,0.06);border:1px solid rgba(255,184,77,0.2);border-radius:var(--radius-lg)">
               <span style="font-size:11px;font-weight:700;color:var(--amber)">Équipe A :</span>
               <input type="range" id="asymSlider" min="15" max="35" step="1" value="25"
@@ -1335,6 +1346,9 @@ const TDD_NON_RETENUS_CONFIG_KEY = 'tdd_non_retenus';   // mode asymétrique (gr
 let _evSaving=false;    // true pendant saveEvTeamsToDB pour ignorer le realtime
 let evAsymSizeA=25;     // nombre de joueurs dans la grosse équipe A
 let evElPriority=false; // les joueurs les plus forts vont en Électrons libres en premier
+let evFairRotation=(()=>{try{return localStorage.getItem('tdd_fair_rotation')==='1';}catch(e){return false;}})();
+const TDD_FAIR_ROTATION_KEY='tdd_fair_rotation_stats';
+let tddFairStats={counts:{},starters:{},week:''};
 let weeklyDrawsData=[];
 let drawBuffer=null; // Mémoire tampon 48h post-archivage (coffres_snapshot de la semaine passée)
 const DAYS=['Lu','Ma','Me','Je','Ve'];
@@ -1412,29 +1426,38 @@ function togglePriorityMode(){
   savePriorityConfig();
 }
 
+function setPriorityMult(val){
+  priorityMultiplier=parseFloat(val);
+  savePriorityConfig();
+  const labels={1.5:'Faible',2:'Moyen',3:'Élevé'};
+  if(priorityModeActive) toast(`Priorité staff : ${labels[priorityMultiplier]||'Moyen'}`);
+}
 
 function updatePriorityUI(){
   const btn=document.getElementById('priorityToggleBtn');
   const lbl=document.getElementById('priorityToggleLabel');
+  const sel=document.getElementById('priorityMultSelect');
   const wrap=document.getElementById('priorityToggleWrap');
   if(!btn)return;
   if(priorityModeActive){
     btn.style.opacity='1';
     lbl.textContent='Priorité staff ON';
     lbl.style.color='var(--amber)';
+    if(sel){sel.style.display='';sel.value=String(priorityMultiplier);}
     if(wrap)wrap.style.background='rgba(255,184,77,0.12)';
     if(wrap)wrap.style.borderColor='rgba(255,184,77,0.35)';
   }else{
     btn.style.opacity='0.4';
     lbl.textContent='Priorité staff OFF';
     lbl.style.color='var(--text3)';
+    if(sel)sel.style.display='none';
     if(wrap)wrap.style.background='rgba(255,184,77,0.04)';
     if(wrap)wrap.style.borderColor='rgba(255,184,77,0.15)';
   }
 }
 
 async function togglePriority(playerId, checkbox){
-  if(!isAdminOrStaff())return;
+  if(!isAdmin())return;
   const val=checkbox.checked;
   await sb.from('participants').update({is_priority:val}).eq('id',playerId);
   const p=participants.find(x=>x.id===playerId);
@@ -2215,6 +2238,60 @@ function sortTddPlayers(players){
   return [...players].sort((a,b)=>{const fa=Number(tddNonRetenus[a.id]||0),fb=Number(tddNonRetenus[b.id]||0);if(fa!==fb)return fb-fa;const pa=a.ev_priority?1:0,pb=b.ev_priority?1:0;if(pa!==pb)return pb-pa;return (b.power_t1||0)-(a.power_t1||0);});
 }
 
+async function loadTddFairStats(){
+  if(!sb)return;
+  try{
+    const {data}=await sb.from('app_config').select('value').eq('key',TDD_FAIR_ROTATION_KEY).maybeSingle();
+    if(data&&data.value){
+      tddFairStats={counts:data.value.counts||{},starters:data.value.starters||{},week:data.value.week||''};
+    }
+  }catch(e){}
+  updateTddFairRotationUi();
+}
+async function saveTddFairStats(){
+  if(!sb)return;
+  await sb.from('app_config').upsert({key:TDD_FAIR_ROTATION_KEY,value:tddFairStats,updated_at:new Date().toISOString()});
+}
+function updateTddFairRotationUi(){
+  const btn=document.getElementById('tddFairRotationBtn');
+  const thumb=document.getElementById('tddFairRotationThumb');
+  if(btn)btn.style.background=evFairRotation?'#50e898':'var(--border2)';
+  if(thumb)thumb.style.transform=evFairRotation?'translateX(18px)':'translateX(0px)';
+}
+function toggleTddFairRotation(){
+  evFairRotation=!evFairRotation;
+  try{localStorage.setItem('tdd_fair_rotation',evFairRotation?'1':'0');}catch(e){}
+  updateTddFairRotationUi();
+  toast(evFairRotation?'🔄 Rotation équitable ON — compatible avec EL priorité':'🔄 Rotation équitable OFF');
+}
+function getTddFairKey(){return getTddWeekKey();}
+function buildTddFairRank(players){
+  const counts=tddFairStats.counts||{}, starters=tddFairStats.starters||{};
+  return [...players].sort((a,b)=>{
+    const ac=Number(counts[a.id]||0), bc=Number(counts[b.id]||0);
+    if(ac!==bc)return ac-bc;
+    const as=Number(starters[a.id]||0), bs=Number(starters[b.id]||0);
+    if(as!==bs)return as-bs;
+    const af=Number(tddNonRetenus[a.id]||0), bf=Number(tddNonRetenus[b.id]||0);
+    if(af!==bf)return bf-af;
+    const ap=a.ev_priority?1:0,bp=b.ev_priority?1:0;
+    if(ap!==bp)return bp-ap;
+    return (b.power_t1||0)-(a.power_t1||0);
+  });
+}
+async function recordTddFairParticipation(placedIds,starterIds){
+  const week=getTddFairKey();
+  const ids=[...placedIds];
+  if(!ids.length)return;
+  // Une seule comptabilisation automatique par semaine pour éviter qu'un second clic
+  // sur « équilibrer » ne fasse artificiellement monter les compteurs.
+  if(tddFairStats.week===week)return;
+  ids.forEach(id=>{tddFairStats.counts[id]=Number(tddFairStats.counts[id]||0)+1;});
+  starterIds.forEach(id=>{tddFairStats.starters[id]=Number(tddFairStats.starters[id]||0)+1;});
+  tddFairStats.week=week;
+  await saveTddFairStats();
+}
+
 async function loadAll(){
   if(!sb)return;
   try{
@@ -2233,6 +2310,7 @@ async function loadAll(){
     renderHistFiltered();
     renderArchiveList();
     await loadTddNonRetenus();
+    await loadTddFairStats();
     evRoles={};
     if(erData){
       erData.forEach(r=>{evRoles[r.player_id]=r.role;});
@@ -2434,7 +2512,7 @@ async function toggleCoffre(id,dayIdx){
 async function resetCoffres(id){await sb.from('participants').update({coffres_days:JSON.stringify([false,false,false,false,false])}).eq('id',id);}
 
 function renderEligInfo(){
-  const el=document.getElementById('eligInfo');if(!el)return;if(!participants.length){el.innerHTML='';return;}
+  const el=document.getElementById('eligInfo');if(!participants.length){el.innerHTML='';return;}
   const basePool=applyDrawBuffer(presentMode?participants.filter(p=>presentIds.has(p.id)):participants);
   const elig=basePool.filter(p=>isEligible(p));
   if(!elig.length)el.innerHTML='<span style="color:var(--text3);font-size:12px">Aucun joueur éligible 🏆</span>';
@@ -2459,16 +2537,17 @@ async function draw(presentOnly){
   const vip=vipUrn[Math.floor(Math.random()*vipUrn.length)];
   const badge=useEligFilter?'🏆 Éligibles':presentOnly?'🟣 Présents':'';
   const bCls=useEligFilter?' gold':'';
-  const resDrv=document.getElementById('resDrv');
-  const resVip=document.getElementById('resVip');
-  const resDrvBadge=document.getElementById('resDrvBadge');
-  const resVipBadge=document.getElementById('resVipBadge');
-  if(resDrv)resDrv.textContent=driver.name;
-  if(resVip)resVip.textContent=vip.name;
-  if(resDrvBadge)resDrvBadge.innerHTML=badge?`<span class="res-badge${bCls}">${badge}</span>`:'';
-  if(resVipBadge)resVipBadge.innerHTML=badge?`<span class="res-badge${bCls}">${badge}</span>`:'';
+  const resDrvEl=document.getElementById('resDrv');
+  const resVipEl=document.getElementById('resVip');
+  const resDrvBadgeEl=document.getElementById('resDrvBadge');
+  const resVipBadgeEl=document.getElementById('resVipBadge');
+  if(resDrvEl)resDrvEl.textContent=driver.name;
+  if(resVipEl)resVipEl.textContent=vip.name;
+  if(resDrvBadgeEl)resDrvBadgeEl.innerHTML=badge?`<span class="res-badge${bCls}">${badge}</span>`:'';
+  if(resVipBadgeEl)resVipBadgeEl.innerHTML=badge?`<span class="res-badge${bCls}">${badge}</span>`:'';
   ['cardDrv','cardVip'].forEach((id,i)=>{
-    const el=document.getElementById(id);if(!el)return;
+    const el=document.getElementById(id);
+    if(!el)return;
     const cls=useEligFilter?'fl-gold':i===0?'fl-blue':'fl-amber';
     el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),1000);
   });
@@ -2506,14 +2585,14 @@ async function doManual(){
   const driver=participants.find(p=>p.id===dId);
   const vip=participants.find(p=>p.id===vId);
   closeModal('manualModal');
-  const resDrv=document.getElementById('resDrv');
-  const resVip=document.getElementById('resVip');
-  const resDrvBadge=document.getElementById('resDrvBadge');
-  const resVipBadge=document.getElementById('resVipBadge');
-  if(resDrv)resDrv.textContent=driver.name;
-  if(resVip)resVip.textContent=vip.name;
-  if(resDrvBadge)resDrvBadge.innerHTML='<span class="res-badge">Tirage personnalisé</span>';
-  if(resVipBadge)resVipBadge.innerHTML='<span class="res-badge">Tirage personnalisé</span>';
+  const resDrvEl=document.getElementById('resDrv');
+  const resVipEl=document.getElementById('resVip');
+  const resDrvBadgeEl=document.getElementById('resDrvBadge');
+  const resVipBadgeEl=document.getElementById('resVipBadge');
+  if(resDrvEl)resDrvEl.textContent=driver.name;
+  if(resVipEl)resVipEl.textContent=vip.name;
+  if(resDrvBadgeEl)resDrvBadgeEl.innerHTML='<span class="res-badge">Tirage personnalisé</span>';
+  if(resVipBadgeEl)resVipBadgeEl.innerHTML='<span class="res-badge">Tirage personnalisé</span>';
   setBusy(true);
   const ops=[
     sb.from('participants').update({driver_count:driver.driver_count+1}).eq('id',dId),
@@ -4467,9 +4546,9 @@ function render(){
 
 
     head.style.display='';
-    const cols=`${showPres?'36px ':''}32px minmax(120px,1fr) 85px repeat(5,28px) 90px${isAdminOrStaff()?' 32px':''}`;
+    const cols=`${showPres?'36px ':''}32px minmax(120px,1fr) 85px repeat(5,28px) 90px${isAdmin()?' 32px':''}`;
     head.style.gridTemplateColumns=cols;
-    head.innerHTML=`${showPres?'<span style="text-align:center">✓</span>':''}<span style="font-size:9px;text-align:center">#</span><span class="h-name">Nom</span><span style="font-size:9px;color:var(--cyan);text-align:center">Puiss.</span>${DAYS.map(d=>`<span style="font-size:9px;text-align:center">${d}</span>`).join('')}<span style="font-size:9px;text-align:center">Élig.</span>${isAdminOrStaff()?'<span title="Priorité staff" style="font-size:9px;text-align:center">⭐</span>':''}`;
+    head.innerHTML=`${showPres?'<span style="text-align:center">✓</span>':''}<span style="font-size:9px;text-align:center">#</span><span class="h-name">Nom</span><span style="font-size:9px;color:var(--cyan);text-align:center">Puiss.</span>${DAYS.map(d=>`<span style="font-size:9px;text-align:center">${d}</span>`).join('')}<span style="font-size:9px;text-align:center">Élig.</span>${isAdmin()?'<span title="Priorité staff" style="font-size:9px;text-align:center">⭐</span>':''}`;
     if(!filtered.length){
       body.innerHTML=`<div style="padding:16px;font-size:13px;color:var(--text3);font-style:italic">${searchFilter?'Aucun résultat pour "'+searchFilter+'"':'Aucun participant.'}</div>`;
     }else{
@@ -4486,22 +4565,22 @@ function render(){
           <div class="power-cell"><span class="power-disp${!p.power_t1?' empty-val':''}" onclick="startEditPower(${realIdx})">${p.power_t1?Number(p.power_t1).toLocaleString('fr-FR'):'—'}</span><input class="power-inp" type="text" ondragstart="event.stopPropagation()" onblur="commitPower(${realIdx})" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape')render();"/></div>
           <div style="display:contents">${coffresBtns}</div>
           <div style="display:flex;align-items:center;justify-content:center;gap:4px"><span class="elig-btn ${elig?'yes':'no'}">${elig?'✓':'✗'}</span><button class="del-btn" onclick="removeName(${p.id})">×</button></div>
-          ${isAdminOrStaff()?`<div style="display:flex;align-items:center;justify-content:center"><input type="checkbox" title="Priorité staff ⭐" ${p.is_priority?'checked':''} onchange="togglePriority(${p.id},this)" ondragstart="event.stopPropagation()" style="width:15px;height:15px;accent-color:var(--amber);cursor:pointer"/></div>`:''}
+          ${isAdmin()?`<div style="display:flex;align-items:center;justify-content:center"><input type="checkbox" title="Priorité staff ⭐" ${p.is_priority?'checked':''} onchange="togglePriority(${p.id},this)" ondragstart="event.stopPropagation()" style="width:15px;height:15px;accent-color:var(--amber);cursor:pointer"/></div>`:''}
         </div>`;
       }).join('');
     }
   if(presentMode)updatePresCount();updateDrawBtns();renderEligInfo();
   if(history.length){
-    const resDrv=document.getElementById('resDrv');
-    const resVip=document.getElementById('resVip');
-    const resDrvBadge=document.getElementById('resDrvBadge');
-    const resVipBadge=document.getElementById('resVipBadge');
-    if(resDrv)resDrv.textContent=history[0].driver;
-    if(resVip)resVip.textContent=history[0].vip;
+    const resDrvEl=document.getElementById('resDrv');
+    const resVipEl=document.getElementById('resVip');
+    const resDrvBadgeEl=document.getElementById('resDrvBadge');
+    const resVipBadgeEl=document.getElementById('resVipBadge');
+    if(resDrvEl)resDrvEl.textContent=history[0].driver;
+    if(resVipEl)resVipEl.textContent=history[0].vip;
     const bTxt=history[0].is_manual?'Tirage personnalisé':history[0].used_eligible?'🏆 Éligibles':history[0].is_present_draw?'🟣 Présents':'';
     const bCls=history[0].used_eligible?' gold':'';
-    if(resDrvBadge)resDrvBadge.innerHTML=bTxt?`<span class="res-badge${bCls}">${bTxt}</span>`:'';
-    if(resVipBadge)resVipBadge.innerHTML=bTxt?`<span class="res-badge${bCls}">${bTxt}</span>`:'';
+    if(resDrvBadgeEl)resDrvBadgeEl.innerHTML=bTxt?`<span class="res-badge${bCls}">${bTxt}</span>`:'';
+    if(resVipBadgeEl)resVipBadgeEl.innerHTML=bTxt?`<span class="res-badge${bCls}">${bTxt}</span>`:'';
   }
   document.getElementById('histList').innerHTML=!history.length?'<span class="empty">Aucun tirage effectué.</span>':history.map((h,i)=>{
     return `<div class="hist-item"><span class="hnum">#${history.length-i}</span><span class="hpart"><span class="role-dot drv" style="width:16px;height:16px;font-size:9px">T</span>${h.driver}</span><span class="hsep">·</span><span class="hpart"><span class="role-dot vip" style="width:16px;height:16px;font-size:9px">★</span>${h.vip}</span><button class="hist-del" onclick="deleteHistoryEntry(${h.id})">×</button></div>`;
@@ -4597,8 +4676,8 @@ async function doImport(){
 function togglePresentMode(){
   presentMode=!presentMode;
   const btn=document.getElementById('presModeBtn');
-  if(btn){btn.textContent=presentMode?'☑ Mode présents':'☐ Mode présents';
-  btn.classList.toggle('btn-primary',presentMode);}
+  btn.textContent=presentMode?'☑ Mode présents':'☐ Mode présents';
+  btn.classList.toggle('btn-primary',presentMode);
   document.getElementById('presBanner').classList.toggle('on',presentMode);
   if(!presentMode)presentIds.clear();
   render();updateDrawBtns();
@@ -4699,9 +4778,8 @@ function toggleElPriority(){
   const thumb = document.getElementById('elPriorityThumb');
   if(btn) btn.style.background = evElPriority ? 'var(--amber)' : 'var(--border2)';
   if(thumb) thumb.style.transform = evElPriority ? 'translateX(18px)' : 'translateX(0px)';
-  toast(evElPriority ? '⚡ EL priorité ON — les plus forts iront en Électrons libres' : 'EL priorité OFF');
+  toast(evElPriority ? '⚡ EL priorité ON — les plus forts sont privilégiés parmi les joueurs sélectionnés' : 'EL priorité OFF');
 }
-
 async function setNbTeams(n){
   if(n==='asym'){
     evAsymMode=true; evNbTeams=2;
@@ -4826,12 +4904,40 @@ const TOTAL_STARTERS=20,TOTAL_SUBS=10;
 
 function makeEmptyTeam(){const t={};CATEGORIES.forEach(c=>{t[c.key]=[];});return t;}
 
+function renderTddFairResultStats(starters,placedIds){
+  const el=document.getElementById('evFairnessList');
+  if(!el)return;
+  if(!(evFairRotation&&!evAsymMode)){el.innerHTML='';return;}
+  const starterPlacedIds=[...placedIds].filter(id=>evRoles[id]==='starter');
+  const starterAsSubIds=[...placedIds].filter(id=>evRoles[id]==='starter' && ['A','B'].some(t=>evTeams?.[t]?.SUB?.some(p=>p.id===id)));
+  const realSubIds=[...placedIds].filter(id=>evRoles[id]==='sub');
+  const avg=starters.length?starters.reduce((sum,p)=>sum+Number(tddFairStats.counts?.[p.id]||0),0)/starters.length:0;
+  const green=starterPlacedIds.filter(id=>Number(tddFairStats.counts?.[id]||0)<avg).length;
+  const yellow=starterPlacedIds.filter(id=>Math.abs(Number(tddFairStats.counts?.[id]||0)-avg)<0.0001).length;
+  const red=starterPlacedIds.filter(id=>Number(tddFairStats.counts?.[id]||0)>avg).length;
+  const overflow=starterAsSubIds.length;
+  el.innerHTML=`<div style="padding:9px 12px;border:1px solid rgba(124,159,255,0.2);background:rgba(124,159,255,0.05);border-radius:var(--radius-lg);font-size:11px;color:var(--text3)"><div style="font-weight:800;color:var(--blue);margin-bottom:6px">🔄 Rotation de la semaine</div><div style="display:flex;gap:8px;flex-wrap:wrap"><span>👤 ${starterPlacedIds.length-overflow} titulaires sélectionnés selon la rotation</span><span>↪️ ${overflow} titulaire${overflow>1?'s':''} reporté${overflow>1?'s':''} en remplaçant</span><span>🔁 ${realSubIds.length} remplaçant${realSubIds.length>1?'s':''} sélectionné${realSubIds.length>1?'s':''}</span></div><div style="margin-top:7px;display:flex;gap:8px;flex-wrap:wrap"><span>🟢 ${green} sous la moyenne de participations</span><span>🟡 ${yellow} dans la moyenne</span><span>🔴 ${red} au-dessus de la moyenne</span></div></div>`;
+}
+
 async function balanceTeams(){
-  const starters=sortTddPlayers(participants.filter(p=>evRoles[p.id]==='starter'));
-  const subs=sortTddPlayers(participants.filter(p=>evRoles[p.id]==='sub'));
+  const allTddRegisteredIds=participants.filter(p=>evRoles[p.id]==='starter'||evRoles[p.id]==='sub').map(p=>p.id);
+  let starters=sortTddPlayers(participants.filter(p=>evRoles[p.id]==='starter'));
+  let subs=sortTddPlayers(participants.filter(p=>evRoles[p.id]==='sub'));
+  const useFairRotation=evFairRotation&&!evAsymMode;
+  if(useFairRotation){
+    starters=buildTddFairRank(starters);
+    // Les remplaçants conservent la logique actuelle (rotation des non-retenus + puissance).
+    subs=sortTddPlayers(subs);
+  }
   if(starters.length+subs.length<1){toast('Sélectionne au moins 1 joueur');return;}
 
   if(evNbTeams===1){
+    if(useFairRotation){
+      const cap=CATEGORIES.filter(c=>c.key!=='SUB').reduce((s,c)=>s+c.size,0);
+      const forced=starters.filter(p=>p.ev_priority);
+      const forcedSet=new Set(forced.map(p=>p.id));
+      starters=[...sortTddPlayers(forced),...buildTddFairRank(starters.filter(p=>!forcedSet.has(p.id)))].slice(0,cap);
+    }
     evTeams={A:buildOneTeam(starters,subs),B:null};
   } else if(evAsymMode){
     // Mode asymétrique : tous les joueurs triés par puissance
@@ -4853,31 +4959,60 @@ async function balanceTeams(){
     const fmtPow = v => v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'k':v;
     toast(`⚡ A : ${groupA.length} joueurs (${fmtPow(powA)}) · B : ${groupB.length} joueurs (${fmtPow(powB)})`);
   } else {
-    // Priorité Option A : les joueurs ev_priority=true sont placés en premiers starters
-    const priorityStarters = sortTddPlayers(starters.filter(p=>p.ev_priority));
-    const normalStarters   = sortTddPlayers(starters.filter(p=>!p.ev_priority));
-    // Répartir d'abord les prioritaires puis les normaux
-    const [prioA, prioB] = splitBalanced(priorityStarters);
-    const [normA, normB] = splitBalanced(normalStarters);
-    const orderedA = [...prioA, ...normA];
-    const orderedB = [...prioB, ...normB];
+    const STARTER_SLOTS = CATEGORIES.filter(c=>c.key!=='SUB').reduce((s,c)=>s+c.size,0);
+    const TOTAL_STARTER_CAP = STARTER_SLOTS * 2;
+    let selectedStarterPool = [];
+    let overflowStarterPool = [];
+    let selectedSubPool = [];
 
-    // Répartir les titulaires équitablement par puissance entre les 2 équipes
-    const [startersA, startersB] = [orderedA, orderedB];
+    if(useFairRotation){
+      // 1) La rotation équitable sélectionne d'abord les TITULAIRES.
+      //    Les REMPLAÇANTS ne peuvent compléter les places titulaires que s'il en manque.
+      const rankedStarters = buildTddFairRank(starters);
+      const selectedStarterCount = Math.min(TOTAL_STARTER_CAP, rankedStarters.length);
+      selectedStarterPool = rankedStarters.slice(0, selectedStarterCount);
+      overflowStarterPool = rankedStarters.slice(selectedStarterCount);
 
-    // Si trop de titulaires pour les slots (20 par équipe), le surplus va en SUB
-    const STARTER_SLOTS = CATEGORIES.filter(c=>c.key!=='SUB').reduce((s,c)=>s+c.size, 0);
-    const titA   = startersA.slice(0, STARTER_SLOTS);
-    const overA  = startersA.slice(STARTER_SLOTS); // excédent de titulaires → SUB
-    const titB   = startersB.slice(0, STARTER_SLOTS);
-    const overB  = startersB.slice(STARTER_SLOTS);
+      // 2) S'il manque des titulaires, on complète les places titulaires avec les R.
+      const rankedSubs = sortTddPlayers(subs);
+      const missingStarterSlots = Math.max(0, TOTAL_STARTER_CAP - selectedStarterPool.length);
+      const subsUsedAsStarters = rankedSubs.slice(0, missingStarterSlots);
+      selectedStarterPool = [...selectedStarterPool, ...subsUsedAsStarters];
 
-    // Répartir les remplaçants équitablement
-    const [subsA, subsB] = splitBalanced(subs);
+      // 3) Les titulaires excédentaires restent prioritaires dans les SUB,
+      //    puis on complète avec les vrais remplaçants.
+      const remainingSubs = rankedSubs.slice(subsUsedAsStarters.length);
+      selectedSubPool = [...overflowStarterPool, ...remainingSubs].slice(0, TOTAL_SUBS * 2);
+    } else {
+      // Fonctionnement historique lorsque Rotation équitable est désactivée.
+      const priorityStarters = sortTddPlayers(starters.filter(p=>p.ev_priority));
+      const normalStarters   = sortTddPlayers(starters.filter(p=>!p.ev_priority));
+      selectedStarterPool = [...priorityStarters, ...normalStarters];
+      selectedSubPool = sortTddPlayers(subs);
+    }
 
-    // SUB = remplaçants + excédent de titulaires (limité à 10)
-    const subPoolA = [...overA, ...subsA].slice(0, TOTAL_SUBS);
-    const subPoolB = [...overB, ...subsB].slice(0, TOTAL_SUBS);
+    // 4) Une fois la sélection faite, la puissance sert uniquement à équilibrer A/B.
+    const [starterGroupA, starterGroupB] = splitBalanced(selectedStarterPool);
+    const titA = starterGroupA.slice(0, STARTER_SLOTS);
+    const titB = starterGroupB.slice(0, STARTER_SLOTS);
+    const overA = starterGroupA.slice(STARTER_SLOTS);
+    const overB = starterGroupB.slice(STARTER_SLOTS);
+
+    let subPoolA, subPoolB;
+    if(useFairRotation){
+      // Les dépassements de titulaires sont toujours placés avant les R dans le pool SUB.
+      const orderedSubPool = [...overA, ...overB, ...selectedSubPool];
+      const chosenSubPool = orderedSubPool.slice(0, TOTAL_SUBS * 2);
+      [subPoolA, subPoolB] = splitBalanced(chosenSubPool);
+      subPoolA = subPoolA.slice(0, TOTAL_SUBS);
+      subPoolB = subPoolB.slice(0, TOTAL_SUBS);
+    } else {
+      // Même comportement qu'avant en mode classique : les excédents de titulaires
+      // complètent les remplaçants, puis chaque équipe reçoit jusqu'à 10 SUB.
+      const [subsA, subsB] = splitBalanced(selectedSubPool);
+      subPoolA = [...overA, ...subsA].slice(0, TOTAL_SUBS);
+      subPoolB = [...overB, ...subsB].slice(0, TOTAL_SUBS);
+    }
 
     evTeams={A:buildOneTeam(titA, subPoolA), B:buildOneTeam(titB, subPoolB)};
 
@@ -4892,12 +5027,26 @@ async function balanceTeams(){
 
     const powA=teamTotalPower(evTeams.A), powB=teamTotalPower(evTeams.B);
     const fmtPow=v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'k':v;
-    toast(`⚖️ A : ${startersA.length} tit. + ${subPoolA.length} rem. (${fmtPow(powA)}) · B : ${startersB.length} tit. + ${subPoolB.length} rem. (${fmtPow(powB)})`);
+    const titleCountInSubs = useFairRotation ? overflowStarterPool.length : 0;
+    toast(`⚖️ A : ${titA.length} tit. + ${subPoolA.length} rem. (${fmtPow(powA)}) · B : ${titB.length} tit. + ${subPoolB.length} rem. (${fmtPow(powB)})${titleCountInSubs?` · ${titleCountInSubs} titulaire${titleCountInSubs>1?'s':''} reporté${titleCountInSubs>1?'s':''} en SUB`:''}`);
   }
   await saveEvTeamsToDB();
   const placedIds=new Set();
   ['A','B'].forEach(tk=>{if(!evTeams?.[tk])return;CATEGORIES.forEach(cat=>(evTeams[tk][cat.key]||[]).forEach(p=>placedIds.add(p.id)));});
-  await recordTddNonRetenus([...starters,...subs].map(p=>p.id),placedIds);
+  const starterPlacedIds=[];
+  if(useFairRotation){
+    ['A','B'].forEach(tk=>{
+      if(!evTeams?.[tk])return;
+      CATEGORIES.filter(cat=>cat.key!=='SUB').forEach(cat=>{
+        (evTeams[tk][cat.key]||[]).forEach(p=>{
+          if(evRoles[p.id]==='starter') starterPlacedIds.push(p.id);
+        });
+      });
+    });
+  }
+  if(useFairRotation) renderTddFairResultStats(starters,placedIds);
+  if(useFairRotation) await recordTddFairParticipation(placedIds,starterPlacedIds);
+  await recordTddNonRetenus(allTddRegisteredIds,placedIds);
   if(!evAsymMode) toast('⚖️ Équipes sauvegardées !');
   updateEvBanner();renderEventTeams();
 }
@@ -5061,18 +5210,22 @@ async function applyTddReplacement(teamKey,catKey,idx,replacementId){
   });
   if(placedIds.has(replacement.id)){toast('Ce joueur est déjà placé dans une équipe');return;}
 
+  // Remplacement = échange logique : le joueur non placé entre dans
+  // exactement le même slot, et le joueur sorti redevient non placé.
   evTeams[teamKey][catKey][idx]=replacement;
 
-  // Une entrée manuelle consomme une rotation : x2 devient x1,
-  // x1 disparaît. Le joueur reste affiché dans la zone tant qu'il lui
-  // reste des rotations à effectuer.
-  if(Object.prototype.hasOwnProperty.call(tddNonRetenus,replacement.id)){
-    const count=Number(tddNonRetenus[replacement.id])||0;
-    if(count>1)tddNonRetenus[replacement.id]=count-1;
-    else delete tddNonRetenus[replacement.id];
-    await saveTddNonRetenus();
-  }
+  // Le joueur entrant consomme une rotation : x2 -> x1, x1 disparaît.
+  const replacementCount=Number(tddNonRetenus[replacement.id])||0;
+  if(replacementCount>1)tddNonRetenus[replacement.id]=replacementCount-1;
+  else if(replacementCount===1)delete tddNonRetenus[replacement.id];
 
+  // Le joueur sorti devient à nouveau non placé pour cette semaine.
+  // On lui attribue une rotation à rattraper afin qu'il apparaisse dans
+  // la zone « Non placés » dès qu'il quitte l'équipe.
+  const currentCount=Number(tddNonRetenus[current.id])||0;
+  tddNonRetenus[current.id]=currentCount+1;
+
+  await saveTddNonRetenus();
   await saveEvTeamsToDB();
   renderEventTeams();
   renderTddNonRetenus();

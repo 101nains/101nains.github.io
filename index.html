@@ -512,7 +512,17 @@ body.light .archive-player-row.validated{border-left-color:#2a1c00;background:rg
 .ev-team-power{font-family:var(--font-mono);font-size:12px;color:var(--text2);font-weight:600}
 .ev-team-player{display:flex;align-items:center;gap:8px;padding:7px 18px;font-size:13px;cursor:grab;transition:background var(--transition);border-bottom:1px solid var(--border)}
 .ev-team-player:last-child{border-bottom:none}.ev-team-player:hover{background:rgba(255,255,255,0.02)}
-.ev-team-player.dragging-team{opacity:.2}.ev-team-player.drag-over-team{background:rgba(80,232,152,0.06)}
+/* Drag & drop TDD amélioré */
+.ev-team-player{position:relative;display:flex;align-items:center;gap:8px;padding:8px 10px;margin:3px 0;border:1px solid var(--border);border-radius:8px;background:var(--surface2);transition:transform .12s,background .12s,border-color .12s,box-shadow .12s;cursor:grab;touch-action:none}
+.ev-team-player:hover{border-color:var(--border2);background:var(--surface3)}
+.ev-team-player:active{cursor:grabbing}
+.ev-team-player.dragging-team{opacity:.35;transform:scale(.985);border-style:dashed}
+.ev-team-player.drag-over-team{border-color:rgba(124,159,255,.65);background:rgba(124,159,255,.10);box-shadow:0 0 0 2px rgba(124,159,255,.12)}
+.ev-drag-handle{color:var(--text3);font-size:16px;line-height:1;cursor:grab;user-select:none;flex-shrink:0;min-width:18px;text-align:center}
+.ev-cat-drop{margin:6px 2px;padding:7px 10px!important;min-height:34px;border:1px dashed var(--border2);background:rgba(255,255,255,.015);color:var(--text3)}
+.ev-cat-drop.ev-drop-active{border-color:rgba(124,159,255,.8);background:rgba(124,159,255,.11);box-shadow:inset 0 0 0 1px rgba(124,159,255,.12);transform:scale(1.01)}
+.ev-cat-drop.ev-drop-invalid{border-color:rgba(255,107,107,.65);background:rgba(255,107,107,.07)}
+
 .ev-team-player .ev-pnum{font-family:var(--font-mono);font-size:10px;color:var(--text4);min-width:20px;font-weight:700}
 .ev-team-player .ev-pname{flex:1;font-weight:700}
 .ev-team-player .ev-ppow{font-family:var(--font-mono);font-size:11px;color:var(--cyan);font-weight:700}
@@ -837,7 +847,7 @@ body.light .modal textarea{background:rgba(0,0,0,0.07);border:1px solid var(--bo
       <!-- PLANNING SEMAINE -->
       <div class="planning-section" id="planningSection" style="margin-top:1rem">
         <div class="planning-header">
-          <div class="section-header-left" onclick="toggleSection('planningBody','planningToggle')" style="display:flex;flex-direction:column;gap:6px;flex:1;cursor:pointer">
+          <div class="section-header-left" style="display:flex;flex-direction:column;gap:6px;flex:1">
             <div class="planning-title">
               🚂 Planning de la semaine
               <span class="planning-badge-rt">🔴 Live</span>
@@ -858,10 +868,10 @@ body.light .modal textarea{background:rgba(0,0,0,0.07);border:1px solid var(--bo
                 <option value="3">Élevé</option>
               </select>
             </div>
-            <span class="section-toggle collapsed" id="planningToggle" onclick="toggleSection('planningBody','planningToggle')">▾</span>
+            
           </div>
         </div>
-        <div class="section-body collapsed" id="planningBody" style="max-height:0">
+        <div class="section-body" id="planningBody">
           <div id="planningContainer" style="padding-top:14px">
             <div class="planning-empty">Aucun planning cette semaine pour l'instant…</div>
           </div>
@@ -1137,14 +1147,14 @@ body.light .modal textarea{background:rgba(0,0,0,0.07);border:1px solid var(--bo
             <button class="btn btn-primary" id="balanceBtn" onclick="balanceTeams()">⚖️ Équilibrer et sauvegarder</button>
             <div style="display:flex;align-items:center;gap:8px;padding:0 10px;background:rgba(255,184,77,0.06);border:1px solid rgba(255,184,77,0.15);border-radius:var(--radius-lg);height:34px">
               <span style="font-size:11px;font-weight:700;color:var(--amber)">⚡ EL en priorité</span>
-              <button id="elPriorityBtn" onclick="toggleElPriority()" style="width:38px;height:20px;border-radius:99px;border:none;cursor:pointer;background:var(--border2);padding:2px;transition:background .2s">
-                <span id="elPriorityThumb" style="display:block;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;transform:translateX(0px)"></span>
+              <button id="elPriorityBtn" onclick="toggleElPriority()" style="width:38px;height:20px;border-radius:99px;border:none;cursor:pointer;background:var(--amber);padding:2px;transition:background .2s">
+                <span id="elPriorityThumb" style="display:block;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;transform:translateX(18px)"></span>
               </button>
             </div>
             <div style="display:flex;align-items:center;gap:8px;padding:0 10px;background:rgba(80,232,152,0.06);border:1px solid rgba(80,232,152,0.15);border-radius:var(--radius-lg);height:34px">
               <span style="font-size:11px;font-weight:700;color:var(--green,#50e898)">🔄 Rotation équitable</span>
-              <button id="tddFairRotationBtn" onclick="toggleTddFairRotation()" style="width:38px;height:20px;border-radius:99px;border:none;cursor:pointer;background:var(--border2);padding:2px;transition:background .2s">
-                <span id="tddFairRotationThumb" style="display:block;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;transform:translateX(0px)"></span>
+              <button id="tddFairRotationBtn" onclick="toggleTddFairRotation()" style="width:38px;height:20px;border-radius:99px;border:none;cursor:pointer;background:var(--green,#50e898);padding:2px;transition:background .2s">
+                <span id="tddFairRotationThumb" style="display:block;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;transform:translateX(18px)"></span>
               </button>
             </div>
             <div id="asymControls" style="display:none;align-items:center;gap:8px;padding:6px 12px;background:rgba(255,184,77,0.06);border:1px solid rgba(255,184,77,0.2);border-radius:var(--radius-lg)">
@@ -1345,8 +1355,8 @@ let tddNonRetenusWeek = '';
 const TDD_NON_RETENUS_CONFIG_KEY = 'tdd_non_retenus';   // mode asymétrique (grosse équipe A + petite équipe B)
 let _evSaving=false;    // true pendant saveEvTeamsToDB pour ignorer le realtime
 let evAsymSizeA=25;     // nombre de joueurs dans la grosse équipe A
-let evElPriority=false; // les joueurs les plus forts vont en Électrons libres en premier
-let evFairRotation=(()=>{try{return localStorage.getItem('tdd_fair_rotation')==='1';}catch(e){return false;}})();
+let evElPriority=true; // activé par défaut : les joueurs les plus forts vont en Électrons libres en premier
+let evFairRotation=(()=>{try{const v=localStorage.getItem('tdd_fair_rotation'); return v===null ? true : v==='1';}catch(e){return true;}})();
 const TDD_FAIR_ROTATION_KEY='tdd_fair_rotation_stats';
 let tddFairStats={counts:{},starters:{},week:''};
 let weeklyDrawsData=[];
@@ -2221,7 +2231,7 @@ function renderTddNonRetenus(){
   const summary=document.getElementById('evFairnessSummary'),list=document.getElementById('evFairnessList');
   const entries=Object.entries(tddNonRetenus).map(([id,count])=>({p:participants.find(x=>String(x.id)===String(id)),count:Number(count)||0})).filter(x=>x.p&&x.count>0).sort((a,b)=>b.count-a.count||a.p.name.localeCompare(b.p.name));
   if(summary)summary.textContent=entries.length?`🔄 Rotation : ${entries.length} joueur${entries.length>1?'s':''} à rattraper`:'🔄 Rotation : aucun joueur en attente';
-  if(list)list.innerHTML=entries.length?'<div style="padding:8px 12px;border:1px solid rgba(255,184,77,0.2);background:rgba(255,184,77,0.05);border-radius:var(--radius-lg);font-size:11px;color:var(--text3)"><strong style="color:var(--amber)">🔄 Rotation des non-retenus</strong> — les joueurs non pris sont automatiquement enregistrés et prioritaires la semaine suivante.<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">'+entries.map(x=>`<span style="padding:3px 7px;border:1px solid var(--border2);border-radius:99px;color:var(--text)">${x.p.name} <b style="color:var(--amber)">×${x.count}</b></span>`).join('')+'</div></div>':'';
+  if(list)list.innerHTML=entries.length?'<div style="padding:8px 12px;border:1px solid rgba(255,184,77,0.2);background:rgba(255,184,77,0.05);border-radius:var(--radius-lg);font-size:11px;color:var(--text3)"><strong style="color:var(--amber)">🔄 Rotation des non-retenus</strong> — les joueurs non retenus sont automatiquement enregistrés et bénéficient d’une priorité supplémentaire lors de la prochaine TDD. S’ils s’inscrivent comme titulaires, cette priorité s’applique parmi les titulaires. S’ils s’inscrivent comme remplaçants, elle s’applique parmi les remplaçants. Un remplaçant ne passe pas devant un titulaire uniquement grâce à cette priorité.<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">'+entries.map(x=>`<span style="padding:3px 7px;border:1px solid var(--border2);border-radius:99px;color:var(--text)">${x.p.name} <b style="color:var(--amber)">×${x.count}</b></span>`).join('')+'</div></div>':'';
 }
 async function recordTddNonRetenus(registeredIds,placedIds){
   const week=getTddWeekKey(); if(tddNonRetenusWeek===week)return;
@@ -4940,21 +4950,19 @@ async function balanceTeams(){
     }
     evTeams={A:buildOneTeam(starters,subs),B:null};
   } else if(evAsymMode){
-    // Mode asymétrique : tous les joueurs triés par puissance
-    // Équipe A = les N premiers (les plus forts), Équipe B = le reste
-    const all=sortTddPlayers([...starters,...subs]);
+    // Mode asymétrique : A est construite avec les joueurs les plus puissants,
+    // tout en respectant la répartition des catégories titulaires (H1-H4, R1-R2, EL).
+    // B reçoit ensuite absolument tous les joueurs restants : aucun joueur n'est perdu.
+    const all=[...starters,...subs].sort((a,b)=>(b.power_t1||0)-(a.power_t1||0));
     if(all.length<2){toast('Sélectionne au moins 2 joueurs');return;}
     const nA = Math.min(Math.max(1, evAsymSizeA), all.length-1);
     const groupA = all.slice(0, nA);
     const groupB = all.slice(nA);
-    // Remplir les catégories avec les joueurs du groupe, le surplus va en SUB
-    // On calcule combien de places de titulaires existent (hors SUB)
-    const STARTER_SLOTS = CATEGORIES.filter(c=>c.key!=='SUB').reduce((s,c)=>s+c.size,0);
-    const titA = groupA.slice(0, STARTER_SLOTS);
-    const subA = groupA.slice(STARTER_SLOTS);
-    const titB = groupB.slice(0, STARTER_SLOTS);
-    const subB = groupB.slice(STARTER_SLOTS);
-    evTeams={A:buildOneTeam(titA, subA), B:buildOneTeam(titB, subB)};
+
+    // buildOneTeam répartit les joueurs dans les catégories titulaires selon
+    // les quotas définis dans CATEGORIES, puis place le surplus en SUB.
+    // En asymétrique, B conserve aussi tout son surplus en SUB.
+    evTeams={A:buildOneTeam(groupA, []), B:buildOneTeam(groupB, [], true)};
     const powA=teamTotalPower(evTeams.A), powB=teamTotalPower(evTeams.B);
     const fmtPow = v => v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'k':v;
     toast(`⚡ A : ${groupA.length} joueurs (${fmtPow(powA)}) · B : ${groupB.length} joueurs (${fmtPow(powB)})`);
@@ -5058,7 +5066,7 @@ function splitBalanced(players){
   return[A,B];
 }
 
-function buildOneTeam(starters,subs){
+function buildOneTeam(starters,subs,keepAllSubs=false){
   const team=makeEmptyTeam();const subPool=[...subs];
   const sorted=[...starters].sort((a,b)=>(b.power_t1||0)-(a.power_t1||0));
   const starterCats=CATEGORIES.filter(c=>c.key!=='SUB'); // toutes les cats titulaires
@@ -5079,7 +5087,7 @@ function buildOneTeam(starters,subs){
   }
   // Compléter avec les subs si places vides
   for(const cat of starterCats){while(team[cat.key].length<cat.size&&subPool.length>0){team[cat.key].push(subPool.shift());}}
-  team['SUB']=subPool.slice(0,TOTAL_SUBS);return team;
+  team['SUB']=keepAllSubs?subPool.slice():subPool.slice(0,TOTAL_SUBS);return team;
 }
 
 function teamTotalPower(team){if(!team)return 0;return CATEGORIES.flatMap(c=>team[c.key]||[]).reduce((s,p)=>s+(p.power_t1||0),0);}
@@ -5093,7 +5101,9 @@ function evDragStart(e,team,catKey,idx){
   e.dataTransfer.setData('text/plain',team+':'+catKey+':'+(player?player.id:0));
   setTimeout(()=>{const el=document.querySelector(`[data-ev-team="${team}"][data-ev-cat="${catKey}"][data-ev-idx="${idx}"]`);if(el)el.classList.add('dragging-team');},0);
 }
-function evDragOver(e){e.preventDefault();document.querySelectorAll('.ev-team-player').forEach(el=>el.classList.remove('drag-over-team'));}
+function evDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';document.querySelectorAll('.ev-team-player').forEach(el=>el.classList.remove('drag-over-team'));const el=e.currentTarget;if(el&&!el.classList.contains('dragging-team'))el.classList.add('drag-over-team');}
+function evDragEnterPlayer(e){e.preventDefault();if(e.currentTarget&&!e.currentTarget.classList.contains('dragging-team'))e.currentTarget.classList.add('drag-over-team');}
+function evDragLeavePlayer(e){if(e.currentTarget)e.currentTarget.classList.remove('drag-over-team');}
 
 function evDropZoneOver(event,teamKey,catKey){
   event.preventDefault();
@@ -5101,20 +5111,41 @@ function evDropZoneOver(event,teamKey,catKey){
   const catDef=CATEGORIES.find(c=>c.key===catKey);
   const isFull=cat&&catDef&&cat.length>=catDef.size;
   const z=event.currentTarget;
-  z.style.background='rgba(124,159,255,0.08)';z.style.outline='2px dashed rgba(124,159,255,0.4)';
+  z.classList.remove('ev-drop-invalid');z.classList.add('ev-drop-active');
+  event.dataTransfer.dropEffect='move';
 }
-function evDropZoneLeave(event){event.currentTarget.style.background='';event.currentTarget.style.outline='';}
+function evDropZoneLeave(event){event.currentTarget.classList.remove('ev-drop-active','ev-drop-invalid');}
 function evDropOnCatUniversal(event,teamKey,catKey){
-  event.preventDefault();
-  event.currentTarget.style.background='';event.currentTarget.style.outline='';
+  event.preventDefault();event.currentTarget.classList.remove('ev-drop-active','ev-drop-invalid');
   if(evDragSrcData){evDropOnCat(event,teamKey,catKey);}
 }
 async function evDropOnCat(e,toTeam,toCatKey){
   e.preventDefault();if(!evDragSrcData||!evTeams)return;
   const{team:fromTeam,catKey:fromCat,idx:fromIdx}=evDragSrcData;
-  const player=evTeams[fromTeam][fromCat].splice(fromIdx,1)[0];
-  evTeams[toTeam][toCatKey].push(player);evDragSrcData=null;
-  await saveEvTeamsToDB();renderEventTeams();
+  const target=evTeams[toTeam][toCatKey];const catDef=CATEGORIES.find(c=>c.key===toCatKey);
+  if(!target||!catDef)return;
+  if(fromTeam===toTeam&&fromCat===toCatKey){const arr=evTeams[fromTeam][fromCat];const player=arr.splice(fromIdx,1)[0];arr.push(player);}
+  else{
+    const player=evTeams[fromTeam][fromCat].splice(fromIdx,1)[0];
+    if(target.length>=catDef.size){
+      const replaced=target[target.length-1];
+      target[target.length-1]=player;
+      evTeams[fromTeam][fromCat].push(replaced);
+    }else target.push(player);
+  }
+  evDragSrcData=null;await saveEvTeamsToDB();renderEventTeams();
+}
+async function evDropOnPlayer(e,toTeam,toCatKey,toIdx){
+  e.preventDefault();e.stopPropagation();if(!evDragSrcData||!evTeams)return;
+  const{team:fromTeam,catKey:fromCat,idx:fromIdx}=evDragSrcData;
+  if(fromTeam===toTeam&&fromCat===toCatKey&&fromIdx===toIdx){evDragEnd();return;}
+  const fromArr=evTeams[fromTeam]&&evTeams[fromTeam][fromCat];
+  const toArr=evTeams[toTeam]&&evTeams[toTeam][toCatKey];
+  if(!fromArr||!toArr)return;
+  const moving=fromArr[fromIdx],target=toArr[toIdx];
+  if(!moving||!target)return;
+  fromArr[fromIdx]=target;toArr[toIdx]=moving;
+  evDragSrcData=null;await saveEvTeamsToDB();renderEventTeams();
 }
 function evDragEnd(){evDragSrcData=null;document.querySelectorAll('.ev-team-player').forEach(el=>{el.classList.remove('dragging-team');el.classList.remove('drag-over-team');});}
 
@@ -5253,10 +5284,14 @@ function renderEventTeams(){
   const powA=teamTotalPower(evTeams.A);const powB=evTeams.B?teamTotalPower(evTeams.B):0;
   let balanceHtml='';
   if(evTeams.B){
-    const diff=Math.abs(powA-powB);const total=powA+powB;const pct=total>0?Math.round(diff/total*100):0;
-    const cls=pct<=5?'ev-balance-pill':'ev-balance-pill warn';
-    const icon=pct<=5?'✓ Très équilibré':pct<=10?'~ Bon équilibre':'⚠️ Déséquilibré';
-    balanceHtml=`<div class="ev-balance-info" style="margin-bottom:14px"><span class="${cls}">Écart A/B : ${diff.toLocaleString('fr-FR')} pts (${pct}%) — ${icon}</span></div>`;
+    if(evAsymMode){
+      balanceHtml=`<div class="ev-balance-info" style="margin-bottom:14px"><span class="ev-balance-pill warn">⚡ Mode asymétrique — Équipe A = joueurs les plus puissants, avec respect des quotas de catégories · Équipe B = tout le reste</span></div>`;
+    }else{
+      const diff=Math.abs(powA-powB);const total=powA+powB;const pct=total>0?Math.round(diff/total*100):0;
+      const cls=pct<=5?'ev-balance-pill':'ev-balance-pill warn';
+      const icon=pct<=5?'✓ Très équilibré':pct<=10?'~ Bon équilibre':'⚠️ Déséquilibré';
+      balanceHtml=`<div class="ev-balance-info" style="margin-bottom:14px"><span class="${cls}">Écart A/B : ${diff.toLocaleString('fr-FR')} pts (${pct}%) — ${icon}</span></div>`;
+    }
   }
   const renderTeam=(teamKey,label,headerCls)=>{
     const team=evTeams[teamKey];if(!team)return'';
@@ -5269,14 +5304,14 @@ function renderEventTeams(){
         const replaceBtn=`<button onclick="openTddReplaceMenu(event,'${teamKey}','${cat.key}',${i})" title="Remplacer par un joueur non placé" style="background:rgba(124,159,255,0.07);border:1px solid rgba(124,159,255,0.2);border-radius:6px;cursor:pointer;font-size:11px;padding:2px 7px;color:var(--blue);white-space:nowrap;flex-shrink:0;transition:all .15s">⇄ Remplacer</button>`;
         const roleLetter=evRoles[p.id]==='starter'?'T':evRoles[p.id]==='sub'?'R':'';
         const roleBadge=roleLetter?`<span style="font-size:11px;font-weight:800;color:var(--text2);min-width:14px;text-align:center" title="${roleLetter==='T'?'Titulaire':'Remplaçant'}">${roleLetter}</span>`:'';
-        return `<div class="ev-team-player" data-ev-team="${teamKey}" data-ev-cat="${cat.key}" data-ev-idx="${i}" draggable="true" ondragstart="evDragStart(event,'${teamKey}','${cat.key}',${i})" ondragend="evDragEnd()"><span class="ev-pnum">${i+1}</span>${roleBadge}<span class="ev-pname">${p.name}</span>${replaceBtn}${switchBtn}<span style="font-size:11px;color:var(--text4);cursor:grab;flex-shrink:0">⠿</span></div>`;
+        return `<div class="ev-team-player" data-ev-team="${teamKey}" data-ev-cat="${cat.key}" data-ev-idx="${i}" draggable="true" ondragstart="evDragStart(event,'${teamKey}','${cat.key}',${i})" ondragover="evDragOver(event)" ondrop="evDropOnPlayer(event,'${teamKey}','${cat.key}',${i})" ondragenter="evDragEnterPlayer(event)" ondragleave="evDragLeavePlayer(event)" ondragend="evDragEnd()"><span class="ev-drag-handle" title="Glisser pour déplacer">⠿</span><span class="ev-pnum">${i+1}</span>${roleBadge}<span class="ev-pname" style="flex:1;min-width:0">${p.name}</span>${replaceBtn}${switchBtn}</div>`;
       }).join('');
-      const isFull=players.length>=cat.size;const dropZone=`<div class="ev-cat-drop" ondragover="evDropZoneOver(event,'${teamKey}','${cat.key}')" ondragleave="evDropZoneLeave(event)" ondrop="evDropOnCatUniversal(event,'${teamKey}','${cat.key}')" style="min-height:${isEmpty?'38px':'4px'};display:flex;align-items:center;justify-content:center;border-radius:6px;transition:all .15s">${isEmpty?`<span style="font-size:11px;color:var(--text3);font-style:italic">${isFull?'Plein':'Déposer ici'}</span>`:''}</div>`;
+      const dropZone=`<div class="ev-cat-drop" ondragover="evDropZoneOver(event,'${teamKey}','${cat.key}')" ondragleave="evDropZoneLeave(event)" ondrop="evDropOnCatUniversal(event,'${teamKey}','${cat.key}')" style="min-height:${isEmpty?'38px':'10px'};display:flex;align-items:center;justify-content:center;border-radius:8px;transition:all .15s"></div>`;
       return `<div class="ev-cat-block" style="border-left:2px solid ${cat.color}"><div class="ev-cat-header" style="background:${cat.bg}"><span class="ev-cat-title" style="color:${cat.color}">${cat.label}</span><span class="ev-cat-info">${players.length}/${cat.size}</span></div>${playersHtml}${dropZone}</div>`;
     }).join('');
-    return `<div class="ev-team-card"><div class="ev-team-header ${headerCls}"><span class="ev-team-title ${headerCls}">⚔️ ${label}</span><span class="ev-team-power">${stCount} tit. · ${subCount} rempl.</span></div><div class="ev-team-body">${catsHtml}</div><button class="ev-copy-btn" onclick="evCopyTeam('${teamKey}','${label}')">📋 Copier ${label}</button></div>`;
+    return `<div class="ev-team-card"><div class="ev-team-header ${headerCls}"><span class="ev-team-title ${headerCls}">⚔️ ${label}</span><span class="ev-team-power">${stCount} tit. · ${subCount} rempl. · ${pow.toLocaleString('fr-FR')} pts</span></div><div class="ev-team-body">${catsHtml}</div><button class="ev-copy-btn" onclick="evCopyTeam('${teamKey}','${label}')">📋 Copier ${label}</button></div>`;
   };
-  result.innerHTML=`${balanceHtml}<div class="ev-teams-grid${evTeams.B?' two':''}">
+  result.innerHTML=`${balanceHtml}<div class="ev-drag-help">⠿ <span>Glissez un joueur vers une autre catégorie ou une autre équipe. Les zones de dépôt s'illuminent pendant le déplacement.</span></div><div class="ev-teams-grid${evTeams.B?' two':''}">
     ${renderTeam('A','Équipe A','teamA')}
     ${evTeams.B?renderTeam('B','Équipe B','teamB'):''}
   </div>`;

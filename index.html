@@ -2275,6 +2275,10 @@ async function loadPollResults(){
     (data||[]).forEach(function(r){ pollResults[r.participant_id] = r.response; });
     updatePollEvBanner();
     renderPollStaffTable();
+    if(availabilityState.tdd && currentUser){
+      await loadTddSlotVotes();
+      applyTddPollRolesToEvent();
+    }
     renderEventPlayers();
   }catch(e){console.warn('Chargement des réponses TDD :',e);}
 }
@@ -3003,7 +3007,11 @@ async function _loadAllImpl(){
     presentIds=new Set([...presentIds].filter(id=>ids.has(id)));
     setStatus('on','Connecté · temps réel actif');
     initEvRoles();render();renderEventPlayers();renderEventTeams();
-    await loadTddTeamSlots();await loadTddSlotVotes();
+    // La page principale doit elle aussi connaître la session TDD active :
+    // sans cela, applyTddPollRolesToEvent() ignore les réponses du sondage.
+    await fetchAvailabilitySession('tdd');
+    await loadTddTeamSlots();
+    await loadTddSlotVotes();
     // Charger les votes avant d'afficher la présélection : au rechargement,
     // event_roles ne doit pas masquer les réponses du sondage actif.
     await loadPollResults();
@@ -3022,16 +3030,24 @@ function subscribeRT(){
   // Synchronisation de la présélection TDD depuis les votes, comme pour Canyon.
   // Ne modifie jamais les équipes déjà équilibrées.
   async function refreshTddSelectionFromVotes(){
-    if(!sb || !availabilityState.tdd || !currentUser)return;
-    const {data,error}=await sb.from('tdd_poll').select('participant_id,response');
-    if(error){console.warn('Synchronisation TDD :',error);return;}
-    pollResults={};
-    (data||[]).forEach(r=>{pollResults[r.participant_id]=r.response;});
-    applyTddPollRolesToEvent();
-    updatePollEvBanner();renderPollStaffTable();updateEvBanner();
+    if(!sb || !currentUser)return;
+    try{
+      // Récupérer la session depuis l'onglet principal, même si le staff
+      // n'a jamais ouvert la page publique du sondage sur cet appareil.
+      await fetchAvailabilitySession('tdd');
+      if(!availabilityState.tdd){updatePollEvBanner();return;}
+      const {data,error}=await sb.from('tdd_poll').select('participant_id,response');
+      if(error)throw error;
+      pollResults={};
+      (data||[]).forEach(r=>{pollResults[r.participant_id]=r.response;});
+      // Le rôle et le créneau sont deux données distinctes du même vote.
+      await loadTddSlotVotes();
+      applyTddPollRolesToEvent();
+      updatePollEvBanner();renderPollStaffTable();updateEvBanner();
+    }catch(e){console.warn('Synchronisation TDD :',e);}
   }
   // Rattrapage périodique si Supabase Realtime ne transmet pas un changement.
-  setInterval(()=>{if(availabilityState.tdd && currentUser)refreshTddSelectionFromVotes();},10000);
+  setInterval(()=>{if(currentUser)refreshTddSelectionFromVotes();},10000);
   sb.channel('tdd_poll_main').on('postgres_changes',{event:'*',schema:'public',table:'tdd_poll'},(payload)=>{
     const r=payload.new||payload.old;
     if(payload.eventType==='DELETE'){if(r)delete pollResults[r.participant_id];}
@@ -3040,6 +3056,18 @@ function subscribeRT(){
     renderPollStaffTable();
     refreshTddSelectionFromVotes();
   }).subscribe();
+  // Une ouverture/fermeture de session doit aussi être connue de l'onglet TDD.
+  sb.channel('tdd_session_management_sync').on('postgres_changes',
+    {event:'*',schema:'public',table:'availability_sessions'},
+    async(payload)=>{
+      const row=payload.new||payload.old;
+      if(row?.kind!=='tdd')return;
+      availabilityState.tdd=null;
+      await fetchAvailabilitySession('tdd');
+      if(availabilityState.tdd)await refreshTddSelectionFromVotes();
+      else updatePollEvBanner();
+    }
+  ).subscribe();
 
   sb.channel('t1_counter_management_sync').on('postgres_changes',{event:'*',schema:'public',table:'t1_submissions'},()=>refreshT1ResponseCounter()).on('postgres_changes',{event:'*',schema:'public',table:'t1_rounds'},()=>refreshT1ResponseCounter()).subscribe();
 

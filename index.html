@@ -1798,7 +1798,7 @@ function tddBalancedSlots(){
  assign(starters,'starters',capTit);assign(subs,'subs',TOTAL_SUBS);
  // Titulaires excédentaires : places de remplaçants, sans dépasser les 10 par équipe.
  assign(starters.filter(p=>!placed.has(p.id)),'subs',TOTAL_SUBS);
- return {A:buildOneTeam(teams.A.starters,teams.A.subs),B:buildOneTeam(teams.B.starters,teams.B.subs)};
+ return {A:buildOneTeam(teams.A.starters,teams.A.subs,true),B:buildOneTeam(teams.B.starters,teams.B.subs,true)};
 }
 
 let evAsymMode=false;
@@ -2257,16 +2257,26 @@ function pollStep(n){
   if(n === '2b') setTimeout(function(){ const inp = document.getElementById('pollPinInp'); if(inp) inp.focus(); }, 100);
 }
 
+function applyTddPollRolesToEvent(){
+  if(!availabilityState.tdd || !currentUser || !participants.length)return;
+  // La réponse au sondage alimente la présélection TDD : présent = titulaire,
+  // remplaçant = remplaçant, absent/non-répondant = aucun rôle.
+  participants.forEach(p=>{evRoles[p.id]=POLL_ROLE_MAP[pollResults[p.id]]||'none';});
+  updateEvBanner();
+  renderEventPlayers();
+}
+
 async function loadPollResults(){
   if(!sb) return;
   try{
-    const {data} = await sb.from('tdd_poll').select('participant_id,response');
+    const {data,error} = await sb.from('tdd_poll').select('participant_id,response');
+    if(error)throw error;
     pollResults = {};
     (data||[]).forEach(function(r){ pollResults[r.participant_id] = r.response; });
     updatePollEvBanner();
     renderPollStaffTable();
     renderEventPlayers();
-  }catch(e){}
+  }catch(e){console.warn('Chargement des réponses TDD :',e);}
 }
 
 function updatePollEvBanner(){
@@ -2994,9 +3004,12 @@ async function _loadAllImpl(){
     setStatus('on','Connecté · temps réel actif');
     initEvRoles();render();renderEventPlayers();renderEventTeams();
     await loadTddTeamSlots();await loadTddSlotVotes();
+    // Charger les votes avant d'afficher la présélection : au rechargement,
+    // event_roles ne doit pas masquer les réponses du sondage actif.
+    await loadPollResults();
+    applyTddPollRolesToEvent();
     if(canSeeSection('sectionStats'))renderStats();
   renderCanyonPlayers();
-  loadPollResults();
   loadCanyonPollResults();
   refreshT1ResponseCounter();
     loadDrawBuffer();
@@ -3014,9 +3027,8 @@ function subscribeRT(){
     if(error){console.warn('Synchronisation TDD :',error);return;}
     pollResults={};
     (data||[]).forEach(r=>{pollResults[r.participant_id]=r.response;});
-    const voteRoles={present:'starter',remplacant:'sub',absent:'none'};
-    participants.forEach(p=>{evRoles[p.id]=voteRoles[pollResults[p.id]]||'none';});
-    updatePollEvBanner();renderPollStaffTable();renderEventPlayers();updateEvBanner();
+    applyTddPollRolesToEvent();
+    updatePollEvBanner();renderPollStaffTable();updateEvBanner();
   }
   // Rattrapage périodique si Supabase Realtime ne transmet pas un changement.
   setInterval(()=>{if(availabilityState.tdd && currentUser)refreshTddSelectionFromVotes();},10000);
@@ -3045,7 +3057,11 @@ function subscribeRT(){
         data.forEach(r=>{evRoles[r.player_id]=r.role;});
         if(data.length>0&&data[0].nb_teams){evNbTeams=data[0].nb_teams;document.getElementById('evNb1').classList.toggle('active',evNbTeams===1);document.getElementById('evNb2').classList.toggle('active',evNbTeams===2);}
       }
-      initEvRoles();renderEventPlayers();updateEvBanner();
+      initEvRoles();
+      // Une mise à jour event_roles ne doit pas faire disparaître la présélection
+      // issue du sondage TDD toujours ouvert.
+      applyTddPollRolesToEvent();
+      renderEventPlayers();updateEvBanner();
     })
     .on('postgres_changes',{event:'*',schema:'public',table:'event_teams'},async()=>{
       if(_evSaving)return; // ignore pendant un save en cours (DELETE + INSERT)
@@ -5847,7 +5863,7 @@ function splitBalanced(players){
   return[A,B];
 }
 
-function buildOneTeam(starters,subs){
+function buildOneTeam(starters,subs,keepSubs=false){
   const team=makeEmptyTeam();const subPool=[...subs];
   const sorted=[...starters].sort((a,b)=>(b.power_t1||0)-(a.power_t1||0));
   const starterCats=CATEGORIES.filter(c=>c.key!=='SUB'); // toutes les cats titulaires
@@ -5866,8 +5882,11 @@ function buildOneTeam(starters,subs){
     let filled=true;
     while(filled&&pool.length>0){filled=false;for(const cat of starterCats){if(team[cat.key].length<cat.size&&pool.length>0){team[cat.key].push(pool.shift());filled=true;}}}
   }
-  // Compléter avec les subs si places vides
-  for(const cat of starterCats){while(team[cat.key].length<cat.size&&subPool.length>0){team[cat.key].push(subPool.shift());}}
+  // En équilibrage TDD midi/soir, les remplaçants restent remplaçants :
+  // ne pas les déplacer pour combler des postes titulaires vacants.
+  if(!keepSubs){
+    for(const cat of starterCats){while(team[cat.key].length<cat.size&&subPool.length>0){team[cat.key].push(subPool.shift());}}
+  }
   team['SUB']=subPool.slice(0,TOTAL_SUBS);return team;
 }
 

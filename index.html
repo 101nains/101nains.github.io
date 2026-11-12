@@ -576,11 +576,24 @@ function onSupabaseError(){
 <!-- MODAL IMPORT -->
 <div class="modal-ov" id="importModal">
   <div class="modal">
-    <h3>Importer une liste</h3>
-    <p>Un nom par ligne.</p>
-    <textarea id="importTxt" placeholder="Alice&#10;Bob&#10;Charlie&#10;…"></textarea>
+    <h3>Importer des joueurs</h3>
+    <p>Importe un fichier Excel (<code>.xlsx</code>, <code>.xls</code>, <code>.csv</code>) avec les colonnes <strong>Pseudo</strong> et <strong>Puissance T1</strong>, ou colle une liste ci-dessous.</p>
+    
+    <div style="margin-bottom: 12px;">
+      <label for="importExcelFile" class="btn" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;width:100%;justify-content:center;border:1px dashed var(--border2);padding:10px;">
+        📊 Choisir un fichier Excel (.xlsx, .xls, .csv)
+      </label>
+      <input type="file" id="importExcelFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleImportExcelFile(this)" />
+      <div id="importExcelStatus" style="font-size:12px;color:var(--cyan);margin-top:6px;"></div>
+    </div>
+
+    <textarea id="importTxt" placeholder="Alice&#10;Bob ; 51.30M&#10;Charlie&#9;48.50&#10;…"></textarea>
+    <div style="font-size:11px;color:var(--text3);margin-top:-8px;margin-bottom:12px;">
+      💡 Astuce : tu peux aussi copier-coller directement deux colonnes depuis Excel. Les joueurs déjà existants verront leur puissance T1 mise à jour.
+    </div>
+
     <div class="modal-acts">
-      <button class="btn" onclick="closeModal('importModal')">Annuler</button>
+      <button class="btn" onclick="resetImportModal()">Annuler</button>
       <button class="btn btn-primary" onclick="doImport()">Importer</button>
     </div>
   </div>

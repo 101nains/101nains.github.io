@@ -3752,20 +3752,183 @@ async function deleteHistoryEntry(id){
   await Promise.all(ops);
 }
 
+let pendingExcelRows = [];
+
+function resetImportModal(){
+  pendingExcelRows = [];
+  const fileInp = document.getElementById('importExcelFile');
+  const statusEl = document.getElementById('importExcelStatus');
+  const txtEl = document.getElementById('importTxt');
+  if(fileInp) fileInp.value = '';
+  if(statusEl) statusEl.textContent = '';
+  if(txtEl) txtEl.value = '';
+  closeModal('importModal');
+}
+
+async function ensureXlsxLoaded(){
+  if(typeof XLSX !== 'undefined') return;
+  await new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+async function handleImportExcelFile(input){
+  const file = input.files?.[0];
+  const statusEl = document.getElementById('importExcelStatus');
+  if(!file) return;
+
+  try{
+    if(statusEl) statusEl.textContent = '⏳ Lecture du fichier Excel…';
+    await ensureXlsxLoaded();
+
+    const buffer = await file.arrayBuffer();
+    const wb = XLSX.read(buffer, { type: 'array' });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+
+    pendingExcelRows = [];
+    rawRows.forEach((row, index) => {
+      const name = String(row[0] ?? '').trim();
+      const rawPow = String(row[1] ?? '').trim();
+      if(!name) return;
+
+      // Ignorer la ligne d'en-tête (ex: "Pseudo" / "Puissance T1")
+      if(index === 0 && /^(pseudo|nom|joueur|player|name)$/i.test(name)) return;
+
+      const power = rawPow ? t1ParsePower(rawPow) : null;
+      pendingExcelRows.push({ name, power });
+    });
+
+    if(!pendingExcelRows.length){
+      if(statusEl) statusEl.textContent = '⚠️ Aucun joueur valide trouvé dans la première feuille.';
+      return;
+    }
+
+    const withPow = pendingExcelRows.filter(r => r.power !== null).length;
+    if(statusEl){
+      statusEl.textContent = `✅ ${pendingExcelRows.length} joueur(s) détecté(s) (${withPow} avec puissance T1) dans "${file.name}".`;
+    }
+  }catch(e){
+    console.error('Erreur import Excel :', e);
+    pendingExcelRows = [];
+    if(statusEl) statusEl.textContent = '❌ Impossible de lire ce fichier Excel.';
+  }
+}
+
+function parseImportTextarea(txt){
+  const entries = [];
+  txt.split(/\r?\n/).forEach(line => {
+    const clean = line.trim();
+    if(!clean) return;
+
+    // Supporte : "Pseudo", "Pseudo\t51.30M", "Pseudo;51.30", "Pseudo,51.30"
+    let name = clean;
+    let rawPow = '';
+
+    if(clean.includes('\t')){
+      const parts = clean.split('\t');
+      name = parts[0].trim();
+      rawPow = (parts[1] || '').trim();
+    } else if(clean.includes(';')){
+      const parts = clean.split(';');
+      name = parts[0].trim();
+      rawPow = (parts[1] || '').trim();
+    } else {
+      const m = clean.match(/^(.+?)\s+(\d+(?:[.,]\d+)?\s*[mMkK]?)$/);
+      if(m){
+        name = m[1].trim();
+        rawPow = m[2].trim();
+      }
+    }
+
+    if(!name || /^(pseudo|nom|joueur)$/i.test(name)) return;
+    const power = rawPow ? t1ParsePower(rawPow) : null;
+    entries.push({ name, power });
+  });
+  return entries;
+}
+
 async function doImport(){
-  const txt=document.getElementById('importTxt').value;
-  const names=txt.split('\n').map(n=>n.trim()).filter(n=>n.length>0);
-  if(!names.length){toast('Aucun nom à importer');return;}
-  closeModal('importModal');setBusy(true);
-  const existing=new Set(participants.map(p=>p.name.toLowerCase()));
-  const toAdd=names.filter(n=>!existing.has(n.toLowerCase()));
-  if(!toAdd.length){toast('Tous ces noms existent déjà !');setBusy(false);return;}
-  const startPos=participants.length;
-  const rows=toAdd.map((name,i)=>({name,position:startPos+i,driver_count:0,vip_count:0,weeks_validated:0,coffres_days:JSON.stringify([false,false,false,false,false])}));
-  await sb.from('participants').insert(rows);
-  toast(`${toAdd.length} joueur(s) importé(s) !`);
-  document.getElementById('importTxt').value='';
-  setBusy(false);
+  const txt = document.getElementById('importTxt').value;
+  const textEntries = parseImportTextarea(txt);
+
+  // Fusionner les entrées Excel + texte (le texte prioritaire en cas de doublon)
+  const mergedMap = new Map();
+  [...pendingExcelRows, ...textEntries].forEach(item => {
+    const key = item.name.toLowerCase();
+    const prev = mergedMap.get(key);
+    mergedMap.set(key, {
+      name: item.name,
+      power: item.power !== null ? item.power : (prev?.power ?? null)
+    });
+  });
+
+  const entries = [...mergedMap.values()];
+  if(!entries.length){
+    toast('Aucun joueur ou fichier Excel à importer');
+    return;
+  }
+
+  resetImportModal();
+  setBusy(true);
+
+  try{
+    const existingByName = new Map(participants.map(p => [p.name.toLowerCase(), p]));
+    const toInsert = [];
+    const toUpdate = [];
+
+    entries.forEach(item => {
+      const found = existingByName.get(item.name.toLowerCase());
+      if(found){
+        // Si le joueur existe déjà et qu'une puissance T1 est fournie, on met à jour sa puissance
+        if(item.power !== null && Number(found.power_t1) !== item.power){
+          toUpdate.push({ id: found.id, power_t1: item.power });
+        }
+      } else {
+        toInsert.push({
+          name: item.name,
+          position: participants.length + toInsert.length,
+          driver_count: 0,
+          vip_count: 0,
+          weeks_validated: 0,
+          power_t1: item.power,
+          coffres_days: JSON.stringify([false, false, false, false, false])
+        });
+      }
+    });
+
+    if(!toInsert.length && !toUpdate.length){
+      toast('Aucune nouveauté (joueurs et puissances déjà à jour)');
+      setBusy(false);
+      return;
+    }
+
+    if(toInsert.length){
+      const { error } = await sb.from('participants').insert(toInsert);
+      if(error) throw error;
+    }
+
+    if(toUpdate.length){
+      await Promise.all(
+        toUpdate.map(u => sb.from('participants').update({ power_t1: u.power_t1 }).eq('id', u.id))
+      );
+    }
+
+    await loadAll();
+    const msgs = [];
+    if(toInsert.length) msgs.push(`${toInsert.length} ajouté(s)`);
+    if(toUpdate.length) msgs.push(`${toUpdate.length} puissance(s) T1 mise(s) à jour`);
+    toast(`✅ Import terminé : ${msgs.join(', ')}`);
+  }catch(e){
+    console.error('Erreur doImport :', e);
+    toast('❌ Erreur lors de l’import : ' + (e.message || e));
+  }finally{
+    setBusy(false);
+  }
 }
 
 function togglePresentMode(){

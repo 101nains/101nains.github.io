@@ -3109,9 +3109,12 @@ async function exportPlayersXlsx(){
   }
   const sorted = [...participants].sort((a,b)=>a.name.localeCompare(b.name));
   const wb = XLSX.utils.book_new();
-  const rows = [['Pseudo'], ...sorted.map(p=>[p.name])];
+  const rows = [
+    ['Pseudo', 'Puissance T1'],
+    ...sorted.map(p => [p.name, p.power_t1 ? t1FormatPower(p.power_t1) : ''])
+  ];
   const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = [{wch: 25}];
+  ws['!cols'] = [{wch: 25}, {wch: 18}];
   XLSX.utils.book_append_sheet(wb, ws, 'Joueurs');
   const date = new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-');
   XLSX.writeFile(wb, 'joueurs_nains_de_mithril_'+date+'.xlsx');

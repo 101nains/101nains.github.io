@@ -1,0 +1,240 @@
+html body{
+  --lw-bg:#101c23;
+  --lw-surface:#1a2931;
+  --lw-surface2:#20343c;
+  --lw-surface3:#2a4049;
+  --lw-border:rgba(255,207,117,.13);
+  --lw-border2:rgba(255,207,117,.25);
+  --lw-border3:rgba(255,207,117,.4);
+  --lw-text:#f9f3de;
+  --lw-text2:#c7c7b4;
+  --lw-muted:#9ba9a3;
+  --lw-blue:#69d9ed;
+  --lw-amber:#ffbd45;
+  --lw-gold:#ffdc79;
+  min-height:100vh;
+  color:var(--lw-text);
+  font-family:Rajdhani,'DM Sans',sans-serif;
+  letter-spacing:.012em;
+  background:
+    radial-gradient(ellipse at 50% 8%,rgba(245,154,40,.18),transparent 58%),
+    radial-gradient(ellipse 55% 55% at 100% 80%,rgba(21,135,154,.14),transparent 75%),
+    linear-gradient(145deg,#101b23 0%,#172a30 54%,#0b181e 100%);
+}
+html body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background-image:
+    linear-gradient(rgba(248,210,135,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(248,210,135,.025) 1px,transparent 1px);
+  background-size:48px 48px;
+}
+html body main{max-width:1060px;margin:0 auto;padding:24px 16px 60px}
+html body .panel{
+  overflow:hidden;
+  border:1px solid rgba(255,187,65,.38);
+  border-radius:18px;
+  background:linear-gradient(145deg,rgba(26,41,49,.97),rgba(16,30,36,.98));
+  box-shadow:0 18px 50px rgba(0,0,0,.42),inset 0 2px 0 rgba(255,211,106,.16);
+}
+html body .head{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  margin:0;
+  padding:clamp(28px,6vw,52px) 18px 24px;
+  border-bottom:1px solid rgba(255,187,65,.35);
+  text-align:center;
+  background:
+    linear-gradient(90deg,rgba(7,20,25,.9),rgba(13,31,37,.58) 52%,rgba(7,20,25,.88)),
+    url("../Bataille%20%C3%A9pique%20pour%20la%20derni%C3%A8re%20guerre.png") center top/cover no-repeat;
+}
+html body .head::after{
+  content:'';
+  position:absolute;
+  right:12%;
+  bottom:0;
+  left:12%;
+  height:2px;
+  background:linear-gradient(90deg,transparent,var(--lw-amber),var(--lw-gold),var(--lw-amber),transparent);
+  opacity:.8;
+}
+html body .eyebrow{
+  color:var(--lw-gold);
+  font:800 12px Rajdhani,'DM Sans',sans-serif;
+  letter-spacing:.24em;
+  text-shadow:0 2px 8px #000;
+}
+html body .head h1{
+  margin:40px 0 2px;
+  color:var(--lw-gold);
+  font:800 clamp(30px,6vw,48px) Rajdhani,'DM Sans',sans-serif;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  text-shadow:0 3px 0 #18272b,0 8px 18px rgba(0,0,0,.8);
+}
+html body .head p{
+  margin:6px auto;
+  color:#e4e6d9;
+  font:600 14px 'DM Sans',sans-serif;
+  text-shadow:0 2px 8px #000;
+}
+html body .langs{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:clamp(72px,12vw,100px)}
+html body .lang{
+  min-height:42px;
+  padding:9px 13px;
+  border:1px solid var(--lw-border2);
+  border-radius:9px;
+  background:linear-gradient(180deg,var(--lw-surface3),var(--lw-surface));
+  color:var(--lw-text2);
+  font:700 12px 'DM Sans',sans-serif;
+  cursor:pointer;
+  transition:filter .16s ease,transform .16s ease,border-color .16s ease;
+}
+html body .lang:hover{border-color:var(--lw-amber);filter:brightness(1.08);transform:translateY(-1px)}
+html body .lang[aria-pressed="true"]{
+  border-color:#ffe3a0;
+  background:linear-gradient(180deg,#ffe28b,#e9a23c);
+  color:#2b1d0d;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 3px 0 rgba(100,62,20,.48);
+}
+html body .content{padding:24px 20px 30px}
+html body .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+html body .card{
+  --poll-accent:var(--lw-amber);
+  --poll-accent-rgb:255,189,69;
+  position:relative;
+  display:flex;
+  min-width:0;
+  overflow:hidden;
+  flex-direction:column;
+  border:1px solid var(--lw-border2);
+  border-radius:14px;
+  background:linear-gradient(155deg,#2c4148,#1a2c33 72%);
+  box-shadow:0 10px 24px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,232,177,.08);
+  text-align:center;
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+html body .card::before{content:'';height:4px;background:linear-gradient(90deg,transparent,var(--poll-accent),transparent)}
+html body .card:hover{transform:translateY(-3px);border-color:var(--poll-accent);box-shadow:0 16px 30px rgba(0,0,0,.38),0 0 20px rgba(var(--poll-accent-rgb),.15)}
+html body .card.canyon{--poll-accent:#69d9ed;--poll-accent-rgb:105,217,237}
+html body .card.tdd{--poll-accent:#ffbd45;--poll-accent-rgb:255,189,69}
+html body .card.t1{--poll-accent:#8fe087;--poll-accent-rgb:143,224,135}
+html body .card .art{
+  display:grid;
+  height:100px;
+  place-items:center;
+  border-bottom:1px solid var(--lw-border);
+  background:radial-gradient(circle,rgba(var(--poll-accent-rgb),.17),transparent 70%);
+  font-size:50px;
+}
+html body .card h2{
+  margin:14px 8px 5px;
+  color:var(--poll-accent);
+  font:800 clamp(21px,3vw,29px) Rajdhani,'DM Sans',sans-serif;
+  letter-spacing:.08em;
+}
+html body .card p{
+  flex:1;
+  margin:4px 14px 20px;
+  color:var(--lw-text2);
+  font:500 13px/1.55 'DM Sans',sans-serif;
+}
+html body .card a{
+  display:block;
+  min-height:48px;
+  margin:0 12px 14px;
+  padding:14px 8px 12px;
+  border:1px solid #ffe5a1;
+  border-radius:9px;
+  background:linear-gradient(180deg,#ffe28b 0%,#f1ae43 58%,#d77b27 100%);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.42),0 4px 0 rgba(106,62,19,.66),0 8px 16px rgba(0,0,0,.28);
+  color:#2b1d0d;
+  font:800 12px Rajdhani,'DM Sans',sans-serif;
+  letter-spacing:.09em;
+  text-decoration:none;
+  transition:filter .15s,transform .15s;
+}
+html body .card a:hover,html body .card a:focus-visible{filter:brightness(1.09);transform:translateY(-1px);outline:2px solid #fff0c1;outline-offset:2px}
+html body .poll-stats{
+  max-width:860px;
+  margin:26px auto 0;
+  overflow-x:auto;
+  color:var(--lw-text);
+  font-family:'DM Sans',sans-serif;
+}
+html body .poll-stats-title{
+  margin:0 0 12px;
+  color:var(--lw-gold);
+  font:800 clamp(20px,3vw,26px) Rajdhani,'DM Sans',sans-serif;
+  text-align:center;
+}
+html body .poll-stats-table{
+  width:100%;
+  border:1px solid var(--lw-border2);
+  border-collapse:separate;
+  border-spacing:0;
+  border-radius:10px;
+  overflow:hidden;
+  background:linear-gradient(145deg,var(--lw-surface2),var(--lw-surface));
+}
+html body .poll-stats-table th,html body .poll-stats-table td{
+  padding:11px 12px;
+  border-bottom:1px solid var(--lw-border);
+  color:var(--lw-text2);
+  font-size:13px;
+  text-align:left;
+}
+html body .poll-stats-table thead th{
+  border-bottom:1px solid var(--lw-border2);
+  background:linear-gradient(100deg,#35464a,#26393e);
+  color:var(--lw-gold);
+  font:800 12px Rajdhani,'DM Sans',sans-serif;
+  letter-spacing:.06em;
+}
+html body .poll-stats-table thead th:nth-child(2){text-align:center}
+html body .poll-stats-table tbody tr:last-child th,html body .poll-stats-table tbody tr:last-child td{border-bottom:0}
+html body .poll-stats-table tbody tr:hover{background:rgba(255,189,69,.045)}
+html body .poll-stats-row-name{color:var(--lw-text)!important;font-weight:700}
+html body .poll-stats-count{text-align:center!important;font-weight:800;color:var(--lw-text)!important}
+html body .poll-stats-status{
+  width:1%;
+  white-space:nowrap;
+  text-align:center!important;
+}
+html body .poll-stats-status[data-status="open"]{color:#8fe087!important}
+html body .poll-stats-status[data-status="closed"]{color:#c7c7b4!important}
+html body .poll-stats-status[data-status="error"]{color:#ff7866!important}
+@media(max-width:650px){
+  html body main{padding:12px 10px 32px}
+  html body .head{padding:27px 12px 20px;background-position:center top}
+  html body .head h1{font-size:clamp(22px,6vw,34px)}
+  html body .content{padding:17px 12px 22px}
+  html body .cards{grid-template-columns:1fr;gap:11px}
+  html body .card{
+    display:grid;
+    grid-template-columns:76px minmax(0,1fr);
+    grid-template-rows:auto auto auto;
+    align-items:center;
+    text-align:left;
+  }
+  html body .card::before{position:absolute;inset:0 auto 0 0;width:4px;height:auto;background:var(--poll-accent)}
+  html body .card .art{
+    grid-row:1/4;
+    height:100%;
+    min-height:112px;
+    border-right:1px solid var(--lw-border);
+    border-bottom:0;
+    font-size:39px;
+  }
+  html body .card h2{margin:10px 10px 2px;font-size:23px}
+  html body .card p{margin:2px 10px 8px;font-size:12px}
+  html body .card a{margin:0 10px 11px;padding:11px;text-align:center}
+  html body .poll-stats-table th,html body .poll-stats-table td{padding:9px 7px;font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){
+  html body .card,html body .lang,html body .card a{transition:none}
+}

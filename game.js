@@ -139,19 +139,63 @@ let drawBuffer=null; // Mémoire tampon 48h post-archivage (coffres_snapshot de 
 let permConfig=JSON.parse(JSON.stringify(DEFAULT_PERM));
 let permTableExists=true;
 const DASHBOARD_PAGES=[
-  {id:'home',label:'Train',description:'Retrouve le planning et les tirages de la semaine.',sections:['secTirage']},
-  {id:'players',label:'Joueurs',description:'Gère les participants, leurs informations et consulte les statistiques.',sections:['sectionParticipants','sectionStats']},
-  {id:'activities',label:'Activités',description:'Prépare les équipes pour la Tempête du désert et le Canyon.',sections:['secEvents','secCanyon']},
-  {id:'polls',label:'Sondages',description:'Ouvre et gère les sondages de la Tempête du désert, du Canyon et de la puissance T1.',sections:['sectionPolls']},
-  {id:'history',label:'Historique',description:'Consulte les tirages passés et les archives des semaines.',sections:['secHist','secArchive']},
-  {id:'tools',label:'Outils',description:'Outils disponibles selon ton rôle.',sections:['secMovements','secRewards']},
-  {id:'about',label:'À propos',description:'Informations sur l’application.',sections:['aboutSection']}
+  {id:'home',sections:['secTirage']},
+  {id:'players',sections:['sectionParticipants','sectionStats']},
+  {id:'activities',sections:['secEvents','secCanyon']},
+  {id:'polls',sections:['sectionPolls']},
+  {id:'history',sections:['secHist','secArchive']},
+  {id:'tools',sections:['secMovements','secRewards']},
+  {id:'about',sections:['aboutSection']}
 ];
+const DASHBOARD_TABS={
+  home:[
+    {section:'secTirage',label:'Planning de la semaine'}
+  ],
+  players:[
+    {section:'sectionParticipants',label:'Participants'},
+    {section:'sectionStats',label:'Statistiques'}
+  ],
+  activities:[
+    {section:'secCanyon',label:'Canyon'},
+    {section:'secEvents',label:'Tempête du désert'}
+  ],
+  history:[
+    {section:'secHist',label:'Tirages'},
+    {section:'secArchive',label:'Semaines archivées'}
+  ],
+  polls:[
+    {section:'sectionPolls',label:'Sondages'}
+  ],
+  tools:[
+    {section:'secMovements',label:'Recrutements & Départs'},
+    {section:'secRewards',label:'Récompenses'}
+  ],
+  about:[
+    {section:'aboutSection',label:'À propos'}
+  ],
+  pollTypes:[
+    {section:'tddPollPanel',label:'Tempête du désert'},
+    {section:'canyonPollPanel',label:'Canyon'},
+    {section:'t1PollPanel',label:'Puissance T1'},
+    {section:'publicPollsPanel',label:'Centre de sondage'}
+  ]
+};
+const activeDashboardTabs={
+  home:'secTirage',
+  players:'sectionParticipants',
+  activities:'secCanyon',
+  history:'secHist',
+  polls:'sectionPolls',
+  tools:'secMovements',
+  about:'aboutSection',
+  pollTypes:'tddPollPanel'
+};
 let activeDashboardPage='home';
 
 function canSeeSection(secId){
   if(!currentUser)return false;
   const role=currentUser.role;
+  if(secId==='tddPollPanel'||secId==='canyonPollPanel'||secId==='t1PollPanel'||secId==='publicPollsPanel')return canSeeSection('sectionPolls');
   if(secId==='secRewards'||secId==='secMovements')return role==='admin'||role==='staff';
   if(secId==='aboutSection') return role==='admin';
   if(secId==='sectionPolls')return role==='admin'||role==='staff';
@@ -166,6 +210,32 @@ function updateDashboardNavLayout(){
   const visibleCount=Array.from(nav.querySelectorAll('.dashboard-nav-btn'))
     .filter(button=>getComputedStyle(button).display!=='none').length;
   nav.style.setProperty('--dashboard-nav-items',String(Math.max(visibleCount,1)));
+}
+
+function setDashboardTab(pageId,sectionId){
+  const tabs=DASHBOARD_TABS[pageId];
+  if(!tabs)return;
+  const activeSection=tabs.some(tab=>tab.section===sectionId&&canSeeSection(tab.section))
+    ?sectionId
+    :tabs.find(tab=>canSeeSection(tab.section))?.section;
+  if(!activeSection)return;
+  activeDashboardTabs[pageId]=activeSection;
+
+  const tabNav=document.querySelector(`[data-dashboard-tabs="${pageId}"]`);
+  if(tabNav){
+    tabNav.querySelectorAll('[role="tab"]').forEach(button=>{
+      const selected=button.dataset.dashboardTab===activeSection;
+      button.hidden=!canSeeSection(button.dataset.dashboardTab);
+      button.setAttribute('aria-selected',String(selected));
+      button.tabIndex=selected?0:-1;
+      button.classList.toggle('active',selected);
+    });
+  }
+  tabs.forEach(tab=>{
+    const section=document.getElementById(tab.section);
+    if(section)section.style.display=canSeeSection(tab.section)&&tab.section===activeSection?'':'none';
+  });
+  if(pageId==='pollTypes')refreshPollManagementPanel(activeSection);
 }
 
 function applyPermissions(){
@@ -214,16 +284,13 @@ function setDashboardPage(pageId){
     if(active)button.setAttribute('aria-current','page');
     else button.removeAttribute('aria-current');
   });
-  const title=document.getElementById('dashboardPageTitle');
-  const description=document.getElementById('dashboardPageDescription');
-  if(title)title.textContent=page.label;
-  if(description)description.textContent=page.description;
-
-  if(pageId==='home'){
-    if(document.getElementById('planningBody')?.getAttribute('aria-hidden')==='true')animateSectionBody('planningBody',true);
-  }
+  document.querySelectorAll('[data-dashboard-tabs]').forEach(tabNav=>{
+    tabNav.hidden=tabNav.dataset.dashboardTabs!==pageId
+      &&!(pageId==='polls'&&tabNav.dataset.dashboardTabs==='pollTypes');
+  });
+  if(DASHBOARD_TABS[pageId])setDashboardTab(pageId,activeDashboardTabs[pageId]);
+  if(pageId==='polls')setDashboardTab('pollTypes',activeDashboardTabs.pollTypes);
   if(pageChanged){
-    document.getElementById('dashboardPageTitle')?.focus({preventScroll:true});
     document.getElementById('dashboardContent')?.scrollIntoView({
       behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',
       block:'start'
@@ -655,29 +722,47 @@ function updatePollEvBanner(){
   el.textContent=isOpen?`${count} votant${count>1?'s':''}`:'';
 }
 
-// ══ MODAL SONDAGE (bouton "Lancer le sondage" dans le hall) ═════════════════
+// ══ GESTION DU SONDAGE TDD ══════════════════════════════════════════════════
 
-function openPollModal(){
-  const modal = document.getElementById('pollModal');
-  if(!modal) return;
-  // Remplir le champ lien
-  const url = window.location.href.split('?')[0] + '?poll=tdd';
-  const inp = document.getElementById('pollLinkInput');
-  if(inp) inp.value = url;
-  // Tableau de correction réservé aux membres du staff et administrateurs.
+function refreshPollManagementPanel(panelId){
+  if(panelId==='tddPollPanel')refreshTddPollPanel();
+  else if(panelId==='canyonPollPanel')refreshCanyonPollPanel();
+  else if(panelId==='t1PollPanel')refreshT1PollPanel();
+  else if(panelId==='publicPollsPanel')refreshPublicPollsPanel();
+}
+
+function publicPollsUrl(){
+  return new URL('polls/index.html',window.location.href).href;
+}
+
+function refreshPublicPollsPanel(){
+  const url=publicPollsUrl();
+  const input=document.getElementById('publicPollsLink');
+  if(input)input.value=url;
+  const link=document.getElementById('openPublicPollsLink');
+  if(link)link.href=url;
+}
+
+function copyPublicPollsLink(){
+  const url=publicPollsUrl();
+  if(!navigator.clipboard?.writeText){prompt('Copie le lien :',url);return;}
+  navigator.clipboard.writeText(url)
+    .then(()=>toast('Lien Polls copié !'))
+    .catch(()=>prompt('Copie le lien :',url));
+}
+
+function refreshTddPollPanel(){
+  const inp=document.getElementById('pollLinkInput');
+  if(inp)inp.value=window.location.href.split('?')[0]+'?poll=tdd';
   const staffPanel=document.getElementById('pollStaffPanel');
-  if(staffPanel) staffPanel.style.display=isAdminOrStaff()?'':'none';
+  if(staffPanel)staffPanel.style.display=isAdminOrStaff()?'':'none';
+  if(!sb)return;
   renderPollStaffTable();
   loadAvailabilityStaff('tdd');
-  modal.style.display = 'flex';
+  loadPollResults();
 }
 
-function closePollModal(){
-  const modal = document.getElementById('pollModal');
-  if(modal) modal.style.display = 'none';
-}
-
-function copyPollLinkModal(){
+function copyTddPollLink(){
   const inp = document.getElementById('pollLinkInput');
   if(!inp) return;
   navigator.clipboard.writeText(inp.value).then(function(){ toast('Lien sondage copié !'); });
@@ -733,10 +818,10 @@ function copyPollLink(){
 // ══ SONDAGE BATAILLE DU CANYON (indépendant de la TDD) ══
 let canyonPollParticipants=[],canyonPollResults={},canyonPollSelected=null,canyonPollPending=false;
 function canyonPollUrl(){return window.location.href.split('?')[0]+'?poll=canyon';}
-function openCanyonPollModal(){
+function refreshCanyonPollPanel(){
   const url=canyonPollUrl();
   const input=document.getElementById('canyonPollLink');if(input)input.value=url;
-  const modal=document.getElementById('canyonPollModal');if(modal)modal.style.display='flex';
+  if(!sb)return;
   renderCanyonPollStaff();
   loadCanyonPollResults();
   loadAvailabilityStaff('canyon');
@@ -3756,76 +3841,23 @@ async function commitPower(idx){
   }finally{setBusy(false);}
 }
 
-function setSectionExpanded(bodyId,expanded){
-  const body=document.getElementById(bodyId);
-  if(body){
-    body.setAttribute('aria-hidden',String(!expanded));
-    body.inert=!expanded;
-  }
-  document.querySelectorAll('[aria-controls="'+bodyId+'"]').forEach(control=>{
-    control.setAttribute('aria-expanded',String(expanded));
-    if(control.classList.contains('section-toggle'))control.classList.toggle('collapsed',!expanded);
-  });
-}
-
 document.addEventListener('keydown',event=>{
-  const control=event.target;
-  if(!(control instanceof Element)||!control.matches('[data-section-toggle][role="button"]'))return;
-  if(event.key==='Enter'||event.key===' '){
-    event.preventDefault();
-    control.click();
-  }
+  const tab=event.target instanceof Element?event.target.closest('[role="tab"][data-dashboard-tab]'):null;
+  if(!tab)return;
+  const tabNav=tab.closest('[data-dashboard-tabs]');
+  const availableTabs=Array.from(tabNav.querySelectorAll('[role="tab"]:not([hidden])'));
+  const currentIndex=availableTabs.indexOf(tab);
+  let nextIndex;
+  if(event.key==='ArrowRight')nextIndex=(currentIndex+1)%availableTabs.length;
+  else if(event.key==='ArrowLeft')nextIndex=(currentIndex-1+availableTabs.length)%availableTabs.length;
+  else if(event.key==='Home')nextIndex=0;
+  else if(event.key==='End')nextIndex=availableTabs.length-1;
+  else return;
+  event.preventDefault();
+  const nextTab=availableTabs[nextIndex];
+  nextTab.focus();
+  nextTab.click();
 });
-
-function animateSectionBody(bodyId,expanded){
-  const body=document.getElementById(bodyId);
-  if(!body)return;
-
-  if(body._sectionTransitionHandler){
-    body.removeEventListener('transitionend',body._sectionTransitionHandler);
-    clearTimeout(body._sectionTransitionTimer);
-  }
-
-  const startHeight=body.getBoundingClientRect().height;
-  body.style.maxHeight='none';
-  body.classList.remove('collapsed','is-closing');
-  body.style.height=startHeight+'px';
-  setSectionExpanded(bodyId,expanded);
-  body.getBoundingClientRect();
-
-  if(expanded){
-    body.style.height=body.scrollHeight+'px';
-  }else{
-    body.classList.add('is-closing');
-    body.style.height='0px';
-  }
-
-  const finish=()=>{
-    body.removeEventListener('transitionend',onTransitionEnd);
-    body._sectionTransitionHandler=null;
-    clearTimeout(body._sectionTransitionTimer);
-    body.classList.remove('is-closing');
-    if(body.getAttribute('aria-hidden')==='true'){
-      body.classList.add('collapsed');
-      body.style.height='0px';
-    }else{
-      body.style.height='auto';
-    }
-  };
-  const onTransitionEnd=event=>{
-    if(event.target===body&&event.propertyName==='height')finish();
-  };
-  body._sectionTransitionHandler=onTransitionEnd;
-  body.addEventListener('transitionend',onTransitionEnd);
-  body._sectionTransitionTimer=setTimeout(finish,window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:380);
-}
-
-function toggleSection(bodyId,toggleId){
-  const body=document.getElementById(bodyId);const toggle=document.getElementById(toggleId);if(!body||!toggle)return;
-  const isCollapsed=body.getAttribute('aria-hidden')==='true';
-  animateSectionBody(bodyId,isCollapsed);
-  toggle.classList.toggle('collapsed',!isCollapsed);
-}
 
 function updateDrawBtns(){
   const presPool=participants.filter(p=>presentIds.has(p.id));
@@ -5013,10 +5045,10 @@ async function refreshT1ResponseCounter(){
 }
 // Le compteur se rafraîchit même lorsque la publication Realtime n'est pas activée.
 setInterval(()=>{if(currentUser)refreshT1ResponseCounter();},15000);
-async function openT1StaffModal(){
-  const modal=document.getElementById('t1StaffModal');modal.style.display='flex';
+async function refreshT1PollPanel(){
   document.getElementById('t1ShareLink').value=t1Url();
   if(!isAdminOrStaff()){document.getElementById('t1StaffList').textContent='Seul le staff peut consulter et corriger les déclarations.';return;}
+  if(!sb)return;
   await loadT1Staff();
   await refreshT1ResponseCounter();
 }

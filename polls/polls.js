@@ -73,11 +73,11 @@ const pollStats = {
 };
 
 const pollStatsSection = document.createElement('section');
-pollStatsSection.style.cssText = 'max-width:860px;margin:24px auto 0;color:#f8f6e9';
+pollStatsSection.className = 'poll-stats';
 const pollStatsTitle = document.createElement('h2');
-pollStatsTitle.style.cssText = 'margin:0 0 12px;color:#ffda80;font-size:clamp(20px,3vw,26px);text-align:center';
+pollStatsTitle.className = 'poll-stats-title';
 const pollStatsTable = document.createElement('table');
-pollStatsTable.style.cssText = 'width:100%;border-collapse:collapse;border:1px solid #ffffff35;border-radius:12px;overflow:hidden;background:#142235';
+pollStatsTable.className = 'poll-stats-table';
 const pollStatsHead = document.createElement('thead');
 const pollStatsHeaderRow = document.createElement('tr');
 const pollStatsBody = document.createElement('tbody');
@@ -86,7 +86,7 @@ const pollStatsCells = {};
 ['survey', 'answers', 'status'].forEach(key => {
   const cell = document.createElement('th');
   cell.scope = 'col';
-  cell.style.cssText = 'padding:11px 12px;background:#203a57;color:#ffda80;text-align:left;font-size:13px';
+  cell.className = 'poll-stats-heading';
   pollStatsHeaderRow.appendChild(cell);
 });
 pollStatsHead.appendChild(pollStatsHeaderRow);
@@ -98,11 +98,9 @@ pollStatsTable.append(pollStatsHead, pollStatsBody);
   const countCell = document.createElement('td');
   const statusCell = document.createElement('td');
   nameCell.scope = 'row';
-  [nameCell, countCell, statusCell].forEach(cell => {
-    cell.style.cssText = 'padding:11px 12px;border-top:1px solid #ffffff24;text-align:left;font-size:14px';
-  });
-  countCell.style.fontWeight = '800';
-  countCell.style.textAlign = 'center';
+  nameCell.className = 'poll-stats-row-name';
+  countCell.className = 'poll-stats-count';
+  statusCell.className = 'poll-stats-status';
   pollStatsCells[kind] = { name: nameCell, count: countCell, status: statusCell };
   row.append(nameCell, countCell, statusCell);
   pollStatsBody.appendChild(row);
@@ -128,14 +126,17 @@ function renderPollStats() {
       cells.count.textContent = '—';
       cells.status.textContent = messages.error;
       cells.status.title = stats.error;
+      cells.status.dataset.status = 'error';
     } else if (stats.answered === null) {
       cells.count.textContent = messages.loading;
       cells.status.textContent = messages.loading;
       cells.status.removeAttribute('title');
+      cells.status.dataset.status = 'loading';
     } else {
       cells.count.textContent = `${stats.answered} / ${stats.total}`;
       cells.status.textContent = stats.open ? messages.open : messages.closed;
       cells.status.removeAttribute('title');
+      cells.status.dataset.status = stats.open ? 'open' : 'closed';
     }
   });
 }

@@ -845,8 +845,6 @@ body.light .poll-page{box-shadow:0 15px 45px rgba(0,0,0,.16)!important}
 .t1-drop{display:block;border:1px dashed var(--border3);border-radius:14px;padding:18px;text-align:center;cursor:pointer;color:var(--text2);background:var(--surface3)}
 .t1-drop input{display:none}.t1-drop img{display:block;max-width:100%;max-height:210px;margin:12px auto;border-radius:9px}
 .t1-action{width:100%;margin-top:12px}.t1-status{font-size:12px;min-height:20px;margin-top:9px;color:var(--text2)}
-#t1StaffModal{position:fixed;inset:0;z-index:1100;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.78)}
-#t1StaffModal .t1-staff-card{width:100%;max-width:430px;max-height:90vh;overflow:auto;padding:22px;border-radius:18px;border:1px solid var(--border2);background:var(--surface2)}
 .t1-staff-row{display:grid;grid-template-columns:minmax(110px,1fr) 130px auto;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
 @media(max-width:530px){.t1-staff-row{grid-template-columns:1fr 1fr}.t1-staff-row strong{grid-column:1/-1}}
 
@@ -1105,15 +1103,41 @@ body.light #appScreen header{color:#fff4d2}body.light #appScreen header h1{color
 .poll-language button.active{border-color:var(--blue);color:var(--text);background:var(--blue-l)}
 
 /* V6 — Écran de connexion éclairci, ambiance Last War préservée */
-#loginScreen{background:radial-gradient(ellipse at 50% 0%,rgba(255,202,112,.36),transparent 65%),linear-gradient(145deg,#c7dce2 0%,#a9c3cd 52%,#d9d5bd 100%)!important}
-#loginScreen .login-card{background:linear-gradient(155deg,#f9f5e8 0%,#e7edf0 100%)!important;border:2px solid #ba883c!important;box-shadow:0 18px 55px rgba(30,53,65,.28),0 0 0 5px rgba(255,243,208,.35)!important;color:#203641!important}
-#loginScreen .login-title{-webkit-text-fill-color:#243c48!important;background:none!important;color:#243c48!important;text-shadow:none!important}
-#loginScreen .login-sub,#loginScreen .login-field label,#loginScreen .login-team-field label,#loginScreen .login-remember{color:#415967!important}
-#loginScreen .login-inp,#loginScreen .login-team-select{background:#fff!important;border:1.5px solid #98aeb8!important;color:#203641!important;box-shadow:inset 0 1px 3px rgba(0,0,0,.06)}
-#loginScreen .login-inp::placeholder{color:#768994!important}
-#loginScreen .login-inp:focus,#loginScreen .login-team-select:focus{border-color:#bd7b20!important;box-shadow:0 0 0 3px rgba(243,165,52,.24)!important}
-#loginScreen .login-card:after{color:#79551f!important;border-top-color:rgba(142,104,46,.3)!important}
-#loginScreen .login-error{color:#a32121!important}
+#loginScreen,
+body.light #loginScreen{
+  background:
+    radial-gradient(ellipse at 50% 8%,rgba(245,154,40,.18),transparent 58%),
+    linear-gradient(145deg,#101b23 0%,#172a30 54%,#0b181e 100%)!important;
+}
+#loginScreen .login-card{
+  background:
+    radial-gradient(ellipse at 50% 0,rgba(238,161,53,.13),transparent 56%),
+    linear-gradient(145deg,#182f37,#10232b)!important;
+  border:2px solid #c99145!important;
+  box-shadow:0 25px 65px rgba(0,0,0,.55),inset 0 4px 0 rgba(255,209,103,.22)!important;
+  color:#f9f3de!important;
+}
+#loginScreen .login-title{-webkit-text-fill-color:transparent!important}
+#loginScreen .login-sub,
+#loginScreen .login-field label,
+#loginScreen .login-team-field label,
+#loginScreen .login-remember{color:#c7c7b4!important}
+#loginScreen .login-inp,
+#loginScreen .login-team-select{
+  background:#13262e!important;
+  border:1px solid rgba(255,207,117,.25)!important;
+  color:#f9f3de!important;
+  box-shadow:inset 0 1px 4px rgba(0,0,0,.25);
+}
+#loginScreen .login-inp::placeholder{color:#81918d!important}
+#loginScreen .login-inp:focus,
+#loginScreen .login-team-select:focus{
+  border-color:#ffbd45!important;
+  box-shadow:0 0 0 3px rgba(255,189,69,.2)!important;
+}
+#loginScreen .login-remember input{accent-color:#ffbd45}
+#loginScreen .login-card:after{color:#eac47d!important;border-top-color:rgba(255,204,119,.24)!important}
+#loginScreen .login-error{color:#ff7866!important}
 
 /* Navigation de l’espace membre : panneau latéral sur grand écran, barre basse sur mobile. */
 #appScreen .page{max-width:1440px}
@@ -1135,9 +1159,6 @@ body.light #appScreen header{color:#fff4d2}body.light #appScreen header h1{color
 .dashboard-nav-btn.active{background:linear-gradient(100deg,rgba(255,176,54,.2),rgba(19,47,54,.58));border-color:rgba(255,195,85,.28);color:var(--gold)}
 .dashboard-nav-btn:focus-visible{outline:2px solid #ffcb70;outline-offset:2px}
 .sections-container{min-width:0;gap:2px}
-.dashboard-page-heading{padding:4px 4px 14px;margin-bottom:8px;border-bottom:1px solid var(--border2)}
-.dashboard-page-heading h2{color:var(--text);font:800 clamp(22px,2.4vw,30px) Rajdhani,'DM Sans',sans-serif;letter-spacing:.02em}
-.dashboard-page-heading p{margin-top:3px;color:var(--text2);font-size:13px;line-height:1.5}
 body.light .dashboard-nav{background:linear-gradient(155deg,#f4f0df,#e8e6d7);box-shadow:0 8px 20px rgba(35,52,59,.12)}
 body.light .dashboard-nav-btn.active{background:linear-gradient(100deg,rgba(255,176,54,.22),rgba(238,232,208,.8));color:#80500d}
 @media(max-width:850px){
@@ -1153,7 +1174,6 @@ body.light .dashboard-nav-btn.active{background:linear-gradient(100deg,rgba(255,
   .dashboard-nav-heading{display:none}
   .dashboard-nav-btn{justify-content:center;flex-direction:column;gap:2px;min-width:0;min-height:56px;padding:4px 2px;border-radius:10px;font-size:10px;line-height:1.05;text-align:center;white-space:normal}
   .dashboard-nav-icon{flex-basis:auto;font-size:19px}
-  .dashboard-page-heading{padding:2px 3px 12px}
   body.light .dashboard-nav{background:rgba(244,240,223,.97)}
 }
 @media(max-width:380px){
@@ -1355,6 +1375,99 @@ body.light #appScreen .mv-table th{
   color:#2b1d0d!important;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 3px 0 rgba(100,62,20,.48);
 }
+.dashboard-subnav{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  margin:0 0 14px;
+  padding:4px 3px 10px;
+  border-bottom:1px solid var(--border2);
+  scrollbar-width:thin;
+  scrollbar-color:var(--amber) transparent;
+}
+.dashboard-subnav[hidden]{display:none}
+.dashboard-subnav-btn{
+  flex:0 0 auto;
+  min-height:38px;
+  padding:8px 14px;
+  border:1px solid var(--border2);
+  border-radius:10px;
+  background:linear-gradient(180deg,var(--surface3),var(--surface2));
+  color:var(--text2);
+  font:700 12px 'DM Sans',sans-serif;
+  white-space:nowrap;
+  cursor:pointer;
+  transition:background .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+.dashboard-subnav-btn:hover{color:var(--text);border-color:rgba(255,195,85,.42)}
+.dashboard-subnav-btn.active{
+  background:linear-gradient(180deg,#ffe28b,#e9a23c);
+  border-color:#ffe3a0;
+  color:#2b1d0d;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 3px 0 rgba(100,62,20,.48);
+}
+.dashboard-subnav-btn:focus-visible{outline:2px solid #ffcb70;outline-offset:2px}
+body.light .dashboard-subnav-btn:not(.active){background:linear-gradient(180deg,#f8f2e3,#e6e1d1)}
+@media(max-width:850px){
+  .dashboard-subnav{margin-bottom:10px;padding-bottom:8px}
+  .dashboard-subnav-btn{min-height:36px;padding:7px 12px;font-size:11px}
+}
+.poll-management-tabs{margin-top:8px}
+.poll-management-panel{min-width:0;padding:4px 2px 8px}
+.poll-management-panel-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:4px 0 14px}
+.poll-management-panel-header h3{color:var(--gold);font:800 21px Rajdhani,'DM Sans',sans-serif}
+.poll-management-count{
+  padding:6px 10px;
+  border:1px solid var(--border2);
+  border-radius:999px;
+  background:var(--surface2);
+  color:var(--text2);
+  font-size:12px;
+  font-weight:700;
+}
+.poll-management-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:12px 0 18px}
+.poll-management-status{font-size:12px;color:var(--text2)}
+.poll-management-status-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.poll-management-status-group .t1-help{margin:0}
+.poll-management-staff{
+  margin:16px 0;
+  padding:14px;
+  border:1px solid var(--border2);
+  border-radius:12px;
+  background:var(--surface2);
+}
+.poll-management-staff>strong{font-size:12px}
+.poll-management-staff>p,.poll-management-share>p{margin:7px 0 10px;color:var(--text2);font-size:12px;line-height:1.55}
+.poll-management-table-wrap{max-height:300px;overflow:auto}
+.poll-management-table-wrap table{width:100%;min-width:300px}
+.poll-management-share{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  gap:8px 12px;
+  align-items:center;
+  max-width:700px;
+  margin:18px 0;
+}
+.poll-management-share p{grid-column:1/-1}
+.poll-management-share input{
+  min-width:0;
+  width:100%;
+  height:38px;
+  padding:0 10px;
+  border:1px solid var(--border2);
+  border-radius:8px;
+  background:var(--surface);
+  color:var(--blue);
+  font:12px var(--font-mono,monospace);
+}
+.poll-management-public-link{display:inline-flex;text-decoration:none}
+@media(max-width:520px){
+  .poll-management-panel-header h3{font-size:18px}
+  .poll-management-share{grid-template-columns:1fr}
+  .poll-management-share p{grid-column:auto}
+  .poll-management-share .btn{width:100%}
+  .poll-management-actions .btn{flex:1}
+}
 #appScreen .btn,
 #appScreen .planning-copy-btn,
 #appScreen .stats-view-tab,
@@ -1451,4 +1564,51 @@ body.light #appScreen .mv-table th{
   background-position:center,62% top !important;
   background-repeat:no-repeat !important;
   box-shadow:0 6px 0 #0c1b20,0 0 30px rgba(255,180,61,.24);
+}
+
+/* Keep the in-app poll manager on the same Last War palette in light mode. */
+#appScreen #sectionPolls{
+  --surface:#1a2931;
+  --surface2:#20343c;
+  --surface3:#2a4049;
+  --surface4:#344b53;
+  --border:rgba(255,207,117,.13);
+  --border2:rgba(255,207,117,.25);
+  --border3:rgba(255,207,117,.4);
+  --text:#f9f3de;
+  --text2:#c7c7b4;
+  --text3:#9ba9a3;
+  --text4:#81918d;
+  --blue:#69d9ed;
+  --amber:#ffbd45;
+  --gold:#ffdc79;
+  --green:#8fe087;
+  --red:#ff7866;
+  --shadow:0 6px 22px rgba(0,0,0,.28);
+  --shadow-lg:0 12px 38px rgba(0,0,0,.34);
+  --shadow-xl:0 20px 55px rgba(0,0,0,.45);
+  background:linear-gradient(145deg,#1a2931,#20343c);
+  border-color:rgba(255,187,65,.38);
+  color:#f9f3de;
+}
+#appScreen #sectionPolls .dashboard-subnav-btn:not(.active){
+  background:linear-gradient(180deg,#2a4049,#1a2931);
+  border-color:rgba(255,207,117,.25);
+  color:#c7c7b4;
+}
+#appScreen #sectionPolls .poll-management-staff{
+  background:linear-gradient(145deg,#20343c,#1a2931);
+  border-color:rgba(255,207,117,.25);
+}
+#appScreen #sectionPolls .poll-management-share input{
+  background:#13262e;
+  border-color:rgba(255,207,117,.25);
+  color:#69d9ed;
+}
+
+body::before,
+body.light::before{
+  background:
+    radial-gradient(ellipse at 50% 8%,rgba(245,154,40,.18),transparent 58%),
+    radial-gradient(ellipse 55% 55% at 100% 80%,rgba(21,135,154,.14),transparent 75%);
 }

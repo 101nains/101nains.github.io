@@ -100,40 +100,128 @@ function onSupabaseError(){
       <button type="button" class="dashboard-nav-btn" data-page="tools" onclick="setDashboardPage('tools')"><span class="dashboard-nav-icon">📊</span><span>Outils</span></button>
       <button type="button" class="dashboard-nav-btn" data-page="about" onclick="setDashboardPage('about')"><span class="dashboard-nav-icon">ℹ️</span><span>À propos</span></button>
     </nav>
-    <main class="sections-container" id="dashboardContent" aria-labelledby="dashboardPageTitle">
-      <div class="dashboard-page-heading">
-        <h2 id="dashboardPageTitle">Train</h2>
-        <p id="dashboardPageDescription">Retrouve le planning et les tirages de la semaine.</p>
+    <main class="sections-container" id="dashboardContent">
+      <div class="dashboard-subnav" data-dashboard-tabs="home" role="tablist" aria-label="Rubrique Train" hidden>
+        <button type="button" class="dashboard-subnav-btn active" id="planningTab" role="tab" aria-selected="true" aria-controls="secTirage" tabindex="0" data-dashboard-tab="secTirage" onclick="setDashboardTab('home','secTirage')">🚂 Planning de la semaine</button>
+      </div>
+      <div class="dashboard-subnav" data-dashboard-tabs="players" role="tablist" aria-label="Rubriques Joueurs" hidden>
+        <button type="button" class="dashboard-subnav-btn active" id="participantsTab" role="tab" aria-selected="true" aria-controls="sectionParticipants" tabindex="0" data-dashboard-tab="sectionParticipants" onclick="setDashboardTab('players','sectionParticipants')">👥 Participants</button>
+        <button type="button" class="dashboard-subnav-btn" id="statsTab" role="tab" aria-selected="false" aria-controls="sectionStats" tabindex="-1" data-dashboard-tab="sectionStats" onclick="setDashboardTab('players','sectionStats')">📊 Statistiques</button>
+      </div>
+      <div class="dashboard-subnav" data-dashboard-tabs="activities" role="tablist" aria-label="Rubriques Activités" hidden>
+        <button type="button" class="dashboard-subnav-btn active" id="canyonTab" role="tab" aria-selected="true" aria-controls="secCanyon" tabindex="0" data-dashboard-tab="secCanyon" onclick="setDashboardTab('activities','secCanyon')">🏜️ Canyon</button>
+        <button type="button" class="dashboard-subnav-btn" id="desertStormTab" role="tab" aria-selected="false" aria-controls="secEvents" tabindex="-1" data-dashboard-tab="secEvents" onclick="setDashboardTab('activities','secEvents')">⚔️ Tempête du désert</button>
+      </div>
+      <div class="dashboard-subnav" data-dashboard-tabs="history" role="tablist" aria-label="Rubriques Historique" hidden>
+        <button type="button" class="dashboard-subnav-btn active" id="drawHistoryTab" role="tab" aria-selected="true" aria-controls="secHist" tabindex="0" data-dashboard-tab="secHist" onclick="setDashboardTab('history','secHist')">🎲 Tirages</button>
+        <button type="button" class="dashboard-subnav-btn" id="archiveHistoryTab" role="tab" aria-selected="false" aria-controls="secArchive" tabindex="-1" data-dashboard-tab="secArchive" onclick="setDashboardTab('history','secArchive')">📅 Semaines archivées</button>
+      </div>
+      <div class="dashboard-subnav" data-dashboard-tabs="tools" role="tablist" aria-label="Rubriques Outils" hidden>
+        <button type="button" class="dashboard-subnav-btn active" id="movementsTab" role="tab" aria-selected="true" aria-controls="secMovements" tabindex="0" data-dashboard-tab="secMovements" onclick="setDashboardTab('tools','secMovements')">🤝 Recrutements & Départs</button>
+        <button type="button" class="dashboard-subnav-btn" id="rewardsTab" role="tab" aria-selected="false" aria-controls="secRewards" tabindex="-1" data-dashboard-tab="secRewards" onclick="setDashboardTab('tools','secRewards')">🏆 Récompenses</button>
       </div>
 
-      <div class="section" id="sectionPolls">
+      <div class="dashboard-subnav" data-dashboard-tabs="polls" role="tablist" aria-label="Rubrique Sondages" hidden>
+        <button type="button" class="dashboard-subnav-btn active" id="pollsTab" role="tab" aria-selected="true" aria-controls="sectionPolls" tabindex="0" data-dashboard-tab="sectionPolls" onclick="setDashboardTab('polls','sectionPolls')">🗳️ Sondages</button>
+      </div>
+      <div class="section" id="sectionPolls" role="tabpanel" aria-labelledby="pollsTab" tabindex="0">
         <div class="section-header">
           <div class="section-header-left">
             <span class="section-title">🗳️ Gestion des sondages</span>
           </div>
         </div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin:12px 0">
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            <button class="btn btn-primary" type="button" onclick="openPollModal()">🏜️ Sondage Tempête du désert</button>
-            <span id="tddPollCounts" style="display:none;font-size:12px;color:var(--text2)" aria-live="polite"></span>
+        <div class="dashboard-subnav poll-management-tabs" data-dashboard-tabs="pollTypes" role="tablist" aria-label="Types de sondage">
+          <button type="button" class="dashboard-subnav-btn active" id="tddPollTab" role="tab" aria-selected="true" aria-controls="tddPollPanel" tabindex="0" data-dashboard-tab="tddPollPanel" onclick="setDashboardTab('pollTypes','tddPollPanel')">🏜️ Tempête du désert</button>
+          <button type="button" class="dashboard-subnav-btn" id="canyonPollTab" role="tab" aria-selected="false" aria-controls="canyonPollPanel" tabindex="-1" data-dashboard-tab="canyonPollPanel" onclick="setDashboardTab('pollTypes','canyonPollPanel')">⚔️ Canyon</button>
+          <button type="button" class="dashboard-subnav-btn" id="t1PollTab" role="tab" aria-selected="false" aria-controls="t1PollPanel" tabindex="-1" data-dashboard-tab="t1PollPanel" onclick="setDashboardTab('pollTypes','t1PollPanel')">⚡ Puissance T1</button>
+          <button type="button" class="dashboard-subnav-btn" id="publicPollsTab" role="tab" aria-selected="false" aria-controls="publicPollsPanel" tabindex="-1" data-dashboard-tab="publicPollsPanel" onclick="setDashboardTab('pollTypes','publicPollsPanel')">🌐 Centre de sondage</button>
+        </div>
+        <div class="poll-management-panel" id="tddPollPanel" role="tabpanel" aria-labelledby="tddPollTab" tabindex="0">
+          <div class="poll-management-panel-header">
+            <h3>🏜️ Sondage Tempête du désert</h3>
+            <span id="tddPollCounts" class="poll-management-count" aria-live="polite" style="display:none"></span>
           </div>
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            <button class="btn btn-primary" type="button" onclick="openCanyonPollModal()">⚔️ Sondage Canyon</button>
-            <span id="canyonPollCounts" style="display:none;font-size:12px;color:var(--text2)" aria-live="polite"></span>
+          <div class="poll-management-actions">
+            <button class="btn btn-primary" type="button" onclick="availabilityStaffAction('tdd','open')">➕ Nouvelle session TDD</button>
+            <button class="btn" type="button" onclick="availabilityStaffAction('tdd','close')">🔒 Clôturer</button>
+            <div id="tddSessionStaff" class="poll-management-status" aria-live="polite"></div>
           </div>
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            <button class="btn btn-primary" type="button" onclick="openT1StaffModal()" title="Gérer les recensements T1 et copier le lien du sondage">⚡ Sondage Puissance T1</button>
-            <span id="t1ResponseCounter" style="display:none;font-size:12px;color:var(--text2);font-weight:600" aria-live="polite"></span>
+          <div id="pollStaffPanel" class="poll-management-staff">
+            <strong>🛡️ Corriger les votes (staff/admin)</strong>
+            <p>Le mot de passe choisi à l’ouverture du sondage est demandé pour chaque correction. « Non répondu » libère le pseudo.</p>
+            <div class="poll-management-table-wrap"><table id="pollStaffTable"><tbody></tbody></table></div>
           </div>
-          <a class="btn" href="/polls/" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none">↗ Ouvrir la page Polls</a>
+          <div class="poll-management-share">
+            <p>Partage ce lien aux membres pour qu’ils répondent sans se connecter.</p>
+            <input id="pollLinkInput" readonly aria-label="Lien du sondage Tempête du désert">
+            <button class="btn btn-primary" type="button" onclick="copyTddPollLink()">📋 Copier le lien</button>
+            <button class="btn" type="button" onclick="window.open(document.getElementById('pollLinkInput').value,'_blank','noopener')">↗ Prévisualiser</button>
+          </div>
+        </div>
+        <div class="poll-management-panel" id="canyonPollPanel" role="tabpanel" aria-labelledby="canyonPollTab" tabindex="0" style="display:none">
+          <div class="poll-management-panel-header">
+            <h3>⚔️ Sondage Canyon</h3>
+            <span id="canyonPollCounts" class="poll-management-count" aria-live="polite" style="display:none"></span>
+          </div>
+          <div class="poll-management-actions">
+            <button class="btn btn-primary" type="button" onclick="availabilityStaffAction('canyon','open')">➕ Nouvelle session Canyon</button>
+            <button class="btn" type="button" onclick="availabilityStaffAction('canyon','close')">🔒 Clôturer</button>
+            <div id="canyonSessionStaff" class="poll-management-status" aria-live="polite"></div>
+          </div>
+          <div id="canyonPollStaffPanel" class="poll-management-staff" style="display:none">
+            <strong>🛡️ Corriger les votes (staff/admin)</strong>
+            <p>Le mot de passe choisi à l’ouverture du sondage est demandé pour chaque correction. « Non répondu » libère le pseudo.</p>
+            <div class="poll-management-table-wrap"><table id="canyonPollStaffTable"><tbody></tbody></table></div>
+          </div>
+          <div class="poll-management-share">
+            <p>Partage ce lien unique aux membres de l’alliance.</p>
+            <input id="canyonPollLink" readonly aria-label="Lien du sondage Canyon">
+            <button class="btn btn-primary" type="button" onclick="copyCanyonPollLink()">📋 Copier le lien</button>
+            <button class="btn" type="button" onclick="window.open(canyonPollUrl(),'_blank','noopener')">↗ Prévisualiser</button>
+          </div>
+        </div>
+        <div class="poll-management-panel" id="t1PollPanel" role="tabpanel" aria-labelledby="t1PollTab" tabindex="0" style="display:none">
+          <div class="poll-management-panel-header">
+            <h3>⚡ Recensement Puissance T1</h3>
+            <div class="poll-management-status-group">
+              <p id="t1StaffRoundInfo" class="t1-help" aria-live="polite"></p>
+              <span id="t1ResponseCounter" class="poll-management-count" aria-live="polite" style="display:none"></span>
+            </div>
+          </div>
+          <div class="poll-management-actions">
+            <button class="btn btn-primary" type="button" onclick="t1StaffNewRound()">➕ Lancer un nouveau recensement</button>
+            <button class="btn" type="button" onclick="t1StaffCloseRound()">🔒 Clôturer le recensement</button>
+          </div>
+          <div id="t1CorrectionsPanel" class="poll-management-staff">
+            <strong>🛡️ Corriger les déclarations (staff/admin)</strong>
+            <p>Le mot de passe choisi à l’ouverture du sondage est demandé pour chaque correction.</p>
+            <div id="t1StaffList" class="poll-management-table-wrap"></div>
+          </div>
+          <div class="poll-management-share">
+            <p>Partage ce lien avec toute l’alliance. Les corrections sont réservées au staff/admin.</p>
+            <input id="t1ShareLink" class="t1-field" readonly aria-label="Lien du recensement Puissance T1">
+            <button class="btn btn-primary" type="button" onclick="copyT1Link()">📋 Copier le lien</button>
+            <button class="btn" type="button" onclick="window.open(t1Url(),'_blank','noopener')">↗ Prévisualiser</button>
+          </div>
+        </div>
+        <div class="poll-management-panel" id="publicPollsPanel" role="tabpanel" aria-labelledby="publicPollsTab" tabindex="0" style="display:none">
+          <div class="poll-management-panel-header">
+            <h3>🌐 Centre de sondage</h3>
+          </div>
+          <div class="poll-management-share">
+            <p>Ouvre la page publique des sondages ou copie son lien pour le partager à l’alliance.</p>
+            <input id="publicPollsLink" readonly aria-label="Lien de la page publique Polls">
+            <button class="btn btn-primary" type="button" onclick="copyPublicPollsLink()">📋 Copier le lien</button>
+            <a class="btn poll-management-public-link" id="openPublicPollsLink" href="polls/index.html" target="_blank" rel="noopener">↗ Ouvrir la page Polls</a>
+          </div>
         </div>
       </div>
 
   <!-- PLANNING SEMAINE ET TIRAGES -->
-  <div id="secTirage" style="margin-bottom:1rem">
+  <div id="secTirage" style="margin-bottom:1rem" role="tabpanel" aria-labelledby="planningTab" tabindex="0">
       <div class="planning-section" id="planningSection">
         <div class="planning-header">
-          <div class="section-header-left" data-section-toggle role="button" tabindex="0" aria-controls="planningBody" aria-expanded="false" onclick="toggleSection('planningBody','planningToggle')" style="display:flex;flex-direction:column;gap:6px;flex:1;cursor:pointer">
+          <div class="section-header-left" style="display:flex;flex-direction:column;gap:6px;flex:1">
             <div class="planning-title">
               🚂 Planning de la semaine
               <span class="planning-badge-rt">🔴 Live</span>
@@ -154,10 +242,9 @@ function onSupabaseError(){
                 <option value="3">Élevé</option>
               </select>
             </div>
-            <button type="button" class="section-toggle collapsed" id="planningToggle" aria-label="Ouvrir ou fermer le planning de la semaine" aria-controls="planningBody" aria-expanded="false" onclick="toggleSection('planningBody','planningToggle')">▾</button>
           </div>
         </div>
-        <div class="section-body collapsed" id="planningBody" aria-hidden="true" inert style="max-height:0">
+        <div class="section-body">
           <div id="planningContainer" style="padding-top:14px">
             <div class="planning-empty">Aucun planning cette semaine pour l'instant…</div>
           </div>
@@ -166,15 +253,8 @@ function onSupabaseError(){
   </div>
 
     <!-- HISTORIQUE DES TIRAGES -->
-    <div class="section" id="secHist">
-      <div class="section-header">
-        <div class="section-header-left" data-section-toggle role="button" tabindex="0" aria-controls="historySection" aria-expanded="false" onclick="toggleSection('historySection','historyToggle')">
-          <span class="section-title">Historique des tirages</span>
-        </div>
-        <button type="button" class="section-toggle collapsed" id="historyToggle" aria-label="Ouvrir ou fermer l’historique des tirages" aria-controls="historySection" aria-expanded="false"
-              onclick="toggleSection('historySection','historyToggle')">▾</button>
-      </div>
-      <div class="section-body collapsed" id="historySection" aria-hidden="true" inert style="max-height:0">
+    <div class="section" id="secHist" role="tabpanel" aria-labelledby="drawHistoryTab" tabindex="0">
+      <div class="section-body">
         <div class="hist-list" id="histList" style="margin-top:6px">
           <span class="empty">Chargement…</span>
         </div>
@@ -182,15 +262,8 @@ function onSupabaseError(){
      </div>
 
     <!-- PARTICIPANTS -->
-    <div class="section" id="sectionParticipants">
-      <div class="section-header">
-        <div class="section-header-left" data-section-toggle role="button" tabindex="0" aria-controls="participantsSection" aria-expanded="false" onclick="toggleSection('participantsSection','participantsToggle')">
-          <span class="section-title">Participants</span>
-        </div>
-        <button type="button" class="section-toggle collapsed" id="participantsToggle" aria-label="Ouvrir ou fermer les participants" aria-controls="participantsSection" aria-expanded="false"
-              onclick="toggleSection('participantsSection','participantsToggle')">▾</button>
-      </div>
-      <div class="section-body collapsed" id="participantsSection" aria-hidden="true" inert style="max-height:0">
+    <div class="section" id="sectionParticipants" role="tabpanel" aria-labelledby="participantsTab" tabindex="0">
+      <div class="section-body">
         <div class="add-row" style="margin-top:6px">
           <input type="text" id="nameInput" placeholder="Ajouter un nom…"/>
           <button class="btn btn-primary" id="addBtn" onclick="addName()">Ajouter</button>
@@ -238,15 +311,8 @@ function onSupabaseError(){
     </div>
 
         <!-- STATISTIQUES -->
-        <div class="section" id="sectionStats">
-          <div class="section-header">
-            <div class="section-header-left" data-section-toggle role="button" tabindex="0" aria-controls="statsSection" aria-expanded="false" onclick="toggleSection('statsSection','statsToggle')">
-              <span class="section-title">📊 Statistiques</span>
-            </div>
-            <button type="button" class="section-toggle collapsed" id="statsToggle" aria-label="Ouvrir ou fermer les statistiques" aria-controls="statsSection" aria-expanded="false"
-                  onclick="toggleSection('statsSection','statsToggle')">▾</button>
-          </div>
-          <div class="section-body collapsed" id="statsSection" aria-hidden="true" inert style="max-height:0">
+        <div class="section" id="sectionStats" role="tabpanel" aria-labelledby="statsTab" tabindex="0">
+          <div class="section-body">
             <div style="margin-top:8px;margin-bottom:1rem">
               <div class="stats-global" id="statsGlobal"></div>
               <div class="stats-view-tabs">
@@ -291,14 +357,8 @@ function onSupabaseError(){
         </div>
 
     <!-- BATAILLE DU CANYON -->
-    <div class="section" id="secCanyon">
-      <div class="section-header">
-        <div class="section-header-left" data-section-toggle role="button" tabindex="0" aria-controls="canyonBody" aria-expanded="false" onclick="toggleSection('canyonBody','canyonToggle')">
-          <span class="section-title">🏜️ Bataille du Canyon</span>
-        </div>
-        <button type="button" class="section-toggle collapsed" id="canyonToggle" aria-label="Ouvrir ou fermer la bataille du Canyon" aria-controls="canyonBody" aria-expanded="false" onclick="toggleSection('canyonBody','canyonToggle')">▾</button>
-      </div>
-      <div class="section-body collapsed" id="canyonBody" aria-hidden="true" inert style="max-height:0">
+    <div class="section" id="secCanyon" role="tabpanel" aria-labelledby="canyonTab" tabindex="0">
+      <div class="section-body">
         <div style="margin-top:10px;margin-bottom:1.5rem">
           <div class="ev-active-banner" id="canyonActiveBanner">
             <span>🏜️</span>
@@ -348,15 +408,8 @@ function onSupabaseError(){
     </div>
 
     <!-- ÉVÉNEMENTS -->
-    <div class="section" id="secEvents">
-      <div class="section-header">
-        <div class="section-header-left" data-section-toggle role="button" tabindex="0" aria-controls="eventsSection" aria-expanded="false" onclick="toggleSection('eventsSection','eventsToggle')">
-          <span class="section-title">⚔️ Tempête du désert</span>
-        </div>
-        <button type="button" class="section-toggle collapsed" id="eventsToggle" aria-label="Ouvrir ou fermer la Tempête du désert" aria-controls="eventsSection" aria-expanded="false"
-              onclick="toggleSection('eventsSection','eventsToggle')">▾</button>
-      </div>
-      <div class="section-body collapsed" id="eventsSection" aria-hidden="true" inert style="max-height:0">
+    <div class="section" id="secEvents" role="tabpanel" aria-labelledby="desertStormTab" tabindex="0">
+      <div class="section-body">
         <div style="margin-top:10px;margin-bottom:1.5rem">
           <div class="poll-ev-banner" id="pollEvBanner" style="display:none">
             <span class="poll-ev-title">📊 Sondage TDD</span>
@@ -431,9 +484,8 @@ function onSupabaseError(){
 
     <!-- HISTORIQUE DES SEMAINES -->
 <!-- V17.6 : mouvements inter-saisons -->
-<section class="section" id="secMovements" style="display:none">
- <div class="section-header" data-section-toggle role="button" tabindex="0" aria-controls="movementsBody" aria-expanded="false" onclick="toggleSection('movementsBody','movementsToggle')" style="cursor:pointer"><div class="section-header-left"><span class="section-title">🤝 Recrutements & Départs · Staff</span></div><span class="section-toggle collapsed" id="movementsToggle" aria-hidden="true">▾</span></div>
- <div class="section-body collapsed" id="movementsBody" aria-hidden="true" inert style="max-height:0">
+<section class="section" id="secMovements" style="display:none" role="tabpanel" aria-labelledby="movementsTab" tabindex="0">
+<div class="section-body" id="movementsBody">
   <p class="mv-note">🔒 Réservé au staff. Les recrutements n'ajoutent jamais automatiquement un participant ; les départs ne suppriment jamais un joueur. Sauvegarde partagée via Supabase.</p>
   <div class="mv-grid"><input type="hidden" id="mvSeason" value="Registre commun" aria-hidden="true"><div class="mv-panel"><strong id="mvIn">0</strong><p class="mv-note">Recrutements confirmés</p></div><div class="mv-panel"><strong id="mvOut">0</strong><p class="mv-note">Départs confirmés</p></div><div class="mv-panel"><strong id="mvBalance">0</strong><p class="mv-note">Solde des mouvements confirmés</p></div></div><div class="mv-grid" style="margin-top:12px"><div class="mv-panel"><strong id="mvT1In">—</strong><p class="mv-note">⚡ Puissance T1 entrante</p></div><div class="mv-panel"><strong id="mvT1Out">—</strong><p class="mv-note">⚡ Puissance T1 sortante</p></div><div class="mv-panel"><strong id="mvT1Diff">—</strong><p class="mv-note">⚖️ Différence T1 (entrées − sorties)</p></div></div><p class="mv-note" id="mvT1Coverage">Puissance T1 des recrutements et départs confirmés uniquement.</p>
   <div id="mvSync" class="mv-note">Connexion en attente…</div>
@@ -444,12 +496,8 @@ function onSupabaseError(){
  </div>
 </section>
   <!-- V17 : récompenses saison, réservé au staff -->
-  <div class="section" id="secRewards" style="display:none">
-    <div class="section-header" data-section-toggle role="button" tabindex="0" aria-controls="rewardsBody" aria-expanded="false" onclick="toggleSection('rewardsBody','rewardsToggle')" style="cursor:pointer">
-      <div class="section-header-left"><span class="section-title">🏆 Récompenses de saison · Staff</span></div>
-      <span class="section-toggle collapsed" id="rewardsToggle" aria-hidden="true">▾</span>
-    </div>
-    <div class="section-body collapsed" id="rewardsBody" aria-hidden="true" inert style="max-height:0">
+  <div class="section" id="secRewards" style="display:none" role="tabpanel" aria-labelledby="rewardsTab" tabindex="0">
+    <div class="section-body" id="rewardsBody">
       <p class="rw-note">🔒 Espace staff — saisie partagée via Supabase. Les modifications sont synchronisées entre les membres du staff connectés. Les captures d’écran ne sont pas reconnues automatiquement.</p>
       <div class="rw-grid">
         <div class="rw-panel"><label for="rwSeason">Saison</label><input id="rwSeason" placeholder="Ex. Saison 5" onchange="rwSave()"></div>
@@ -461,15 +509,8 @@ function onSupabaseError(){
       <div class="rw-panel" style="margin-top:12px"><div class="rw-actions"><button class="btn btn-primary" onclick="rwRender()">🧮 Calculer la distribution</button><button class="btn" onclick="rwExport()">📤 Export CSV</button><button class="btn" onclick="rwExportBackup()">💾 Sauvegarde JSON</button><button class="btn" onclick="document.getElementById('rwBackupFile').click()">📂 Restaurer JSON</button><input id="rwBackupFile" type="file" accept=".json" style="display:none" onchange="rwRestoreBackup(this)"></div><div id="rwSummary" class="rw-note"></div><div style="overflow-x:auto"><table class="rw-table"><thead><tr><th>Rang</th><th>Pseudo</th><th>Score /100</th><th>Présences</th><th>Attribution</th><th>Correction staff</th></tr></thead><tbody id="rwRows"></tbody></table></div></div>
     </div>
   </div>
-    <div class="section" id="secArchive">
-      <div class="section-header">
-        <div class="section-header-left" data-section-toggle role="button" tabindex="0" aria-controls="archiveSection" aria-expanded="false" onclick="toggleSection('archiveSection','archiveToggle')">
-          <span class="section-title">📅 Historique des semaines</span>
-        </div>
-        <button type="button" class="section-toggle collapsed" id="archiveToggle" aria-label="Ouvrir ou fermer l’historique des semaines" aria-controls="archiveSection" aria-expanded="false"
-              onclick="toggleSection('archiveSection','archiveToggle')">▾</button>
-      </div>
-      <div class="section-body collapsed" id="archiveSection" aria-hidden="true" inert style="max-height:0">
+    <div class="section" id="secArchive" role="tabpanel" aria-labelledby="archiveHistoryTab" tabindex="0">
+      <div class="section-body" id="archiveSection">
         <div style="margin-top:10px;margin-bottom:1.5rem">
           <div id="archiveList">
             <span class="empty">Chargement…</span>
@@ -478,15 +519,11 @@ function onSupabaseError(){
       </div>
 
     </div>
-    <div class="section" id="aboutSection" style="display:none">
-      <div class="section-header">
-        <div class="section-header-left" data-section-toggle role="button" tabindex="0" aria-controls="aboutBody" aria-expanded="false" onclick="toggleSection('aboutBody','aboutToggle')">
-          <span class="section-title">À propos</span>
-        </div>
-        <button type="button" class="section-toggle collapsed" id="aboutToggle" aria-label="Ouvrir ou fermer la section À propos" aria-controls="aboutBody" aria-expanded="false"
-              onclick="toggleSection('aboutBody','aboutToggle')">▾</button>
-      </div>
-      <div class="section-body collapsed" id="aboutBody" aria-hidden="true" inert style="max-height:0">
+    <div class="dashboard-subnav" data-dashboard-tabs="about" role="tablist" aria-label="Rubrique À propos" hidden>
+      <button type="button" class="dashboard-subnav-btn active" id="aboutTab" role="tab" aria-selected="true" aria-controls="aboutSection" tabindex="0" data-dashboard-tab="aboutSection" onclick="setDashboardTab('about','aboutSection')">ℹ️ À propos</button>
+    </div>
+    <div class="section" id="aboutSection" style="display:none" role="tabpanel" aria-labelledby="aboutTab" tabindex="0">
+      <div class="section-body" id="aboutBody">
         <div class="about-box" style="margin-top:6px;margin-bottom:1rem">
           <h3>🚂 Tirage au sort — Gestion de guilde</h3>
           <p>Application de gestion des tirages au sort, du suivi des coffres et de la composition des équipes.</p>
@@ -666,67 +703,6 @@ function onSupabaseError(){
       <div class="poll-confirm-msg">Puissance enregistrée !</div>
       <p id="t1SuccessText" class="t1-help"></p>
       <p class="t1-help">Ta déclaration est verrouillée. Contacte le staff pour toute correction.</p>
-    </div>
-  </div>
-</div>
-<div id="t1StaffModal" onclick="if(event.target===this)this.style.display='none'">
-  <div class="t1-staff-card">
-    <h3>⚡ Recensement T1</h3>
-    <p id="t1StaffRoundInfo" class="t1-help"></p><button class="btn btn-primary" onclick="t1StaffNewRound()">➕ Lancer un nouveau recensement</button> <button class="btn" onclick="t1StaffCloseRound()">🔒 Clôturer le recensement</button><div id="t1CorrectionsPanel" style="margin:16px 0;padding:14px;border:1px solid var(--border2);border-radius:12px">
-      <div style="font-size:12px;font-weight:800">🛡️ Corriger les déclarations (staff/admin)</div>
-      <p style="font-size:11px;color:var(--text3);margin:8px 0">Le mot de passe choisi à l’ouverture du sondage est demandé pour chaque correction.</p>
-      <div id="t1StaffList" style="max-height:250px;overflow-y:auto;overflow-x:hidden"></div>
-    </div>
-    <p class="t1-help">Partage ce lien avec toute l'alliance. Les corrections sont réservées au staff/admin.</p>
-    <input id="t1ShareLink" class="t1-field" readonly>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 18px">
-      <button class="btn btn-primary" onclick="copyT1Link()">📋 Copier le lien</button>
-      <button class="btn" onclick="window.open(t1Url(),'_blank')">↗ Ouvrir</button>
-      <button class="btn" onclick="document.getElementById('t1StaffModal').style.display='none'">Fermer</button>
-    </div>
-
-  </div>
-</div>
-
-<!-- MODAL DE GESTION DU SONDAGE TDD -->
-<div id="pollModal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px">
-  <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-xl);padding:24px;max-width:400px;width:100%;box-shadow:var(--shadow-lg)">
-    <div style="font-family:var(--font-display,inherit);font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px">📊 Sondage TDD</div>
-    <div style="margin:12px 0"><button class="btn btn-primary" onclick="availabilityStaffAction('tdd','open')">➕ Nouvelle session TDD</button> <button class="btn" onclick="availabilityStaffAction('tdd','close')">🔒 Clôturer</button><div id="tddSessionStaff"></div></div>
-    <div id="pollStaffPanel" style="margin-bottom:16px;padding:14px;border:1px solid var(--border2);border-radius:12px">
-      <div style="font-size:12px;font-weight:800;margin-bottom:8px">🛡️ Corriger les votes (staff/admin)</div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Le mot de passe choisi à l’ouverture du sondage est demandé pour chaque correction. « Non répondu » libère le pseudo.</div>
-      <div style="max-height:260px;overflow-y:auto"><table id="pollStaffTable" style="width:100%"><tbody></tbody></table></div>
-    </div>
-    <div style="font-size:12px;color:var(--text3);margin-bottom:16px;line-height:1.6">Partage ce lien à tes membres. Ils pourront répondre sans se connecter.</div>
-    <div style="display:flex;gap:8px;margin-bottom:16px">
-      <input id="pollLinkInput" readonly style="flex:1;height:38px;padding:0 12px;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:var(--radius-lg);color:var(--blue);font-family:var(--font-mono,monospace);font-size:12px;outline:none" value="">
-      <button class="btn btn-primary" style="height:38px;white-space:nowrap" onclick="copyPollLinkModal()">📋 Copier</button>
-    </div>
-    <div style="display:flex;gap:8px;margin-bottom:16px">
-      <button class="btn" style="flex:1;height:36px;font-size:12px" onclick="window.open(document.getElementById('pollLinkInput').value,'_blank')">↗ Ouvrir</button>
-      <button class="btn" style="flex:1;height:36px;font-size:12px" onclick="closePollModal()">Fermer</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ SONDAGE CANYON ══ -->
-<div id="canyonPollModal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.style.display='none'">
-  <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:16px;padding:24px;width:100%;max-width:430px;max-height:90vh;overflow-y:auto">
-    <h3>🏜️ Sondage Bataille du Canyon</h3>
-    <div style="margin-top:12px"><button class="btn btn-primary" onclick="availabilityStaffAction('canyon','open')">➕ Nouvelle session Canyon</button> <button class="btn" onclick="availabilityStaffAction('canyon','close')">🔒 Clôturer</button><div id="canyonSessionStaff"></div></div>
-          <div id="canyonPollStaffPanel" style="display:none;margin-bottom:16px;padding:14px;border:1px solid var(--border2);border-radius:12px">
-            <strong>🛡️ Corriger les votes (staff/admin)</strong>
-            <p style="font-size:11px;color:var(--text3);margin:8px 0">Le mot de passe choisi à l’ouverture du sondage est demandé pour chaque correction. « Non répondu » libère le pseudo.</p>
-            <div style="max-height:250px;overflow:auto"><table id="canyonPollStaffTable" style="width:100%"><tbody></tbody></table></div>
-          </div>
-
-    <p style="font-size:12px;color:var(--text2);margin:10px 0">Partage ce lien unique aux membres de l'alliance.</p>
-    <input id="canyonPollLink" readonly style="width:100%;padding:10px;background:var(--surface);color:var(--text);border:1px solid var(--border2);border-radius:8px">
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <button class="btn btn-primary" onclick="copyCanyonPollLink()">📋 Copier</button>
-      <button class="btn" onclick="window.open(canyonPollUrl(),'_blank')">↗ Ouvrir</button>
-      <button class="btn" onclick="document.getElementById('canyonPollModal').style.display='none'">Fermer</button>
     </div>
   </div>
 </div>

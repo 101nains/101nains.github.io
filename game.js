@@ -1423,6 +1423,7 @@ async function _loadAllImpl(){
     renderArchiveList();
     await loadTddNonRetenus();
     await loadTddFairStats();
+    await loadCanyonNonRetenus();
     evRoles={};
     if(erData){
       erData.forEach(r=>{evRoles[r.player_id]=r.role;});
@@ -3418,6 +3419,9 @@ async function recalcDrawStats(){
 
 let canyonNbTeams = 1;
 let canyonRoles   = {};   // {playerId: 'starter'|'sub'|'none'}
+let canyonElPriority=true;
+let canyonNonRetenus={};
+let canyonNonRetenusWeek='';
 // Les votes du sondage alimentent directement la présélection Canyon.
 // Ne modifie jamais les équipes déjà équilibrées (canyonTeams).
 // Sauvegarde de la présélection au moment de la clôture, partagée entre appareils.
@@ -3442,6 +3446,101 @@ function syncCanyonRolesFromPoll(){
   }
 }
 
+async function loadCanyonNonRetenus(){
+  if(!sb)return;
+  try{
+    const {data,error}=await sb.from('app_config').select('value').eq('key',CANYON_NON_RETENUS_CONFIG_KEY).maybeSingle();
+    if(error)throw error;
+    if(data?.value){
+      canyonNonRetenus=data.value.counts||{};
+      canyonNonRetenusWeek=data.value.week||'';
+    }
+    renderCanyonNonRetenus();
+  }catch(error){console.warn('Rotation Canyon non chargée :',error.message);}
+}
+
+async function saveCanyonNonRetenus(){
+  if(!sb)throw new Error('Supabase indisponible');
+  const {error}=await sb.from('app_config').upsert({
+    key:CANYON_NON_RETENUS_CONFIG_KEY,
+    value:{counts:canyonNonRetenus,week:canyonNonRetenusWeek},
+    updated_at:new Date().toISOString()
+  });
+  if(error)throw error;
+}
+
+function renderCanyonNonRetenus(){
+  const summary=document.getElementById('canyonRotationSummary');
+  const list=document.getElementById('canyonRotationList');
+  if(!summary||!list)return;
+  const entries=Object.entries(canyonNonRetenus)
+    .map(([id,count])=>({player:participants.find(p=>String(p.id)===String(id)),count:Number(count)||0}))
+    .filter(entry=>entry.player&&entry.count>0)
+    .sort((a,b)=>b.count-a.count||a.player.name.localeCompare(b.player.name,'fr'));
+  summary.textContent=entries.length
+    ?`🔄 Rotation : ${entries.length} joueur${entries.length>1?'s':''} à rattraper`
+    :'🔄 Rotation : aucun joueur en attente';
+  list.innerHTML=entries.length
+    ?`<div style="padding:8px 12px;border:1px solid rgba(255,184,77,0.2);background:rgba(255,184,77,0.05);border-radius:var(--radius-lg);font-size:11px;color:var(--text3)"><strong style="color:var(--amber)">🔄 Rotation des non-retenus</strong> — ils seront prioritaires à la prochaine répartition.<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">${entries.map(entry=>`<span style="padding:3px 7px;border:1px solid var(--border2);border-radius:99px;color:var(--text)">${escapeHtml(entry.player.name)} <b style="color:var(--amber)">×${entry.count}</b></span>`).join('')}</div></div>`
+    :'';
+}
+
+function sortCanyonPlayers(players){
+  return [...players].sort((a,b)=>{
+    const aMissed=Number(canyonNonRetenus[a.id]||0);
+    const bMissed=Number(canyonNonRetenus[b.id]||0);
+    if(aMissed!==bMissed)return bMissed-aMissed;
+    return (b.power_t1||0)-(a.power_t1||0)||a.name.localeCompare(b.name,'fr');
+  });
+}
+
+function selectCanyonRoster(availableStarters,availableSubs,maxStarters,maxSubs){
+  const rankedStarters=sortCanyonPlayers(availableStarters);
+  const rankedSubs=sortCanyonPlayers(availableSubs);
+  const selectedStarters=rankedStarters.slice(0,maxStarters);
+  const overflowStarters=rankedStarters.slice(maxStarters);
+  const subsAsStarters=rankedSubs.slice(0,Math.max(0,maxStarters-selectedStarters.length));
+  const starterPool=[...selectedStarters,...subsAsStarters];
+  const subPool=[...overflowStarters,...rankedSubs.slice(subsAsStarters.length)].slice(0,maxSubs);
+  return {starterPool,subPool,overflowStarters,subsAsStarters};
+}
+
+async function recordCanyonNonRetenus(registeredIds,placedIds){
+  if(!sb)return null;
+  const excluded=registeredIds.filter(id=>!placedIds.has(id));
+  const week=getTddWeekKey();
+  if(canyonNonRetenusWeek===week)return null;
+  const counts={...canyonNonRetenus};
+  excluded.forEach(id=>{counts[id]=Number(counts[id]||0)+1;});
+  const {error}=await sb.from('app_config').upsert({
+    key:CANYON_NON_RETENUS_CONFIG_KEY,
+    value:{counts,week},
+    updated_at:new Date().toISOString()
+  });
+  if(error)throw error;
+  canyonNonRetenus=counts;
+  canyonNonRetenusWeek=week;
+  renderCanyonNonRetenus();
+  return excluded.length;
+}
+
+async function resetCanyonNonRetenus(){
+  if(!confirm('Réinitialiser complètement la rotation des joueurs Canyon non retenus ?'))return;
+  const previousCounts=canyonNonRetenus;
+  const previousWeek=canyonNonRetenusWeek;
+  canyonNonRetenus={};
+  canyonNonRetenusWeek='';
+  try{
+    await saveCanyonNonRetenus();
+    renderCanyonNonRetenus();
+    toast('♻️ Rotation Canyon réinitialisée');
+  }catch(error){
+    canyonNonRetenus=previousCounts;
+    canyonNonRetenusWeek=previousWeek;
+    alert('Réinitialisation de la rotation impossible : '+error.message);
+  }
+}
+
 let canyonTeams   = null; // {A: {starters: [...], subs: [...]}, B: {...}|null}
 
 function setCanyonNbTeams(n){
@@ -3451,6 +3550,21 @@ function setCanyonNbTeams(n){
   canyonTeams = null;
   renderCanyonTeams();
   updateCanyonSelectionSummary();
+}
+
+function updateCanyonElPriorityUi(){
+  const btn=document.getElementById('canyonElPriorityBtn');
+  const thumb=document.getElementById('canyonElPriorityThumb');
+  if(btn)btn.style.background=canyonElPriority?'var(--amber)':'var(--border2)';
+  if(thumb)thumb.style.transform=canyonElPriority?'translateX(18px)':'translateX(0px)';
+}
+
+function toggleCanyonElPriority(){
+  canyonElPriority=!canyonElPriority;
+  updateCanyonElPriorityUi();
+  toast(canyonElPriority
+    ?'⚡ EL priorité ON — les 5 plus forts seront placés en Électron libre au prochain équilibrage'
+    :'EL priorité OFF — les quatre zones seront équilibrées par puissance');
 }
 
 function updateCanyonSelectionSummary(){
@@ -3562,18 +3676,25 @@ async function canyonSelectAll(role){
 
 function splitCanyonBalanced(players){
   // Répartition serpentine par puissance décroissante
-  const sorted = [...players].sort((a,b)=>(b.power_t1||0)-(a.power_t1||0));
+  const sorted = [...players].sort((a,b)=>(b.power_t1||0)-(a.power_t1||0)||a.name.localeCompare(b.name,'fr'));
   const A=[], B=[];
   sorted.forEach((p,i)=>{ if(i%2===0)A.push(p); else B.push(p); });
   return [A,B];
 }
 
-function distributeCanyonZones(players){
+function distributeCanyonZones(players,elPriority=canyonElPriority){
   const zones=Object.fromEntries(CANYON_ZONES.map(zone=>[zone.key,[]]));
   const powers=Object.fromEntries(CANYON_ZONES.map(zone=>[zone.key,0]));
-  const sorted=[...players].sort((a,b)=>(b.power_t1||0)-(a.power_t1||0)||a.name.localeCompare(b.name,'fr'));
-  sorted.forEach(player=>{
-    const zone=CANYON_ZONES
+  const remaining=[...players].sort((a,b)=>(b.power_t1||0)-(a.power_t1||0)||a.name.localeCompare(b.name,'fr'));
+  const freeZone=elPriority?CANYON_ZONES.find(zone=>zone.key==='free'):null;
+  if(freeZone){
+    const freePlayers=remaining.splice(0,CANYON_ZONE_CAPACITY);
+    zones[freeZone.key]=freePlayers;
+    powers[freeZone.key]=freePlayers.reduce((sum,player)=>sum+(player.power_t1||0),0);
+  }
+  const distributionZones=CANYON_ZONES.filter(zone=>!freeZone||zone.key!==freeZone.key);
+  remaining.forEach(player=>{
+    const zone=distributionZones
       .filter(({key})=>zones[key].length<CANYON_ZONE_CAPACITY)
       .sort((a,b)=>powers[a.key]-powers[b.key]||zones[a.key].length-zones[b.key].length)[0];
     if(zone){
@@ -3585,15 +3706,15 @@ function distributeCanyonZones(players){
 }
 
 async function balanceCanyonTeams(){
-  const selectedStarters = participants.filter(p=>canyonRoles[p.id]==='starter');
-  const selectedSubs = participants.filter(p=>canyonRoles[p.id]==='sub');
+  const availableStarters = participants.filter(p=>canyonRoles[p.id]==='starter');
+  const availableSubs = participants.filter(p=>canyonRoles[p.id]==='sub');
   const maxStarters = CANYON_STARTERS_PER_TEAM * canyonNbTeams;
   const maxSubs = CANYON_SUBS_PER_TEAM * canyonNbTeams;
-  if(!selectedStarters.length){ toast('Sélectionne au moins un titulaire'); return; }
-  if(selectedStarters.length>maxStarters){ toast(`⚠️ Trop de titulaires : ${selectedStarters.length}/${maxStarters}`); return; }
-  if(selectedSubs.length>maxSubs){ toast(`⚠️ Trop de remplaçants : ${selectedSubs.length}/${maxSubs}`); return; }
+  if(!availableStarters.length&&!availableSubs.length){ toast('Sélectionne au moins un joueur'); return; }
 
-  const starterGroups = canyonNbTeams===1 ? [selectedStarters] : splitCanyonBalanced(selectedStarters);
+  const {starterPool,subPool:selectedSubs}=selectCanyonRoster(availableStarters,availableSubs,maxStarters,maxSubs);
+
+  const starterGroups = canyonNbTeams===1 ? [starterPool] : splitCanyonBalanced(starterPool);
   const subGroups = canyonNbTeams===1 ? [selectedSubs] : splitCanyonBalanced(selectedSubs);
   const AStarters=starterGroups[0]||[];
   const A = {starters:AStarters, zones:distributeCanyonZones(AStarters), subs:subGroups[0]||[]};
@@ -3604,11 +3725,23 @@ async function balanceCanyonTeams(){
   const fmtPow = v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'k':v;
   const totalA = [...A.starters,...A.subs];
   const totalB = B ? [...B.starters,...B.subs] : [];
-  toast(`⚖️ A : ${A.starters.length} tit. + ${A.subs.length} rem. (${fmtPow(totalA.reduce((s,p)=>s+(p.power_t1||0),0))})${B?` · B : ${B.starters.length} tit. + ${B.subs.length} rem. (${fmtPow(totalB.reduce((s,p)=>s+(p.power_t1||0),0))})`:''}`);
+  const registeredIds=[...availableStarters,...availableSubs].map(p=>p.id);
+  const placedIds=new Set([...A.starters,...A.subs,...(B?[...B.starters,...B.subs]:[])].map(p=>p.id));
+  const starterIds=new Set(availableStarters.map(p=>p.id));
+  const subIds=new Set(availableSubs.map(p=>p.id));
+  const startersMovedToSubs=selectedSubs.filter(p=>starterIds.has(p.id)).length;
+  const subsMovedToStarters=starterPool.filter(p=>subIds.has(p.id)).length;
+  const summary=`⚖️ A : ${A.starters.length} tit. + ${A.subs.length} rem. (${fmtPow(totalA.reduce((s,p)=>s+(p.power_t1||0),0))})${B?` · B : ${B.starters.length} tit. + ${B.subs.length} rem. (${fmtPow(totalB.reduce((s,p)=>s+(p.power_t1||0),0))})`:''}${startersMovedToSubs?` · ${startersMovedToSubs} titulaire(s) reporté(s) en remplaçant`:''}${subsMovedToStarters?` · ${subsMovedToStarters} remplaçant(s) utilisé(s) comme titulaire(s)`:''}`;
 
   renderCanyonTeams();
   try{await saveCanyonTeamsToDB();}
-  catch(error){toast('Équipes affichées, mais sauvegarde impossible : '+error.message);}
+  catch(error){toast('Équipes affichées, mais sauvegarde impossible : '+error.message);return;}
+  try{
+    const excluded=await recordCanyonNonRetenus(registeredIds,placedIds);
+    toast(`${summary}${excluded?` · 🔄 ${excluded} joueur${excluded>1?'s':''} non retenu${excluded>1?'s':''} enregistré${excluded>1?'s':''} pour la rotation`:''}`);
+  }catch(error){
+    toast(`${summary} · Équipes sauvegardées, mais rotation non enregistrée : ${error.message}`);
+  }
 }
 
 async function saveCanyonTeamsToDB(){

@@ -8,6 +8,7 @@ const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 const ALLIANCE_NAME_KEY='alliance_display_name';
 
 const TDD_NON_RETENUS_CONFIG_KEY = 'tdd_non_retenus';   // mode asymétrique (grosse équipe A + petite équipe B)
+const CANYON_NON_RETENUS_CONFIG_KEY = 'canyon_non_retenus';
 let _evSaving=false;    // true pendant saveEvTeamsToDB pour ignorer le realtime
 let evAsymSizeA=25;     // nombre de joueurs dans la grosse équipe A
 let evElPriority=true; // les joueurs les plus forts vont en Électrons libres en premier

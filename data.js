@@ -30,6 +30,7 @@ const PERM_SECTIONS=[
   {id:'secHist',        label:'Historique',    icon:'📋'},
   {id:'sectionParticipants', label:'Participants', icon:'👥'},
   {id:'sectionStats',   label:'Statistiques',  icon:'📊'},
+  {id:'sectionPolls',   label:'Sondages',      icon:'🗳️'},
   {id:'secEvents',      label:'Événements',    icon:'⚔️'},
   {id:'secCanyon',      label:'Canyon',        icon:'🏜️'},
   {id:'secArchive',     label:'Archives',      icon:'📦'},
@@ -80,6 +81,15 @@ const POLL_LABELS = {present:'✅ Présent', remplacant:'🔄 Remplaçant', abse
 const CANYON_STARTERS_PER_TEAM = 20;
 
 const CANYON_SUBS_PER_TEAM = 10;
+
+const CANYON_ZONE_CAPACITY = 5;
+
+const CANYON_ZONES = [
+  {key:'right',label:'Droite'},
+  {key:'left',label:'Gauche'},
+  {key:'center',label:'Centrale'},
+  {key:'free',label:'Électron libre'},
+];
 
 const CATEGORIES=[
   {key:'H1',label:'H1',size:3,color:'#7c9fff',bg:'rgba(124,159,255,0.08)'},

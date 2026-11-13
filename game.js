@@ -138,15 +138,34 @@ let drawBuffer=null; // Mémoire tampon 48h post-archivage (coffres_snapshot de 
 
 let permConfig=JSON.parse(JSON.stringify(DEFAULT_PERM));
 let permTableExists=true;
+const DASHBOARD_PAGES=[
+  {id:'home',label:'Train',description:'Retrouve le planning et les tirages de la semaine.',sections:['secTirage']},
+  {id:'players',label:'Joueurs',description:'Gère les participants, leurs informations et consulte les statistiques.',sections:['sectionParticipants','sectionStats']},
+  {id:'activities',label:'Activités',description:'Prépare les équipes pour la Tempête du désert et le Canyon.',sections:['secEvents','secCanyon']},
+  {id:'polls',label:'Sondages',description:'Ouvre et gère les sondages de la Tempête du désert, du Canyon et de la puissance T1.',sections:['sectionPolls']},
+  {id:'history',label:'Historique',description:'Consulte les tirages passés et les archives des semaines.',sections:['secHist','secArchive']},
+  {id:'tools',label:'Outils',description:'Outils disponibles selon ton rôle.',sections:['secMovements','secRewards']},
+  {id:'about',label:'À propos',description:'Informations sur l’application.',sections:['aboutSection']}
+];
+let activeDashboardPage='home';
 
 function canSeeSection(secId){
   if(!currentUser)return false;
   const role=currentUser.role;
   if(secId==='secRewards'||secId==='secMovements')return role==='admin'||role==='staff';
   if(secId==='aboutSection') return role==='admin';
+  if(secId==='sectionPolls')return role==='admin'||role==='staff';
   if(role==='admin')return true;
   const p=role==='staff'?permConfig.staff:permConfig.member;
   return p[secId]!==false;
+}
+
+function updateDashboardNavLayout(){
+  const nav=document.getElementById('dashboardNav');
+  if(!nav)return;
+  const visibleCount=Array.from(nav.querySelectorAll('.dashboard-nav-btn'))
+    .filter(button=>getComputedStyle(button).display!=='none').length;
+  nav.style.setProperty('--dashboard-nav-items',String(Math.max(visibleCount,1)));
 }
 
 function applyPermissions(){
@@ -155,14 +174,61 @@ function applyPermissions(){
     const visible=canSeeSection(id);
     const sec=document.getElementById(id);
     if(sec)sec.style.display=visible?'':'none';
-    const btn=document.querySelector(`.mob-nav-btn[data-tab="${id}"]`);
-    if(btn)btn.style.display=visible?'':'none';
   });
+  DASHBOARD_PAGES.forEach(page=>{
+    const btn=document.querySelector(`.dashboard-nav-btn[data-page="${page.id}"]`);
+    if(btn)btn.style.display=page.sections.some(canSeeSection)?'':'none';
+  });
+  updateDashboardNavLayout();
+  const activePage=DASHBOARD_PAGES.find(page=>page.id===activeDashboardPage&&page.sections.some(canSeeSection))
+    ||DASHBOARD_PAGES.find(page=>page.sections.some(canSeeSection));
+  if(activePage)setDashboardPage(activePage.id);
   // Stats: render si maintenant visible et pas encore rendu
   if(canSeeSection('sectionStats')){
     const g=document.getElementById('statsGrid');
     if(g&&!g.innerHTML)renderStats();
     else if(!g)renderStats();
+  }
+}
+
+function setDashboardPage(pageId){
+  const page=DASHBOARD_PAGES.find(item=>item.id===pageId);
+  if(!page)return;
+  const visibleSections=page.sections.filter(canSeeSection);
+  if(!visibleSections.length)return;
+
+  const pageChanged=activeDashboardPage!==pageId;
+  activeDashboardPage=pageId;
+  PERM_SECTIONS.forEach(({id})=>{
+    const section=document.getElementById(id);
+    if(section)section.style.display=visibleSections.includes(id)?'':'none';
+  });
+  DASHBOARD_PAGES.forEach(item=>{
+    const button=document.querySelector(`.dashboard-nav-btn[data-page="${item.id}"]`);
+    if(button)button.style.display=item.sections.some(canSeeSection)?'':'none';
+  });
+  updateDashboardNavLayout();
+  document.querySelectorAll('.dashboard-nav-btn').forEach(button=>{
+    const active=button.dataset.page===pageId;
+    button.classList.toggle('active',active);
+    if(active)button.setAttribute('aria-current','page');
+    else button.removeAttribute('aria-current');
+  });
+  const title=document.getElementById('dashboardPageTitle');
+  const description=document.getElementById('dashboardPageDescription');
+  if(title)title.textContent=page.label;
+  if(description)description.textContent=page.description;
+
+  if(pageId==='home'){
+    if(document.getElementById('tirageBody')?.getAttribute('aria-hidden')==='true')animateSectionBody('tirageBody',true);
+    if(document.getElementById('planningBody')?.getAttribute('aria-hidden')==='true')animateSectionBody('planningBody',true);
+  }
+  if(pageChanged){
+    document.getElementById('dashboardPageTitle')?.focus({preventScroll:true});
+    document.getElementById('dashboardContent')?.scrollIntoView({
+      behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',
+      block:'start'
+    });
   }
 }
 
@@ -1059,6 +1125,7 @@ function showApp(){
   else document.getElementById('sessionInfo').textContent='· Session temporaire';
   document.getElementById('sectionParticipants').style.display=isAdminOrStaff()?'':'none';
   document.getElementById('sectionStats').style.display=isAdminOrStaff()?'':'none';
+  setDashboardPage('home');
   // aboutSection géré via canSeeSection dans PERM_SECTIONS
   rwInit();
   mvInit();
@@ -3420,6 +3487,22 @@ function splitCanyonBalanced(players){
   return [A,B];
 }
 
+function distributeCanyonZones(players){
+  const zones=Object.fromEntries(CANYON_ZONES.map(zone=>[zone.key,[]]));
+  const powers=Object.fromEntries(CANYON_ZONES.map(zone=>[zone.key,0]));
+  const sorted=[...players].sort((a,b)=>(b.power_t1||0)-(a.power_t1||0)||a.name.localeCompare(b.name,'fr'));
+  sorted.forEach(player=>{
+    const zone=CANYON_ZONES
+      .filter(({key})=>zones[key].length<CANYON_ZONE_CAPACITY)
+      .sort((a,b)=>powers[a.key]-powers[b.key]||zones[a.key].length-zones[b.key].length)[0];
+    if(zone){
+      zones[zone.key].push(player);
+      powers[zone.key]+=(player.power_t1||0);
+    }
+  });
+  return zones;
+}
+
 async function balanceCanyonTeams(){
   const selectedStarters = participants.filter(p=>canyonRoles[p.id]==='starter');
   const selectedSubs = participants.filter(p=>canyonRoles[p.id]==='sub');
@@ -3431,8 +3514,10 @@ async function balanceCanyonTeams(){
 
   const starterGroups = canyonNbTeams===1 ? [selectedStarters] : splitCanyonBalanced(selectedStarters);
   const subGroups = canyonNbTeams===1 ? [selectedSubs] : splitCanyonBalanced(selectedSubs);
-  const A = {starters: starterGroups[0]||[], subs: subGroups[0]||[]};
-  const B = canyonNbTeams===2 ? {starters: starterGroups[1]||[], subs: subGroups[1]||[]} : null;
+  const AStarters=starterGroups[0]||[];
+  const A = {starters:AStarters, zones:distributeCanyonZones(AStarters), subs:subGroups[0]||[]};
+  const BStarters=starterGroups[1]||[];
+  const B = canyonNbTeams===2 ? {starters:BStarters, zones:distributeCanyonZones(BStarters), subs:subGroups[1]||[]} : null;
   canyonTeams = {A, B};
 
   const fmtPow = v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'k':v;
@@ -3441,19 +3526,72 @@ async function balanceCanyonTeams(){
   toast(`⚖️ A : ${A.starters.length} tit. + ${A.subs.length} rem. (${fmtPow(totalA.reduce((s,p)=>s+(p.power_t1||0),0))})${B?` · B : ${B.starters.length} tit. + ${B.subs.length} rem. (${fmtPow(totalB.reduce((s,p)=>s+(p.power_t1||0),0))})`:''}`);
 
   renderCanyonTeams();
-  // Sauvegarder dans app_config
-  if(sb){
-    await sb.from('app_config').upsert({
-      key:'canyon_teams',
-      value: {
-        teams: {
-          A: {starters:A.starters.map(p=>p.id), subs:A.subs.map(p=>p.id)},
-          B: B ? {starters:B.starters.map(p=>p.id), subs:B.subs.map(p=>p.id)} : null
-        },
-        updated_at: new Date().toISOString()
-      }
-    });
+  try{await saveCanyonTeamsToDB();}
+  catch(error){toast('Équipes affichées, mais sauvegarde impossible : '+error.message);}
+}
+
+async function saveCanyonTeamsToDB(){
+  if(!sb||!canyonTeams)return;
+  const toIds=team=>team?{
+    starters:team.starters.map(p=>p.id),
+    zones:Object.fromEntries(CANYON_ZONES.map(({key})=>[key,(team.zones[key]||[]).map(p=>p.id)])),
+    subs:team.subs.map(p=>p.id)
+  }:null;
+  const {error}=await sb.from('app_config').upsert({
+    key:'canyon_teams',
+    value:{teams:{A:toIds(canyonTeams.A),B:toIds(canyonTeams.B)},updated_at:new Date().toISOString()}
+  });
+  if(error)throw error;
+}
+
+let canyonDragSrc=null;
+function canyonDragStart(event,teamKey,type,zoneKey,index){
+  canyonDragSrc={teamKey,type,zoneKey,index};
+  event.dataTransfer.effectAllowed='move';
+  const player=type==='sub'?canyonTeams[teamKey].subs[index]:canyonTeams[teamKey].zones[zoneKey][index];
+  event.dataTransfer.setData('text/plain',String(player?.id||''));
+  const draggedElement=event.currentTarget;
+  setTimeout(()=>draggedElement.classList.add('dragging-team'),0);
+}
+function canyonDragOver(event){
+  event.preventDefault();
+  event.dataTransfer.dropEffect='move';
+  event.currentTarget.classList.add('canyon-drop-over');
+}
+function canyonDragLeave(event){
+  if(!event.currentTarget.contains(event.relatedTarget))event.currentTarget.classList.remove('canyon-drop-over');
+}
+async function canyonDrop(event,toTeamKey,toType,toZoneKey){
+  event.preventDefault();
+  event.currentTarget.classList.remove('canyon-drop-over');
+  if(!canyonDragSrc||!canyonTeams)return;
+  const {teamKey:fromTeamKey,type:fromType,zoneKey:fromZoneKey,index}=canyonDragSrc;
+  const fromTeam=canyonTeams[fromTeamKey];
+  const toTeam=canyonTeams[toTeamKey];
+  if(!fromTeam||!toTeam)return;
+  const fromList=fromType==='sub'?fromTeam.subs:fromTeam.zones[fromZoneKey];
+  const toList=toType==='sub'?toTeam.subs:toTeam.zones[toZoneKey];
+  if(!fromList||!toList)return;
+  const player=fromList[index];
+  if(!player)return;
+  if(fromList!==toList&&toList.length>=(toType==='sub'?CANYON_SUBS_PER_TEAM:CANYON_ZONE_CAPACITY)){
+    toast(toType==='sub'?'Cette équipe a déjà le maximum de remplaçants':'Cette zone est pleine');
+    return;
   }
+  fromList.splice(index,1);
+  toList.push(player);
+  [fromTeam,toTeam].forEach(team=>{team.starters=CANYON_ZONES.flatMap(({key})=>team.zones[key]||[]);});
+  canyonRoles[player.id]=toType==='sub'?'sub':'starter';
+  canyonDragSrc=null;
+  renderCanyonPlayers();
+  renderCanyonTeams();
+  try{await saveCanyonTeamsToDB();}
+  catch(error){toast('Équipes affichées, mais sauvegarde impossible : '+error.message);}
+}
+function canyonDragEnd(){
+  canyonDragSrc=null;
+  document.querySelectorAll('.canyon-team-player').forEach(el=>el.classList.remove('dragging-team'));
+  document.querySelectorAll('.canyon-drop-over').forEach(el=>el.classList.remove('canyon-drop-over'));
 }
 
 function renderCanyonTeams(){
@@ -3463,39 +3601,54 @@ function renderCanyonTeams(){
   if(!canyonTeams){ result.innerHTML=''; if(copyBtn)copyBtn.style.display='none'; return; }
   if(copyBtn) copyBtn.style.display='';
 
-  const renderPlayers = (players, role, title) => {
-    if(!players.length) return '';
-    const rowCls = role==='starter' ? 'role-starter' : 'role-sub';
+  const renderPlayers = (players, role, title,teamKey) => {
     const titleCls = role==='starter' ? 'canyon-result-title starter' : 'canyon-result-title sub';
+    const type=role==='starter'?'starter':'sub';
     return `<div class="canyon-result-group">
       <div class="${titleCls}">${title} <span>(${players.length})</span></div>
-      ${players.map((p,i)=>`<div class="ev-team-player">
+      <div class="canyon-drop-target" ondragover="canyonDragOver(event)" ondragleave="canyonDragLeave(event)" ondrop="canyonDrop(event,'${teamKey}','${type}','')">
+      ${players.length?players.map((p,i)=>`<div class="ev-team-player canyon-team-player" draggable="true" ondragstart="canyonDragStart(event,'${teamKey}','${type}','',${i})" ondragend="canyonDragEnd()">
         <span class="ev-pnum">${i+1}</span>
-        <span class="ev-pname">${p.name}</span>
-      </div>`).join('')}
+        <span class="ev-pname">${escapeHtml(p.name)}</span><span class="canyon-drag-handle" aria-hidden="true">⠿</span>
+      </div>`).join(''):'<div class="canyon-zone-empty">Déposer ici</div>'}
+      </div>
     </div>`;
   };
 
-  const renderTeam = (team, label, headerCls) => {
+  const renderTeam = (team, teamKey,label, headerCls) => {
     if(!team) return '';
     const starters = Array.isArray(team) ? team : (team.starters||[]);
     const subs = Array.isArray(team) ? [] : (team.subs||[]);
+    const zones=Array.isArray(team)?distributeCanyonZones(starters):(team.zones||distributeCanyonZones(starters));
+    const zonesHtml=CANYON_ZONES.map(zone=>{
+      const players=zones[zone.key]||[];
+      return `<div class="canyon-result-group canyon-zone-group">
+        <div class="canyon-result-title zone">${zone.label} <span>(${players.length}/${CANYON_ZONE_CAPACITY})</span></div>
+        <div class="canyon-drop-target" ondragover="canyonDragOver(event)" ondragleave="canyonDragLeave(event)" ondrop="canyonDrop(event,'${teamKey}','starter','${zone.key}')">
+        ${players.length?players.map((p,i)=>`<div class="ev-team-player canyon-team-player" draggable="true" ondragstart="canyonDragStart(event,'${teamKey}','starter','${zone.key}',${i})" ondragend="canyonDragEnd()">
+          <span class="ev-pnum">${i+1}</span>
+          <span class="ev-pname">${escapeHtml(p.name)}</span><span class="canyon-drag-handle" aria-hidden="true">⠿</span>
+        </div>`).join(''):'<div class="canyon-zone-empty">Déposer ici</div>'}
+        </div>
+      </div>`;
+    }).join('');
     return `<div class="ev-team-card">
       <div class="ev-team-header ${headerCls}">
         <span class="ev-team-title ${headerCls}">⚔️ ${label}</span>
         <span class="ev-team-power">${starters.length}/${CANYON_STARTERS_PER_TEAM} tit. · ${subs.length}/${CANYON_SUBS_PER_TEAM} rempl.</span>
       </div>
       <div class="canyon-team-body">
-        ${renderPlayers(starters,'starter','Titulaires')}
-        ${renderPlayers(subs,'sub','Remplaçants')}
+        ${zonesHtml}
+        ${renderPlayers(subs,'sub','Remplaçants',teamKey)}
       </div>
       <button class="ev-copy-btn" onclick="copyCanyonText()">📋 Copier ${label}</button>
     </div>`;
   };
 
-  result.innerHTML = `<div class="ev-teams-grid${canyonTeams.B?' two':''}">
-    ${renderTeam(canyonTeams.A,'Équipe A','teamA')}
-    ${canyonTeams.B?renderTeam(canyonTeams.B,'Équipe B','teamB'):''}
+  result.innerHTML = `<div class="canyon-drag-hint">⠿ Glissez un joueur vers une autre zone, une autre équipe ou les remplaçants.</div>
+  <div class="ev-teams-grid${canyonTeams.B?' two':''}">
+    ${renderTeam(canyonTeams.A,'A','Équipe A','teamA')}
+    ${canyonTeams.B?renderTeam(canyonTeams.B,'B','Équipe B','teamB'):''}
   </div>`;
 }
 
@@ -3532,8 +3685,15 @@ function copyCanyonText(){
     if(!teamData) return '';
     const starters = Array.isArray(teamData) ? teamData : (teamData.starters||[]);
     const subs     = Array.isArray(teamData) ? [] : (teamData.subs||[]);
+    const zones=Array.isArray(teamData)?distributeCanyonZones(starters):(teamData.zones||distributeCanyonZones(starters));
     let t = label+' ('+(starters.length+subs.length)+' joueurs) :\n';
-    if(starters.length){ t += 'Titulaires :\n'+starters.map(p=>'- '+p.name).join('\n')+'\n'; }
+    if(starters.length){
+      t += 'Titulaires :\n';
+      CANYON_ZONES.forEach(zone=>{
+        const players=zones[zone.key]||[];
+        t+=zone.label+' ('+players.length+'/'+CANYON_ZONE_CAPACITY+') :\n'+players.map(p=>'- '+p.name).join('\n')+'\n';
+      });
+    }
     if(subs.length){ t += 'Remplaçants :\n'+subs.map(p=>'- '+p.name).join('\n')+'\n'; }
     return t;
   };
@@ -3600,28 +3760,81 @@ async function commitPower(idx){
   }finally{setBusy(false);}
 }
 
+function setSectionExpanded(bodyId,expanded){
+  const body=document.getElementById(bodyId);
+  if(body){
+    body.setAttribute('aria-hidden',String(!expanded));
+    body.inert=!expanded;
+  }
+  document.querySelectorAll('[aria-controls="'+bodyId+'"]').forEach(control=>{
+    control.setAttribute('aria-expanded',String(expanded));
+    if(control.classList.contains('section-toggle'))control.classList.toggle('collapsed',!expanded);
+  });
+}
+
+document.addEventListener('keydown',event=>{
+  const control=event.target;
+  if(!(control instanceof Element)||!control.matches('[data-section-toggle][role="button"]'))return;
+  if(event.key==='Enter'||event.key===' '){
+    event.preventDefault();
+    control.click();
+  }
+});
+
+function animateSectionBody(bodyId,expanded){
+  const body=document.getElementById(bodyId);
+  if(!body)return;
+
+  if(body._sectionTransitionHandler){
+    body.removeEventListener('transitionend',body._sectionTransitionHandler);
+    clearTimeout(body._sectionTransitionTimer);
+  }
+
+  const startHeight=body.getBoundingClientRect().height;
+  body.style.maxHeight='none';
+  body.classList.remove('collapsed','is-closing');
+  body.style.height=startHeight+'px';
+  setSectionExpanded(bodyId,expanded);
+  body.getBoundingClientRect();
+
+  if(expanded){
+    body.style.height=body.scrollHeight+'px';
+  }else{
+    body.classList.add('is-closing');
+    body.style.height='0px';
+  }
+
+  const finish=()=>{
+    body.removeEventListener('transitionend',onTransitionEnd);
+    body._sectionTransitionHandler=null;
+    clearTimeout(body._sectionTransitionTimer);
+    body.classList.remove('is-closing');
+    if(body.getAttribute('aria-hidden')==='true'){
+      body.classList.add('collapsed');
+      body.style.height='0px';
+    }else{
+      body.style.height='auto';
+    }
+  };
+  const onTransitionEnd=event=>{
+    if(event.target===body&&event.propertyName==='height')finish();
+  };
+  body._sectionTransitionHandler=onTransitionEnd;
+  body.addEventListener('transitionend',onTransitionEnd);
+  body._sectionTransitionTimer=setTimeout(finish,window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:380);
+}
+
 function toggleSection(bodyId,toggleId){
   const body=document.getElementById(bodyId);const toggle=document.getElementById(toggleId);if(!body||!toggle)return;
-  const isCollapsed=body.classList.contains('collapsed');
+  const isCollapsed=body.getAttribute('aria-hidden')==='true';
   if(isCollapsed){
     // À l'ouverture du tirage du train, afficher directement les joueurs tirés pour la semaine.
     if(bodyId==='tirageBody'){
-      const planning=document.getElementById('planningBody');
-      const planningToggle=document.getElementById('planningToggle');
-      if(planning){
-        planning.classList.remove('collapsed');
-        planning.style.maxHeight='none';
-      }
-      if(planningToggle)planningToggle.classList.remove('collapsed');
+      animateSectionBody('planningBody',true);
     }
-    body.classList.remove('collapsed');body.style.maxHeight='none';
-    const h=body.scrollHeight;body.style.maxHeight='0';body.getBoundingClientRect();
-    body.style.maxHeight=h+'px';toggle.classList.remove('collapsed');
-    setTimeout(()=>{if(!body.classList.contains('collapsed'))body.style.maxHeight='none'},400);
-  }else{
-    body.style.maxHeight=body.scrollHeight+'px';body.getBoundingClientRect();
-    body.style.maxHeight='0';body.classList.add('collapsed');toggle.classList.add('collapsed');
   }
+  animateSectionBody(bodyId,isCollapsed);
+  toggle.classList.toggle('collapsed',!isCollapsed);
 }
 
 function updateDrawBtns(){

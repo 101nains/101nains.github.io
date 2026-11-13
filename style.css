@@ -216,8 +216,10 @@ body.light .edit-hint{background:rgba(0,0,0,0.05);border:1px solid var(--border2
 .section-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);transition:color var(--transition)}
 .section-toggle{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);cursor:pointer;transition:all var(--transition)}
 .section-toggle.collapsed{transform:rotate(-90deg)}
-.section-body{overflow:hidden;transition:max-height .4s cubic-bezier(.4,0,.2,1),opacity .3s ease}
-.section-body.collapsed{max-height:0!important;opacity:0;pointer-events:none}
+.section-body{height:auto;overflow:hidden;transition:height .34s cubic-bezier(.22,.61,.36,1),opacity .24s ease}
+.section-body.collapsed{height:0!important;opacity:0;pointer-events:none}
+.section-body.is-closing{opacity:0;pointer-events:none}
+@media(prefers-reduced-motion:reduce){.section-body{transition:none!important}}
 body.light .section-title{color:var(--text2);font-weight:800}
 body.light .section-toggle{background:linear-gradient(145deg,var(--surface),var(--surface2));border:1px solid var(--border2);color:var(--text2);font-weight:800}
 body.light .divider{border-color:var(--border2)}
@@ -629,7 +631,17 @@ body.light .modal textarea{background:rgba(0,0,0,0.07);border:1px solid var(--bo
 .canyon-result-title{padding:7px 14px 5px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .canyon-result-title.starter{color:var(--blue);background:rgba(124,159,255,.08)}
 .canyon-result-title.sub{color:var(--amber);background:rgba(255,184,77,.08)}
+.canyon-result-title.zone{color:var(--blue);background:rgba(124,159,255,.06)}
+.canyon-zone-group{padding-bottom:4px}
+.canyon-zone-empty{padding:5px 14px 9px;font-size:11px;color:var(--text3);font-style:italic}
 .canyon-result-title span{opacity:.75}
+.canyon-drag-hint{margin-bottom:8px;font-size:11px;color:var(--text3)}
+.canyon-team-player{cursor:grab}
+.canyon-team-player:active{cursor:grabbing}
+.canyon-team-player.dragging-team{opacity:.25}
+.canyon-drag-handle{font-size:11px;color:var(--text4);flex-shrink:0}
+.canyon-drop-target{min-height:30px;border-radius:6px;transition:background var(--transition),outline-color var(--transition)}
+.canyon-drop-target.canyon-drop-over{background:rgba(80,232,152,.08);outline:2px dashed rgba(80,232,152,.45)}
 
 
 /* ══ OPTIMISATION MOBILE ══ */
@@ -960,6 +972,46 @@ body.light #appScreen header{color:#fff4d2}body.light #appScreen header h1{color
 @media(max-width:700px){#appScreen header{min-height:205px;padding:19px 17px!important}#appScreen header h1{max-width:100%;font-size:clamp(23px,6vw,33px)!important}#appScreen header p{max-width:100%}#appScreen header .lw-scene{width:85%;opacity:.47}#appScreen header .lw-signal{right:8%;top:20%}#appScreen header::before{font-size:9px;letter-spacing:.08em}#appScreen header::after{font-size:9px;letter-spacing:.03em}#appScreen header .logo-emoji{width:44px;height:44px;font-size:27px}}
 @media(prefers-reduced-motion:reduce){button,.btn{transition:none!important}}
 
+/* Commandes des sections repliables : zone de clic claire et confortable sur tactile. */
+#appScreen .section-header{
+  min-height:56px;
+  padding:6px 10px;
+  border:1px solid var(--border2);
+  border-radius:14px;
+  transition:background var(--transition),border-color var(--transition),box-shadow var(--transition);
+}
+#appScreen .section-header-left[data-section-toggle]{
+  min-height:44px;
+  padding:0 6px;
+  border-radius:9px;
+}
+#appScreen .section-header-left[data-section-toggle]:focus-visible,
+#appScreen .section-header[data-section-toggle]:focus-visible{
+  outline:3px solid #ffcb70;
+  outline-offset:3px;
+}
+#appScreen .section-toggle{
+  width:44px;
+  height:44px;
+  padding:0;
+  font-family:inherit;
+  line-height:1;
+}
+@media(hover:hover){
+  #appScreen .section-header:hover{
+    border-color:rgba(255,195,88,.55);
+    box-shadow:0 0 0 2px rgba(255,179,64,.08);
+  }
+  #appScreen .section-header-left[data-section-toggle]:hover .section-title{
+    color:var(--text);
+  }
+}
+@media(max-width:700px){
+  #appScreen .section-header{min-height:62px;padding:7px 8px}
+  #appScreen .section-header-left[data-section-toggle]{min-height:48px;padding:0 5px}
+  #appScreen .section-toggle{width:48px;height:48px}
+}
+
 
 /* Lisibilité des graphiques — panneaux souples, grands libellés et mobile */
 .lw-stats-chart-layout{display:grid;grid-template-columns:minmax(220px,255px) minmax(0,1fr);gap:18px;align-items:start}
@@ -1064,3 +1116,50 @@ body.light #appScreen header{color:#fff4d2}body.light #appScreen header h1{color
 #loginScreen .login-inp:focus,#loginScreen .login-team-select:focus{border-color:#bd7b20!important;box-shadow:0 0 0 3px rgba(243,165,52,.24)!important}
 #loginScreen .login-card:after{color:#79551f!important;border-top-color:rgba(142,104,46,.3)!important}
 #loginScreen .login-error{color:#a32121!important}
+
+/* Navigation de l’espace membre : panneau latéral sur grand écran, barre basse sur mobile. */
+#appScreen .page{max-width:1440px}
+.dashboard-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:20px;align-items:start}
+.dashboard-nav{
+  position:sticky;top:16px;display:flex;flex-direction:column;gap:7px;
+  padding:12px;background:linear-gradient(155deg,var(--surface2),var(--surface));
+  border:1px solid var(--border2);border-left:3px solid #ffad35;border-radius:16px;
+  box-shadow:0 10px 24px rgba(0,0,0,.2)
+}
+.dashboard-nav-heading{padding:7px 11px 9px;color:var(--text3);font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.dashboard-nav-btn{
+  display:flex;align-items:center;gap:11px;width:100%;min-height:48px;padding:9px 12px;
+  border:1px solid transparent;border-radius:11px;background:transparent;color:var(--text2);
+  font:700 13px 'DM Sans',sans-serif;text-align:left;cursor:pointer;transition:background .18s ease,color .18s ease,border-color .18s ease
+}
+.dashboard-nav-icon{display:inline-grid;place-items:center;flex:0 0 28px;font-size:19px}
+.dashboard-nav-btn:hover{background:rgba(255,176,54,.1);color:var(--text)}
+.dashboard-nav-btn.active{background:linear-gradient(100deg,rgba(255,176,54,.2),rgba(19,47,54,.58));border-color:rgba(255,195,85,.28);color:var(--gold)}
+.dashboard-nav-btn:focus-visible{outline:2px solid #ffcb70;outline-offset:2px}
+.sections-container{min-width:0;gap:2px}
+.dashboard-page-heading{padding:4px 4px 14px;margin-bottom:8px;border-bottom:1px solid var(--border2)}
+.dashboard-page-heading h2{color:var(--text);font:800 clamp(22px,2.4vw,30px) Rajdhani,'DM Sans',sans-serif;letter-spacing:.02em}
+.dashboard-page-heading p{margin-top:3px;color:var(--text2);font-size:13px;line-height:1.5}
+body.light .dashboard-nav{background:linear-gradient(155deg,#f4f0df,#e8e6d7);box-shadow:0 8px 20px rgba(35,52,59,.12)}
+body.light .dashboard-nav-btn.active{background:linear-gradient(100deg,rgba(255,176,54,.22),rgba(238,232,208,.8));color:#80500d}
+@media(max-width:850px){
+  #appScreen .page{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+  .dashboard-layout{display:block}
+  .dashboard-nav{
+    position:fixed;z-index:300;top:auto;right:0;bottom:0;left:0;
+    display:grid;grid-template-columns:repeat(var(--dashboard-nav-items,5),minmax(0,1fr));gap:3px;
+    padding:7px 8px calc(7px + env(safe-area-inset-bottom));
+    border:1px solid var(--border2);border-bottom:0;border-radius:16px 16px 0 0;
+    background:rgba(13,28,34,.96);box-shadow:0 -8px 24px rgba(0,0,0,.28);backdrop-filter:blur(16px)
+  }
+  .dashboard-nav-heading{display:none}
+  .dashboard-nav-btn{justify-content:center;flex-direction:column;gap:2px;min-width:0;min-height:56px;padding:4px 2px;border-radius:10px;font-size:10px;line-height:1.05;text-align:center;white-space:normal}
+  .dashboard-nav-icon{flex-basis:auto;font-size:19px}
+  .dashboard-page-heading{padding:2px 3px 12px}
+  body.light .dashboard-nav{background:rgba(244,240,223,.97)}
+}
+@media(max-width:380px){
+  .dashboard-nav{gap:1px;padding-left:4px;padding-right:4px}
+  .dashboard-nav-btn{font-size:9px}
+  .dashboard-nav-icon{font-size:17px}
+}

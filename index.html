@@ -91,20 +91,60 @@ function onSupabaseError(){
     </div>
   </div>
 
+  <div class="dashboard-layout">
+    <nav class="dashboard-nav" id="dashboardNav" aria-label="Navigation principale">
+      <div class="dashboard-nav-heading">Rubriques</div>
+      <button type="button" class="dashboard-nav-btn active" data-page="home" aria-current="page" onclick="setDashboardPage('home')"><span class="dashboard-nav-icon">🏠</span><span>Train</span></button>
+      <button type="button" class="dashboard-nav-btn" data-page="players" onclick="setDashboardPage('players')"><span class="dashboard-nav-icon">👥</span><span>Joueurs</span></button>
+      <button type="button" class="dashboard-nav-btn" data-page="polls" onclick="setDashboardPage('polls')"><span class="dashboard-nav-icon">🗳️</span><span>Sondages</span></button>
+      <button type="button" class="dashboard-nav-btn" data-page="activities" onclick="setDashboardPage('activities')"><span class="dashboard-nav-icon">⚔️</span><span>Activités</span></button>
+      <button type="button" class="dashboard-nav-btn" data-page="history" onclick="setDashboardPage('history')"><span class="dashboard-nav-icon">🗂️</span><span>Historique</span></button>
+      <button type="button" class="dashboard-nav-btn" data-page="tools" onclick="setDashboardPage('tools')"><span class="dashboard-nav-icon">📊</span><span>Outils</span></button>
+      <button type="button" class="dashboard-nav-btn" data-page="about" onclick="setDashboardPage('about')"><span class="dashboard-nav-icon">ℹ️</span><span>À propos</span></button>
+    </nav>
+    <main class="sections-container" id="dashboardContent" aria-labelledby="dashboardPageTitle">
+      <div class="dashboard-page-heading">
+        <h2 id="dashboardPageTitle">Train</h2>
+        <p id="dashboardPageDescription">Retrouve le planning et les tirages de la semaine.</p>
+      </div>
+
+      <div class="section" id="sectionPolls">
+        <div class="section-header">
+          <div class="section-header-left">
+            <span class="section-title">🗳️ Gestion des sondages</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin:12px 0">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-primary" type="button" onclick="openPollModal()">🏜️ Sondage Tempête du désert</button>
+            <span id="tddPollCounts" style="display:none;font-size:12px;color:var(--text2)" aria-live="polite"></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-primary" type="button" onclick="openCanyonPollModal()">⚔️ Sondage Canyon</button>
+            <span id="canyonPollCounts" style="display:none;font-size:12px;color:var(--text2)" aria-live="polite"></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-primary" type="button" onclick="openT1StaffModal()" title="Gérer les recensements T1 et copier le lien du sondage">⚡ Sondage Puissance T1</button>
+            <span id="t1ResponseCounter" style="display:none;font-size:12px;color:var(--text2);font-weight:600" aria-live="polite"></span>
+          </div>
+          <a class="btn" href="/polls/" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none">↗ Ouvrir la page Polls</a>
+        </div>
+      </div>
+
   <!-- ONGLET TIRAGE -->
   <div class="section" id="secTirage" style="margin-bottom:1rem">
-    <div class="section-header" onclick="toggleSection('tirageBody','tirageToggle')" style="cursor:pointer;margin-bottom:0">
+    <div class="section-header" data-section-toggle role="button" tabindex="0" aria-controls="tirageBody" aria-expanded="false" onclick="toggleSection('tirageBody','tirageToggle')" style="cursor:pointer;margin-bottom:0">
       <div class="section-header-left">
         <span class="section-title">🎲 Tirage du train</span>
       </div>
-      <span class="section-toggle collapsed" id="tirageToggle">▾</span>
+      <span class="section-toggle collapsed" id="tirageToggle" aria-hidden="true">▾</span>
     </div>
-    <div class="section-body collapsed" id="tirageBody" style="max-height:0">
+    <div class="section-body collapsed" id="tirageBody" aria-hidden="true" inert style="max-height:0">
 
       <!-- PLANNING SEMAINE -->
       <div class="planning-section" id="planningSection" style="margin-top:1rem">
         <div class="planning-header">
-          <div class="section-header-left" onclick="toggleSection('planningBody','planningToggle')" style="display:flex;flex-direction:column;gap:6px;flex:1;cursor:pointer">
+          <div class="section-header-left" data-section-toggle role="button" tabindex="0" aria-controls="planningBody" aria-expanded="false" onclick="toggleSection('planningBody','planningToggle')" style="display:flex;flex-direction:column;gap:6px;flex:1;cursor:pointer">
             <div class="planning-title">
               🚂 Planning de la semaine
               <span class="planning-badge-rt">🔴 Live</span>
@@ -125,10 +165,10 @@ function onSupabaseError(){
                 <option value="3">Élevé</option>
               </select>
             </div>
-            <span class="section-toggle collapsed" id="planningToggle" onclick="toggleSection('planningBody','planningToggle')">▾</span>
+            <button type="button" class="section-toggle collapsed" id="planningToggle" aria-label="Ouvrir ou fermer le planning de la semaine" aria-controls="planningBody" aria-expanded="false" onclick="toggleSection('planningBody','planningToggle')">▾</button>
           </div>
         </div>
-        <div class="section-body collapsed" id="planningBody" style="max-height:0">
+        <div class="section-body collapsed" id="planningBody" aria-hidden="true" inert style="max-height:0">
           <div id="planningContainer" style="padding-top:14px">
             <div class="planning-empty">Aucun planning cette semaine pour l'instant…</div>
           </div>
@@ -141,13 +181,13 @@ function onSupabaseError(){
     <!-- HISTORIQUE DES TIRAGES -->
     <div class="section" id="secHist">
       <div class="section-header">
-        <div class="section-header-left" onclick="toggleSection('historySection','historyToggle')">
+        <div class="section-header-left" data-section-toggle role="button" tabindex="0" aria-controls="historySection" aria-expanded="false" onclick="toggleSection('historySection','historyToggle')">
           <span class="section-title">Historique des tirages</span>
         </div>
-        <span class="section-toggle collapsed" id="historyToggle"
-              onclick="toggleSection('historySection','historyToggle')">▾</span>
+        <button type="button" class="section-toggle collapsed" id="historyToggle" aria-label="Ouvrir ou fermer l’historique des tirages" aria-controls="historySection" aria-expanded="false"
+              onclick="toggleSection('historySection','historyToggle')">▾</button>
       </div>
-      <div class="section-body collapsed" id="historySection" style="max-height:0">
+      <div class="section-body collapsed" id="historySection" aria-hidden="true" inert style="max-height:0">
         <div class="hist-list" id="histList" style="margin-top:6px">
           <span class="empty">Chargement…</span>
         </div>
@@ -157,18 +197,13 @@ function onSupabaseError(){
     <!-- PARTICIPANTS -->
     <div class="section" id="sectionParticipants">
       <div class="section-header">
-        <div class="section-header-left" onclick="toggleSection('participantsSection','participantsToggle')">
+        <div class="section-header-left" data-section-toggle role="button" tabindex="0" aria-controls="participantsSection" aria-expanded="false" onclick="toggleSection('participantsSection','participantsToggle')">
           <span class="section-title">Participants</span>
         </div>
-        <span class="section-toggle collapsed" id="participantsToggle"
-              onclick="toggleSection('participantsSection','participantsToggle')">▾</span>
+        <button type="button" class="section-toggle collapsed" id="participantsToggle" aria-label="Ouvrir ou fermer les participants" aria-controls="participantsSection" aria-expanded="false"
+              onclick="toggleSection('participantsSection','participantsToggle')">▾</button>
       </div>
-      <div class="section-body collapsed" id="participantsSection" style="max-height:0">
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0 14px">
-          <button class="btn btn-primary" type="button" onclick="openT1StaffModal()" title="Gérer les recensements T1 et copier le lien du sondage">⚡ Sondage puissances T1</button>
-          <span id="t1ResponseCounter" style="display:none;font-size:12px;color:var(--text2);font-weight:600" aria-live="polite"></span>
-          <span style="font-size:12px;color:var(--text2)">Ouvrir la gestion du recensement et partager le lien aux joueurs.</span>
-        </div>
+      <div class="section-body collapsed" id="participantsSection" aria-hidden="true" inert style="max-height:0">
         <div class="add-row" style="margin-top:6px">
           <input type="text" id="nameInput" placeholder="Ajouter un nom…"/>
           <button class="btn btn-primary" id="addBtn" onclick="addName()">Ajouter</button>
@@ -213,70 +248,70 @@ function onSupabaseError(){
           <button class="btn btn-gold" id="archiveWeekParticipantsBtn" onclick="archiveWeekFromParticipants()" style="display:none">📅 Archiver la semaine</button>
         </div>
       </div>
-     </div>
+    </div>
 
-    <!-- STATISTIQUES -->
-    <div class="section" id="sectionStats">
-      <div class="section-header">
-        <div class="section-header-left" onclick="toggleSection('statsSection','statsToggle')">
-          <span class="section-title">📊 Statistiques</span>
-        </div>
-        <span class="section-toggle collapsed" id="statsToggle"
-              onclick="toggleSection('statsSection','statsToggle')">▾</span>
-      </div>
-      <div class="section-body collapsed" id="statsSection" style="max-height:0">
-        <div style="margin-top:8px;margin-bottom:1rem">
-          <div class="stats-global" id="statsGlobal"></div>
-          <div class="stats-view-tabs">
-            <button class="stats-view-tab" id="svtPodium" onclick="setStatsView('podium')">🏆 Podium</button>
-            <button class="stats-view-tab active" id="svtCards" onclick="setStatsView('cards')">👤 Joueurs</button>
-            <button class="stats-view-tab" id="svtLeaderboard" onclick="setStatsView('leaderboard')">📋 Classement</button>
-            <button class="stats-view-tab" id="svtReliability" onclick="setStatsView('reliability')">🎯 Fiabilité</button>
-            <button class="stats-view-tab" id="svtT1history" onclick="setStatsView('t1history')">⚡ Évolution T1</button>
-            <button class="stats-view-tab" id="svtGraphiques" onclick="setStatsView('graphiques')">📊 Graphiques</button>
+        <!-- STATISTIQUES -->
+        <div class="section" id="sectionStats">
+          <div class="section-header">
+            <div class="section-header-left" data-section-toggle role="button" tabindex="0" aria-controls="statsSection" aria-expanded="false" onclick="toggleSection('statsSection','statsToggle')">
+              <span class="section-title">📊 Statistiques</span>
+            </div>
+            <button type="button" class="section-toggle collapsed" id="statsToggle" aria-label="Ouvrir ou fermer les statistiques" aria-controls="statsSection" aria-expanded="false"
+                  onclick="toggleSection('statsSection','statsToggle')">▾</button>
           </div>
-          <div id="statsViewPodium" style="display:none">
-            <div id="statsPodium"></div>
-          </div>
-          <div id="statsViewCards">
-            <div class="stats-sort-bar">
-              <span style="font-size:11px;color:var(--text3)">Trier par :</span>
-              <button class="stats-sort-btn active" onclick="setStatSort('name',this)">Nom</button>
-              <button class="stats-sort-btn" onclick="setStatSort('power',this)">Puissance</button>
-              <button class="stats-sort-btn" onclick="setStatSort('driver',this)">Chauffeur</button>
-              <button class="stats-sort-btn" onclick="setStatSort('vip',this)">VIP</button>
+          <div class="section-body collapsed" id="statsSection" aria-hidden="true" inert style="max-height:0">
+            <div style="margin-top:8px;margin-bottom:1rem">
+              <div class="stats-global" id="statsGlobal"></div>
+              <div class="stats-view-tabs">
+                <button class="stats-view-tab" id="svtPodium" onclick="setStatsView('podium')">🏆 Podium</button>
+                <button class="stats-view-tab active" id="svtCards" onclick="setStatsView('cards')">👤 Joueurs</button>
+                <button class="stats-view-tab" id="svtLeaderboard" onclick="setStatsView('leaderboard')">📋 Classement</button>
+                <button class="stats-view-tab" id="svtReliability" onclick="setStatsView('reliability')">🎯 Fiabilité</button>
+                <button class="stats-view-tab" id="svtT1history" onclick="setStatsView('t1history')">⚡ Évolution T1</button>
+                <button class="stats-view-tab" id="svtGraphiques" onclick="setStatsView('graphiques')">📊 Graphiques</button>
+              </div>
+              <div id="statsViewPodium" style="display:none">
+                <div id="statsPodium"></div>
+              </div>
+              <div id="statsViewCards">
+                <div class="stats-sort-bar">
+                  <span style="font-size:11px;color:var(--text3)">Trier par :</span>
+                  <button class="stats-sort-btn active" onclick="setStatSort('name',this)">Nom</button>
+                  <button class="stats-sort-btn" onclick="setStatSort('power',this)">Puissance</button>
+                  <button class="stats-sort-btn" onclick="setStatSort('driver',this)">Chauffeur</button>
+                  <button class="stats-sort-btn" onclick="setStatSort('vip',this)">VIP</button>
 
-              <button class="stats-sort-btn" onclick="setStatSort('rate',this)">Taux valid.</button>
-              <div class="stats-search-wrap">
-                <input class="stats-search-inp" id="statsSearchInp" type="text" placeholder="Rechercher un joueur…" oninput="onStatsSearch(this)">
-                <button class="stats-search-clear" id="statsSearchClear" onclick="clearStatsSearch()">×</button>
+                  <button class="stats-sort-btn" onclick="setStatSort('rate',this)">Taux valid.</button>
+                  <div class="stats-search-wrap">
+                    <input class="stats-search-inp" id="statsSearchInp" type="text" placeholder="Rechercher un joueur…" oninput="onStatsSearch(this)">
+                    <button class="stats-search-clear" id="statsSearchClear" onclick="clearStatsSearch()">×</button>
+                  </div>
+                </div>
+                <div class="stats-grid" id="statsGrid"></div>
+              </div>
+              <div id="statsViewLeaderboard" style="display:none">
+                <div id="statsLeaderboard"></div>
+              </div>
+              <div id="statsViewT1history" style="display:none"><div id="t1HistoryStats">Chargement…</div></div>
+              <div id="statsViewGraphiques" style="display:none">
+                <div id="statsGraphiquesContainer"></div>
+              </div>
+              <div id="statsViewReliability" style="display:none">
+                <div id="statsReliabilityContainer"></div>
               </div>
             </div>
-            <div class="stats-grid" id="statsGrid"></div>
-          </div>
-          <div id="statsViewLeaderboard" style="display:none">
-            <div id="statsLeaderboard"></div>
-          </div>
-          <div id="statsViewT1history" style="display:none"><div id="t1HistoryStats">Chargement…</div></div>
-          <div id="statsViewGraphiques" style="display:none">
-            <div id="statsGraphiquesContainer"></div>
-          </div>
-          <div id="statsViewReliability" style="display:none">
-            <div id="statsReliabilityContainer"></div>
           </div>
         </div>
-      </div>
-      </div>
 
     <!-- BATAILLE DU CANYON -->
     <div class="section" id="secCanyon">
       <div class="section-header">
-        <div class="section-header-left" onclick="toggleSection('canyonBody','canyonToggle')">
+        <div class="section-header-left" data-section-toggle role="button" tabindex="0" aria-controls="canyonBody" aria-expanded="false" onclick="toggleSection('canyonBody','canyonToggle')">
           <span class="section-title">🏜️ Bataille du Canyon</span>
         </div>
-        <span class="section-toggle collapsed" id="canyonToggle" onclick="toggleSection('canyonBody','canyonToggle')">▾</span>
+        <button type="button" class="section-toggle collapsed" id="canyonToggle" aria-label="Ouvrir ou fermer la bataille du Canyon" aria-controls="canyonBody" aria-expanded="false" onclick="toggleSection('canyonBody','canyonToggle')">▾</button>
       </div>
-      <div class="section-body collapsed" id="canyonBody" style="max-height:0">
+      <div class="section-body collapsed" id="canyonBody" aria-hidden="true" inert style="max-height:0">
         <div style="margin-top:10px;margin-bottom:1.5rem">
           <div class="ev-active-banner" id="canyonActiveBanner">
             <span>🏜️</span>
@@ -300,10 +335,6 @@ function onSupabaseError(){
             </div>
           </div>
 
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0">
-            <button class="btn btn-primary" onclick="openCanyonPollModal()">📊 Sondage Canyon</button>
-            <span id="canyonPollCounts" style="display:none;font-size:12px;color:var(--text2)" aria-live="polite"></span>
-          </div>
           <div class="ev-search-bar">
             <div class="search-wrap" style="flex:1;max-width:300px">
               <span class="search-icon">🔍</span>
@@ -332,13 +363,13 @@ function onSupabaseError(){
     <!-- ÉVÉNEMENTS -->
     <div class="section" id="secEvents">
       <div class="section-header">
-        <div class="section-header-left" onclick="toggleSection('eventsSection','eventsToggle')">
+        <div class="section-header-left" data-section-toggle role="button" tabindex="0" aria-controls="eventsSection" aria-expanded="false" onclick="toggleSection('eventsSection','eventsToggle')">
           <span class="section-title">⚔️ Tempête du désert</span>
         </div>
-        <span class="section-toggle collapsed" id="eventsToggle"
-              onclick="toggleSection('eventsSection','eventsToggle')">▾</span>
+        <button type="button" class="section-toggle collapsed" id="eventsToggle" aria-label="Ouvrir ou fermer la Tempête du désert" aria-controls="eventsSection" aria-expanded="false"
+              onclick="toggleSection('eventsSection','eventsToggle')">▾</button>
       </div>
-      <div class="section-body collapsed" id="eventsSection" style="max-height:0">
+      <div class="section-body collapsed" id="eventsSection" aria-hidden="true" inert style="max-height:0">
         <div style="margin-top:10px;margin-bottom:1.5rem">
           <div class="poll-ev-banner" id="pollEvBanner" style="display:none">
             <span class="poll-ev-title">📊 Sondage TDD</span>
@@ -363,31 +394,6 @@ function onSupabaseError(){
                 <button class="ev-nb-btn" id="evNb2" onclick="setNbTeams(2)">2 équipes</button>
                 <span id="tddSlotStaff" class="tdd-slot-inline" aria-label="Horaires des équipes TDD"></span>
                 <button class="ev-nb-btn" id="evNbAsym" onclick="setNbTeams('asym')">⚡ Asymétrique</button>
-              </div>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0">
-            <button class="btn btn-primary" onclick="openPollModal()">📊 Sondage TDD</button>
-            <span id="tddPollCounts" style="display:none;font-size:12px;color:var(--text2)" aria-live="polite"></span>
-          </div>
-          <!-- Modal sondage -->
-          <div id="pollModal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px">
-            <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-xl);padding:24px;max-width:400px;width:100%;box-shadow:var(--shadow-lg)">
-              <div style="font-family:var(--font-display,inherit);font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px">📊 Sondage TDD</div>
-              <div style="margin:12px 0"><button class="btn btn-primary" onclick="availabilityStaffAction('tdd','open')">➕ Nouvelle session TDD</button> <button class="btn" onclick="availabilityStaffAction('tdd','close')">🔒 Clôturer</button><div id="tddSessionStaff"></div></div>
-              <div id="pollStaffPanel" style="margin-bottom:16px;padding:14px;border:1px solid var(--border2);border-radius:12px">
-                <div style="font-size:12px;font-weight:800;margin-bottom:8px">🛡️ Corriger les votes (staff/admin)</div>
-                <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Le mot de passe choisi à l’ouverture du sondage est demandé pour chaque correction. « Non répondu » libère le pseudo.</div>
-                <div style="max-height:260px;overflow-y:auto"><table id="pollStaffTable" style="width:100%"><tbody></tbody></table></div>
-              </div>
-              <div style="font-size:12px;color:var(--text3);margin-bottom:16px;line-height:1.6">Partage ce lien à tes membres. Ils pourront répondre sans se connecter.</div>
-              <div style="display:flex;gap:8px;margin-bottom:16px">
-                <input id="pollLinkInput" readonly style="flex:1;height:38px;padding:0 12px;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:var(--radius-lg);color:var(--blue);font-family:var(--font-mono,monospace);font-size:12px;outline:none" value="">
-                <button class="btn btn-primary" style="height:38px;white-space:nowrap" onclick="copyPollLinkModal()">📋 Copier</button>
-              </div>
-              <div style="display:flex;gap:8px;margin-bottom:16px">
-                <button class="btn" style="flex:1;height:36px;font-size:12px" onclick="window.open(document.getElementById('pollLinkInput').value,'_blank')">↗ Ouvrir</button>
-                <button class="btn" style="flex:1;height:36px;font-size:12px" onclick="closePollModal()">Fermer</button>
               </div>
             </div>
           </div>
@@ -439,8 +445,8 @@ function onSupabaseError(){
     <!-- HISTORIQUE DES SEMAINES -->
 <!-- V17.6 : mouvements inter-saisons -->
 <section class="section" id="secMovements" style="display:none">
- <div class="section-header" onclick="toggleSection('movementsBody','movementsToggle')" style="cursor:pointer"><div class="section-header-left"><span class="section-title">🤝 Recrutements & Départs · Staff</span></div><span class="section-toggle collapsed" id="movementsToggle">▾</span></div>
- <div class="section-body collapsed" id="movementsBody" style="max-height:0">
+ <div class="section-header" data-section-toggle role="button" tabindex="0" aria-controls="movementsBody" aria-expanded="false" onclick="toggleSection('movementsBody','movementsToggle')" style="cursor:pointer"><div class="section-header-left"><span class="section-title">🤝 Recrutements & Départs · Staff</span></div><span class="section-toggle collapsed" id="movementsToggle" aria-hidden="true">▾</span></div>
+ <div class="section-body collapsed" id="movementsBody" aria-hidden="true" inert style="max-height:0">
   <p class="mv-note">🔒 Réservé au staff. Les recrutements n'ajoutent jamais automatiquement un participant ; les départs ne suppriment jamais un joueur. Sauvegarde partagée via Supabase.</p>
   <div class="mv-grid"><input type="hidden" id="mvSeason" value="Registre commun" aria-hidden="true"><div class="mv-panel"><strong id="mvIn">0</strong><p class="mv-note">Recrutements confirmés</p></div><div class="mv-panel"><strong id="mvOut">0</strong><p class="mv-note">Départs confirmés</p></div><div class="mv-panel"><strong id="mvBalance">0</strong><p class="mv-note">Solde des mouvements confirmés</p></div></div><div class="mv-grid" style="margin-top:12px"><div class="mv-panel"><strong id="mvT1In">—</strong><p class="mv-note">⚡ Puissance T1 entrante</p></div><div class="mv-panel"><strong id="mvT1Out">—</strong><p class="mv-note">⚡ Puissance T1 sortante</p></div><div class="mv-panel"><strong id="mvT1Diff">—</strong><p class="mv-note">⚖️ Différence T1 (entrées − sorties)</p></div></div><p class="mv-note" id="mvT1Coverage">Puissance T1 des recrutements et départs confirmés uniquement.</p>
   <div id="mvSync" class="mv-note">Connexion en attente…</div>
@@ -452,11 +458,11 @@ function onSupabaseError(){
 </section>
   <!-- V17 : récompenses saison, réservé au staff -->
   <div class="section" id="secRewards" style="display:none">
-    <div class="section-header" onclick="toggleSection('rewardsBody','rewardsToggle')" style="cursor:pointer">
+    <div class="section-header" data-section-toggle role="button" tabindex="0" aria-controls="rewardsBody" aria-expanded="false" onclick="toggleSection('rewardsBody','rewardsToggle')" style="cursor:pointer">
       <div class="section-header-left"><span class="section-title">🏆 Récompenses de saison · Staff</span></div>
-      <span class="section-toggle collapsed" id="rewardsToggle">▾</span>
+      <span class="section-toggle collapsed" id="rewardsToggle" aria-hidden="true">▾</span>
     </div>
-    <div class="section-body collapsed" id="rewardsBody" style="max-height:0">
+    <div class="section-body collapsed" id="rewardsBody" aria-hidden="true" inert style="max-height:0">
       <p class="rw-note">🔒 Espace staff — saisie partagée via Supabase. Les modifications sont synchronisées entre les membres du staff connectés. Les captures d’écran ne sont pas reconnues automatiquement.</p>
       <div class="rw-grid">
         <div class="rw-panel"><label for="rwSeason">Saison</label><input id="rwSeason" placeholder="Ex. Saison 5" onchange="rwSave()"></div>
@@ -470,13 +476,13 @@ function onSupabaseError(){
   </div>
     <div class="section" id="secArchive">
       <div class="section-header">
-        <div class="section-header-left" onclick="toggleSection('archiveSection','archiveToggle')">
+        <div class="section-header-left" data-section-toggle role="button" tabindex="0" aria-controls="archiveSection" aria-expanded="false" onclick="toggleSection('archiveSection','archiveToggle')">
           <span class="section-title">📅 Historique des semaines</span>
         </div>
-        <span class="section-toggle collapsed" id="archiveToggle"
-              onclick="toggleSection('archiveSection','archiveToggle')">▾</span>
+        <button type="button" class="section-toggle collapsed" id="archiveToggle" aria-label="Ouvrir ou fermer l’historique des semaines" aria-controls="archiveSection" aria-expanded="false"
+              onclick="toggleSection('archiveSection','archiveToggle')">▾</button>
       </div>
-      <div class="section-body collapsed" id="archiveSection" style="max-height:0">
+      <div class="section-body collapsed" id="archiveSection" aria-hidden="true" inert style="max-height:0">
         <div style="margin-top:10px;margin-bottom:1.5rem">
           <div id="archiveList">
             <span class="empty">Chargement…</span>
@@ -487,13 +493,13 @@ function onSupabaseError(){
     </div>
     <div class="section" id="aboutSection" style="display:none">
       <div class="section-header">
-        <div class="section-header-left" onclick="toggleSection('aboutBody','aboutToggle')">
+        <div class="section-header-left" data-section-toggle role="button" tabindex="0" aria-controls="aboutBody" aria-expanded="false" onclick="toggleSection('aboutBody','aboutToggle')">
           <span class="section-title">À propos</span>
         </div>
-        <span class="section-toggle collapsed" id="aboutToggle"
-              onclick="toggleSection('aboutBody','aboutToggle')">▾</span>
+        <button type="button" class="section-toggle collapsed" id="aboutToggle" aria-label="Ouvrir ou fermer la section À propos" aria-controls="aboutBody" aria-expanded="false"
+              onclick="toggleSection('aboutBody','aboutToggle')">▾</button>
       </div>
-      <div class="section-body collapsed" id="aboutBody" style="max-height:0">
+      <div class="section-body collapsed" id="aboutBody" aria-hidden="true" inert style="max-height:0">
         <div class="about-box" style="margin-top:6px;margin-bottom:1rem">
           <h3>🚂 Tirage au sort — Gestion de guilde</h3>
           <p>Application de gestion des tirages au sort, du suivi des coffres et de la composition des équipes.</p>
@@ -567,7 +573,8 @@ function onSupabaseError(){
       </div>
     </div>
 
-  </div><!-- /sections-container -->
+    </main>
+  </div><!-- /dashboard-layout -->
 </div><!-- /page -->
 </div><!-- /appScreen -->
 
@@ -691,6 +698,28 @@ function onSupabaseError(){
       <button class="btn" onclick="document.getElementById('t1StaffModal').style.display='none'">Fermer</button>
     </div>
 
+  </div>
+</div>
+
+<!-- MODAL DE GESTION DU SONDAGE TDD -->
+<div id="pollModal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-xl);padding:24px;max-width:400px;width:100%;box-shadow:var(--shadow-lg)">
+    <div style="font-family:var(--font-display,inherit);font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px">📊 Sondage TDD</div>
+    <div style="margin:12px 0"><button class="btn btn-primary" onclick="availabilityStaffAction('tdd','open')">➕ Nouvelle session TDD</button> <button class="btn" onclick="availabilityStaffAction('tdd','close')">🔒 Clôturer</button><div id="tddSessionStaff"></div></div>
+    <div id="pollStaffPanel" style="margin-bottom:16px;padding:14px;border:1px solid var(--border2);border-radius:12px">
+      <div style="font-size:12px;font-weight:800;margin-bottom:8px">🛡️ Corriger les votes (staff/admin)</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Le mot de passe choisi à l’ouverture du sondage est demandé pour chaque correction. « Non répondu » libère le pseudo.</div>
+      <div style="max-height:260px;overflow-y:auto"><table id="pollStaffTable" style="width:100%"><tbody></tbody></table></div>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:16px;line-height:1.6">Partage ce lien à tes membres. Ils pourront répondre sans se connecter.</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <input id="pollLinkInput" readonly style="flex:1;height:38px;padding:0 12px;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:var(--radius-lg);color:var(--blue);font-family:var(--font-mono,monospace);font-size:12px;outline:none" value="">
+      <button class="btn btn-primary" style="height:38px;white-space:nowrap" onclick="copyPollLinkModal()">📋 Copier</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button class="btn" style="flex:1;height:36px;font-size:12px" onclick="window.open(document.getElementById('pollLinkInput').value,'_blank')">↗ Ouvrir</button>
+      <button class="btn" style="flex:1;height:36px;font-size:12px" onclick="closePollModal()">Fermer</button>
+    </div>
   </div>
 </div>
 

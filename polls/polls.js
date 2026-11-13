@@ -2,11 +2,11 @@ const pollStatsMessages = {
   fr: {
     title: 'Statistiques des sondages',
     survey: 'Sondage',
-    answers: 'Réponses / total des joueurs',
+    participation: 'Participation',
     status: 'État',
     tdd: 'Tempête du désert',
     canyon: 'Canyon',
-    t1: 'Puissance T1',
+    t1: 'Recensement T1',
     loading: 'Chargement…',
     open: 'Ouvert',
     closed: 'Fermé',
@@ -15,11 +15,11 @@ const pollStatsMessages = {
   en: {
     title: 'Survey statistics',
     survey: 'Survey',
-    answers: 'Responses / total players',
+    participation: 'Participation',
     status: 'Status',
     tdd: 'Desert Storm',
     canyon: 'Canyon',
-    t1: 'T1 Power',
+    t1: 'T1 Census',
     loading: 'Loading…',
     open: 'Open',
     closed: 'Closed',
@@ -28,11 +28,11 @@ const pollStatsMessages = {
   es: {
     title: 'Estadísticas de las encuestas',
     survey: 'Encuesta',
-    answers: 'Respuestas / total de jugadores',
+    participation: 'Participación',
     status: 'Estado',
     tdd: 'Tormenta del Desierto',
     canyon: 'Cañón',
-    t1: 'Poder T1',
+    t1: 'Censo T1',
     loading: 'Cargando…',
     open: 'Abierta',
     closed: 'Cerrada',
@@ -41,11 +41,11 @@ const pollStatsMessages = {
   de: {
     title: 'Umfragestatistiken',
     survey: 'Umfrage',
-    answers: 'Antworten / Spieler insgesamt',
+    participation: 'Teilnahme',
     status: 'Status',
     tdd: 'Wüstensturm',
     canyon: 'Canyon',
-    t1: 'T1-Stärke',
+    t1: 'T1-Erfassung',
     loading: 'Wird geladen…',
     open: 'Offen',
     closed: 'Geschlossen',
@@ -54,11 +54,11 @@ const pollStatsMessages = {
   it: {
     title: 'Statistiche dei sondaggi',
     survey: 'Sondaggio',
-    answers: 'Risposte / giocatori totali',
+    participation: 'Partecipazione',
     status: 'Stato',
     tdd: 'Tempesta del Deserto',
     canyon: 'Canyon',
-    t1: 'Potenza T1',
+    t1: 'Censimento T1',
     loading: 'Caricamento…',
     open: 'Aperto',
     closed: 'Chiuso',
@@ -97,11 +97,42 @@ pollStatsTable.append(pollStatsHead, pollStatsBody);
   const nameCell = document.createElement('th');
   const countCell = document.createElement('td');
   const statusCell = document.createElement('td');
+  const nameLabel = document.createElement('span');
+  const countValue = document.createElement('span');
+  const progress = document.createElement('div');
+  const progressFill = document.createElement('span');
+  const percentage = document.createElement('span');
+  const statusBadge = document.createElement('span');
   nameCell.scope = 'row';
   nameCell.className = 'poll-stats-row-name';
   countCell.className = 'poll-stats-count';
   statusCell.className = 'poll-stats-status';
-  pollStatsCells[kind] = { name: nameCell, count: countCell, status: statusCell };
+  nameLabel.className = 'poll-stats-name';
+  countValue.className = 'poll-stats-count-value';
+  progress.className = 'poll-stats-progress';
+  progress.setAttribute('role', 'progressbar');
+  progress.setAttribute('aria-valuemin', '0');
+  progress.setAttribute('aria-valuemax', '100');
+  progress.hidden = true;
+  progressFill.className = 'poll-stats-progress-fill';
+  percentage.className = 'poll-stats-percent';
+  percentage.hidden = true;
+  statusBadge.className = 'poll-stats-status-badge';
+  progress.appendChild(progressFill);
+  nameCell.appendChild(nameLabel);
+  countCell.append(countValue, progress, percentage);
+  statusCell.appendChild(statusBadge);
+  pollStatsCells[kind] = {
+    name: nameCell,
+    nameLabel,
+    count: countCell,
+    countValue,
+    progress,
+    progressFill,
+    percentage,
+    status: statusCell,
+    statusBadge
+  };
   row.append(nameCell, countCell, statusCell);
   pollStatsBody.appendChild(row);
 });
@@ -115,26 +146,40 @@ function renderPollStats() {
 
   const headers = pollStatsHeaderRow.querySelectorAll('th');
   headers[0].textContent = messages.survey;
-  headers[1].textContent = messages.answers;
+  headers[1].textContent = messages.participation;
   headers[2].textContent = messages.status;
 
   ['tdd', 'canyon', 't1'].forEach(kind => {
     const cells = pollStatsCells[kind];
     const stats = pollStats[kind];
-    cells.name.textContent = messages[kind];
+    cells.nameLabel.textContent = messages[kind];
     if (stats.error) {
-      cells.count.textContent = '—';
-      cells.status.textContent = messages.error;
+      cells.countValue.textContent = '—';
+      cells.progress.hidden = true;
+      cells.percentage.hidden = true;
+      cells.statusBadge.textContent = messages.error;
       cells.status.title = stats.error;
       cells.status.dataset.status = 'error';
     } else if (stats.answered === null) {
-      cells.count.textContent = messages.loading;
-      cells.status.textContent = messages.loading;
+      cells.countValue.textContent = messages.loading;
+      cells.progress.hidden = true;
+      cells.percentage.hidden = true;
+      cells.statusBadge.textContent = messages.loading;
       cells.status.removeAttribute('title');
       cells.status.dataset.status = 'loading';
     } else {
-      cells.count.textContent = `${stats.answered} / ${stats.total}`;
-      cells.status.textContent = stats.open ? messages.open : messages.closed;
+      const total = Math.max(0, Number(stats.total) || 0);
+      const answered = Math.max(0, Number(stats.answered) || 0);
+      const percent = total > 0 ? Math.min(100, Math.round(answered / total * 100)) : 0;
+      cells.countValue.textContent = `${answered} / ${total}`;
+      cells.progress.hidden = false;
+      cells.progress.setAttribute('aria-label', `${messages.participation} — ${messages[kind]}`);
+      cells.progress.setAttribute('aria-valuenow', String(percent));
+      cells.progress.setAttribute('aria-valuetext', `${answered} / ${total} — ${percent} %`);
+      cells.progressFill.style.width = `${percent}%`;
+      cells.percentage.hidden = false;
+      cells.percentage.textContent = `${percent} %`;
+      cells.statusBadge.textContent = stats.open ? messages.open : messages.closed;
       cells.status.removeAttribute('title');
       cells.status.dataset.status = stats.open ? 'open' : 'closed';
     }

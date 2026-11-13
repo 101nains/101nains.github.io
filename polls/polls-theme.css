@@ -199,15 +199,51 @@ html body .poll-stats-table thead th:nth-child(2){text-align:center}
 html body .poll-stats-table tbody tr:last-child th,html body .poll-stats-table tbody tr:last-child td{border-bottom:0}
 html body .poll-stats-table tbody tr:hover{background:rgba(255,189,69,.045)}
 html body .poll-stats-row-name{color:var(--lw-text)!important;font-weight:700}
+html body .poll-stats-name{display:block}
 html body .poll-stats-count{text-align:center!important;font-weight:800;color:var(--lw-text)!important}
+html body .poll-stats-count-value{display:block;white-space:nowrap}
+html body .poll-stats-progress{
+  width:min(120px,100%);
+  height:6px;
+  margin:7px auto 3px;
+  overflow:hidden;
+  border:1px solid var(--lw-border2);
+  border-radius:99px;
+  background:rgba(0,0,0,.24);
+}
+html body .poll-stats-progress[hidden],html body .poll-stats-percent[hidden]{display:none}
+html body .poll-stats-progress-fill{
+  display:block;
+  width:0;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#e89532,var(--lw-gold));
+  transition:width .25s ease;
+}
+html body .poll-stats-percent{display:block;color:var(--lw-text2);font-size:10px;font-weight:700;line-height:1.2}
 html body .poll-stats-status{
   width:1%;
   white-space:nowrap;
   text-align:center!important;
 }
-html body .poll-stats-status[data-status="open"]{color:#8fe087!important}
-html body .poll-stats-status[data-status="closed"]{color:#c7c7b4!important}
-html body .poll-stats-status[data-status="error"]{color:#ff7866!important}
+html body .poll-stats-status-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  padding:4px 8px;
+  border:1px solid var(--lw-border2);
+  border-radius:99px;
+  background:rgba(199,199,180,.08);
+  color:var(--lw-text2);
+  font-size:10px;
+  font-weight:800;
+  white-space:nowrap;
+}
+html body .poll-stats-status-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+html body .poll-stats-status[data-status="open"] .poll-stats-status-badge{border-color:rgba(143,224,135,.38);background:rgba(143,224,135,.1);color:#8fe087}
+html body .poll-stats-status[data-status="closed"] .poll-stats-status-badge{color:#c7c7b4}
+html body .poll-stats-status[data-status="error"] .poll-stats-status-badge{border-color:rgba(255,120,102,.4);background:rgba(255,120,102,.1);color:#ff7866}
 @media(max-width:650px){
   html body main{padding:12px 10px 32px}
   html body .head{padding:27px 12px 20px;background-position:center top}

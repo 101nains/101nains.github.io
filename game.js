@@ -4804,7 +4804,7 @@ function toggleTheme(){
 }
 
 function loadTheme(){
-  const saved=localStorage.getItem(THEME_KEY)||'light';
+  const saved=localStorage.getItem(THEME_KEY)||'dark';
   applyTheme(saved);
 }
 

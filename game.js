@@ -1119,9 +1119,6 @@ function showApp(){
   const rb=document.getElementById('userRoleDisplay');
   rb.textContent=roleLabel(currentUser.role);
   rb.className='user-role-badge '+roleBadgeClass(currentUser.role);
-  const saved=localStorage.getItem(SESSION_KEY);
-  if(saved){try{const s=JSON.parse(saved);if(s.expires){const days=Math.ceil((s.expires-Date.now())/(24*60*60*1000));document.getElementById('sessionInfo').textContent=`· Session : ${days}j`;}}catch{}}
-  else document.getElementById('sessionInfo').textContent='· Session temporaire';
   document.getElementById('sectionParticipants').style.display=isAdminOrStaff()?'':'none';
   document.getElementById('sectionStats').style.display=isAdminOrStaff()?'':'none';
   setDashboardPage('home');

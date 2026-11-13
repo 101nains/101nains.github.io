@@ -43,7 +43,7 @@ function onSupabaseError(){
 <!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-card">
-    <div class="login-logo">🚂</div>
+    <div class="login-logo" role="img" aria-label="Logo Last War"></div>
     <div class="login-title">bienvenue chez <span data-alliance-name>101</span></div>
     <div class="login-sub">Connecte-toi pour accéder à l'application</div>
     <div class="login-field">
@@ -69,12 +69,7 @@ function onSupabaseError(){
 
   <header>
     <div class="lw-scene" aria-hidden="true"><div class="lw-signal"></div></div>
-    <h1><span class="logo-emoji">🚂</span> bienvenue chez <span data-alliance-name>101</span></h1>
-    <p>
-      <span class="status-dot" id="statusDot"></span>
-      <span id="statusTxt">Connexion…</span>&nbsp;
-      <span class="badge-rt">🔴 Temps réel</span>
-    </p>
+    <h1>bienvenue chez <span data-alliance-name>101</span></h1>
   </header>
 
   <div class="user-bar">
@@ -82,7 +77,10 @@ function onSupabaseError(){
       <div class="user-avatar" id="userAvatar"></div>
       <span class="user-name" id="userNameDisplay"></span>
       <span class="user-role-badge" id="userRoleDisplay"></span>
-      <span class="session-info" id="sessionInfo"></span>
+      <span class="connection-status" aria-live="polite">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusTxt">Connexion…</span>
+      </span>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
       <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Changer le thème">🌙</button>
@@ -94,7 +92,7 @@ function onSupabaseError(){
   <div class="dashboard-layout">
     <nav class="dashboard-nav" id="dashboardNav" aria-label="Navigation principale">
       <div class="dashboard-nav-heading">Rubriques</div>
-      <button type="button" class="dashboard-nav-btn active" data-page="home" aria-current="page" onclick="setDashboardPage('home')"><span class="dashboard-nav-icon">🏠</span><span>Train</span></button>
+      <button type="button" class="dashboard-nav-btn active" data-page="home" aria-current="page" onclick="setDashboardPage('home')"><span class="dashboard-nav-icon">🚂</span><span>Train</span></button>
       <button type="button" class="dashboard-nav-btn" data-page="players" onclick="setDashboardPage('players')"><span class="dashboard-nav-icon">👥</span><span>Joueurs</span></button>
       <button type="button" class="dashboard-nav-btn" data-page="polls" onclick="setDashboardPage('polls')"><span class="dashboard-nav-icon">🗳️</span><span>Sondages</span></button>
       <button type="button" class="dashboard-nav-btn" data-page="activities" onclick="setDashboardPage('activities')"><span class="dashboard-nav-icon">⚔️</span><span>Activités</span></button>

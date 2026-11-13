@@ -134,7 +134,6 @@ header p{font-size:13px;color:var(--text3);display:flex;align-items:center;gap:8
 .user-role-badge.admin{background:rgba(255,209,102,0.1);color:var(--gold);border:1px solid rgba(255,209,102,0.2)}
 .user-role-badge.staff{background:rgba(47,255,212,0.1);color:var(--teal);border:1px solid rgba(47,255,212,0.2)}
 .user-role-badge.member{background:rgba(124,159,255,0.1);color:var(--blue);border:1px solid rgba(124,159,255,0.2)}
-.session-info{font-size:11px;color:var(--text3);font-family:var(--font-mono)}
 .logout-btn{height:32px;padding:0 14px;border:1px solid var(--border2);border-radius:var(--radius);background:transparent;color:var(--text3);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all var(--transition)}
 .logout-btn:hover{background:rgba(255,107,107,0.08);color:var(--red);border-color:rgba(255,107,107,0.25)}
 .theme-toggle-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border2);background:rgba(255,255,255,0.04);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all var(--transition);flex-shrink:0}
@@ -653,7 +652,6 @@ body.light .modal textarea{background:rgba(0,0,0,0.07);border:1px solid var(--bo
   .user-bar{padding:9px 11px;margin-bottom:1rem;border-radius:18px;gap:8px}
   .user-bar-left{gap:7px;font-size:12px;min-width:0}
   .user-name{max-width:115px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .session-info{display:none}
   .logout-btn{height:34px;padding:0 10px;font-size:11px}
   .theme-toggle-btn{width:34px;height:34px}
 
@@ -1162,4 +1160,295 @@ body.light .dashboard-nav-btn.active{background:linear-gradient(100deg,rgba(255,
   .dashboard-nav{gap:1px;padding-left:4px;padding-right:4px}
   .dashboard-nav-btn{font-size:9px}
   .dashboard-nav-icon{font-size:17px}
+}
+
+/* Image d'accueil */
+#appScreen header,
+body.light #appScreen header{
+  min-height:340px !important;
+  background-image:
+    linear-gradient(90deg,rgba(7,22,32,.82) 0%,rgba(7,22,32,.58) 43%,rgba(7,22,32,.12) 100%),
+    url("Bataille%20%C3%A9pique%20pour%20la%20derni%C3%A8re%20guerre.png") !important;
+  background-size:cover !important;
+  background-position:center top !important;
+}
+#appScreen header .lw-scene{display:none}
+#appScreen header h1{
+  position:absolute;
+  z-index:3;
+  left:50%;
+  bottom:14px;
+  width:max-content;
+  max-width:calc(100% - 28px) !important;
+  margin:0;
+  transform:translateX(-50%);
+  text-align:center;
+  font-size:clamp(20px,3.8vw,42px) !important;
+  line-height:1 !important;
+  font-family:Rajdhani,'DM Sans',sans-serif !important;
+  font-weight:800 !important;
+  letter-spacing:.1em !important;
+  text-transform:uppercase;
+  background:linear-gradient(180deg,#f7fbff 0%,#a7e4ff 35%,#ffd969 60%,#f89d2f 100%);
+  background-clip:text;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  -webkit-text-stroke:1px rgba(11,35,55,.85);
+  filter:drop-shadow(0 3px 0 #152c43) drop-shadow(0 8px 5px rgba(0,0,0,.7));
+}
+#appScreen header::before,
+#appScreen header::after{content:none !important}
+#appScreen .connection-status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+#appScreen .connection-status{
+  color:var(--text2);
+  font-size:11px;
+  white-space:nowrap;
+}
+
+/* Charte Last War étendue aux composants de l'application */
+:root{
+  --bg:#0b1720;
+  --surface:#12232e;
+  --surface2:#192d39;
+  --surface3:#21404e;
+  --surface4:#2b4c5a;
+  --border:rgba(255,205,125,.14);
+  --border2:rgba(255,205,125,.26);
+  --border3:rgba(255,205,125,.42);
+  --text:#f5f0df;
+  --text2:#c3d1d6;
+  --text3:#8ea4ad;
+  --text4:#637982;
+  --blue:#54c9e8;
+  --blue2:#25afd0;
+  --blue-d:#147c9a;
+  --blue-l:rgba(37,175,208,.14);
+  --blue-ll:rgba(37,175,208,.07);
+  --amber:#ffb640;
+  --amber-l:rgba(255,182,64,.14);
+  --gold:#ffda79;
+  --gold-l:rgba(255,218,121,.12);
+  --purple:#b7c8d3;
+  --purple-l:rgba(112,164,188,.12);
+  --radius:7px;
+  --radius-lg:10px;
+  --radius-xl:14px;
+  --radius-2xl:18px;
+  --shadow:0 7px 22px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,225,157,.04);
+  --shadow-lg:0 14px 36px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,225,157,.05);
+}
+body.light{
+  --surface:#f4efdf;
+  --surface2:#e8e1cf;
+  --surface3:#ddd2b8;
+  --surface4:#d1c29f;
+  --border:rgba(76,55,26,.14);
+  --border2:rgba(76,55,26,.24);
+  --border3:rgba(76,55,26,.38);
+  --text:#26383e;
+  --text2:#465d64;
+  --text3:#6e8286;
+  --text4:#89989a;
+  --blue:#147f9e;
+  --blue2:#126b89;
+  --blue-d:#104d68;
+  --blue-l:rgba(20,127,158,.12);
+  --blue-ll:rgba(20,127,158,.06);
+  --amber:#91530a;
+  --amber-l:rgba(145,83,10,.12);
+  --gold:#86520b;
+  --gold-l:rgba(134,82,11,.12);
+  --purple:#546a75;
+  --purple-l:rgba(84,106,117,.12);
+}
+#appScreen .section,
+#appScreen .planning-section,
+#appScreen .stat-card,
+#appScreen .team-card,
+#appScreen .card,
+#appScreen .panel,
+#appScreen .archive-week-card,
+#appScreen .podium-card,
+#appScreen .leaderboard-wrap,
+#appScreen .stats-global-card,
+#appScreen .ev-team-card,
+#appScreen .mv-panel,
+#appScreen .rw-panel,
+#appScreen .modal,
+#appScreen .modal-box,
+#appScreen .mv-note-modal-card,
+#appScreen .rcard,
+#appScreen .poll-page{
+  border-color:var(--border2)!important;
+  background:linear-gradient(155deg,var(--surface2),var(--surface))!important;
+  box-shadow:0 10px 26px rgba(0,0,0,.25),inset 0 2px 0 rgba(255,220,140,.06);
+}
+body.light #appScreen .section,
+body.light #appScreen .planning-section,
+body.light #appScreen .stat-card,
+body.light #appScreen .team-card,
+body.light #appScreen .card,
+body.light #appScreen .panel,
+body.light #appScreen .archive-week-card,
+body.light #appScreen .podium-card,
+body.light #appScreen .leaderboard-wrap,
+body.light #appScreen .stats-global-card,
+body.light #appScreen .ev-team-card,
+body.light #appScreen .mv-panel,
+body.light #appScreen .rw-panel,
+body.light #appScreen .modal,
+body.light #appScreen .modal-box,
+body.light #appScreen .mv-note-modal-card,
+body.light #appScreen .rcard,
+body.light #appScreen .poll-page{
+  background:linear-gradient(155deg,var(--surface),var(--surface2))!important;
+  box-shadow:0 8px 22px rgba(35,52,59,.13),inset 0 1px 0 rgba(255,255,255,.6);
+}
+#appScreen .section-header,
+#appScreen .planning-header,
+#appScreen .ev-team-header,
+#appScreen .podium-card-header,
+#appScreen .archive-week-header,
+#appScreen .ptable-head,
+#appScreen .leaderboard-table th,
+#appScreen .rw-table th,
+#appScreen .mv-table th{
+  background:linear-gradient(100deg,rgba(255,176,54,.2),rgba(22,53,67,.86) 70%)!important;
+  border-color:var(--border2);
+}
+body.light #appScreen .section-header,
+body.light #appScreen .planning-header,
+body.light #appScreen .ev-team-header,
+body.light #appScreen .podium-card-header,
+body.light #appScreen .archive-week-header,
+body.light #appScreen .ptable-head,
+body.light #appScreen .leaderboard-table th,
+body.light #appScreen .rw-table th,
+body.light #appScreen .mv-table th{
+  background:linear-gradient(100deg,rgba(255,183,61,.28),rgba(231,224,205,.94))!important;
+}
+#appScreen .section-title,
+#appScreen .planning-title,
+#appScreen .stat-card-name,
+#appScreen .modal h3,
+#appScreen .podium-card-title{
+  color:var(--gold)!important;
+  font-family:Rajdhani,'DM Sans',sans-serif;
+  font-weight:800;
+  letter-spacing:.045em;
+}
+#appScreen .dashboard-nav{
+  background:linear-gradient(155deg,var(--surface2),var(--surface))!important;
+  border-color:var(--border2);
+  border-left:3px solid var(--amber);
+}
+#appScreen .dashboard-nav-btn.active,
+#appScreen .stats-view-tab.active,
+#appScreen .stats-sort-btn.active,
+#appScreen .ev-nb-btn.active{
+  background:linear-gradient(180deg,#ffe28b,#e9a23c)!important;
+  border-color:#ffe3a0!important;
+  color:#2b1d0d!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 3px 0 rgba(100,62,20,.48);
+}
+#appScreen .btn,
+#appScreen .planning-copy-btn,
+#appScreen .stats-view-tab,
+#appScreen .stats-sort-btn,
+#appScreen .ev-nb-btn,
+#appScreen .poll-back-btn,
+#appScreen .pres-qbtn{
+  background:linear-gradient(180deg,var(--surface3),var(--surface2));
+  border-color:var(--border2);
+  color:var(--text2);
+  box-shadow:inset 0 1px 0 rgba(255,226,164,.08),0 2px 0 rgba(0,0,0,.3);
+}
+#appScreen .btn-primary,
+#appScreen button[class*='primary'],
+#appScreen .btn-draw,
+#loginScreen .login-btn{
+  background:linear-gradient(180deg,#ffe28b 0%,#f1ae43 58%,#d77b27 100%)!important;
+  color:#2b1d0d!important;
+  border:1px solid #ffe5a1!important;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.42),0 4px 0 rgba(106,62,19,.66),0 8px 16px rgba(0,0,0,.28)!important;
+}
+#appScreen .btn-purple{
+  background:linear-gradient(180deg,rgba(84,201,232,.2),rgba(32,109,132,.18));
+  color:var(--blue);
+  border-color:rgba(84,201,232,.38);
+}
+#appScreen .btn-danger,
+#appScreen .hist-del:hover,
+#appScreen .del-btn:hover{
+  border-color:rgba(255,105,82,.48);
+  box-shadow:inset 0 1px 0 rgba(255,220,140,.05),0 3px 0 rgba(88,28,21,.45);
+}
+#appScreen input:not([type="checkbox"]):not([type="radio"]),
+#appScreen select,
+#appScreen textarea{
+  background-color:var(--surface);
+  color:var(--text);
+  border-color:var(--border2);
+}
+#appScreen input::placeholder,
+#appScreen textarea::placeholder{color:var(--text4)}
+#appScreen input[type="checkbox"],
+#appScreen input[type="radio"]{accent-color:var(--amber)}
+#appScreen .ev-team-header.teamA{
+  background:linear-gradient(100deg,rgba(51,184,224,.22),rgba(18,54,70,.7))!important;
+}
+#appScreen .ev-team-header.teamB{
+  background:linear-gradient(100deg,rgba(239,93,75,.22),rgba(72,34,32,.72))!important;
+}
+#appScreen .ev-team-title.teamA{color:var(--blue)!important}
+#appScreen .ev-team-title.teamB{color:var(--red)!important}
+#appScreen .poll-logo{
+  background:linear-gradient(145deg,#ffd978,#bd702b);
+  border:2px solid #ffe4a0;
+  box-shadow:0 5px 0 #67421c,0 12px 25px rgba(0,0,0,.3);
+}
+#appScreen .poll-guild,
+#appScreen .poll-title{font-family:Rajdhani,'DM Sans',sans-serif;font-weight:800}
+#appScreen .poll-guild{color:var(--gold)}
+#appScreen .poll-page::before{
+  background:linear-gradient(90deg,transparent,var(--amber),var(--blue),transparent);
+}
+#loginScreen .login-title{
+  width:fit-content;
+  max-width:100%;
+  margin-inline:auto;
+  font-family:Rajdhani,'DM Sans',sans-serif;
+  font-size:clamp(22px,6vw,30px);
+  font-weight:800;
+  line-height:1.1;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  background:linear-gradient(180deg,#f7fbff 0%,#a7e4ff 35%,#ffd969 60%,#f89d2f 100%) !important;
+  background-size:100% 100%;
+  background-clip:text !important;
+  -webkit-background-clip:text !important;
+  -webkit-text-fill-color:transparent !important;
+  -webkit-text-stroke:1px rgba(11,35,55,.85);
+  color:transparent !important;
+  text-shadow:none !important;
+  filter:drop-shadow(0 3px 0 #152c43) drop-shadow(0 8px 5px rgba(0,0,0,.7));
+  animation:none;
+}
+#loginScreen .login-logo{
+  width:280px;
+  max-width:100%;
+  height:130px;
+  border-radius:14px;
+  background-color:#142b41;
+  background-image:
+    linear-gradient(rgba(8,24,36,.04),rgba(8,24,36,.12)),
+    url("Bataille%20%C3%A9pique%20pour%20la%20derni%C3%A8re%20guerre.png") !important;
+  background-size:100% 100%,235% auto !important;
+  background-position:center,62% top !important;
+  background-repeat:no-repeat !important;
+  box-shadow:0 6px 0 #0c1b20,0 0 30px rgba(255,180,61,.24);
 }

@@ -274,3 +274,91 @@ html body .poll-stats-status[data-status="error"] .poll-stats-status-badge{borde
 @media(prefers-reduced-motion:reduce){
   html body .card,html body .lang,html body .card a{transition:none}
 }
+html.light body{
+  --lw-bg:#e1dccb;
+  --lw-surface:#f4efdf;
+  --lw-surface2:#e8e1cf;
+  --lw-surface3:#ddd2b8;
+  --lw-border:rgba(76,55,26,.14);
+  --lw-border2:rgba(76,55,26,.24);
+  --lw-border3:rgba(76,55,26,.38);
+  --lw-text:#26383e;
+  --lw-text2:#465d64;
+  --lw-muted:#6e8286;
+  --lw-blue:#147f9e;
+  --lw-amber:#91530a;
+  --lw-gold:#86520b;
+  color:var(--lw-text);
+  background:linear-gradient(145deg,#e1dccb,#d5cfbd);
+}
+html.light body::before{
+  background-image:
+    linear-gradient(rgba(76,55,26,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(76,55,26,.035) 1px,transparent 1px);
+}
+html.light body .panel{
+  border-color:var(--lw-border2);
+  background:linear-gradient(155deg,var(--lw-surface),var(--lw-surface2));
+  box-shadow:0 8px 22px rgba(35,52,59,.13),inset 0 1px 0 rgba(255,255,255,.6);
+}
+html.light body .head{
+  border-bottom-color:var(--lw-border2);
+  background:
+    linear-gradient(90deg,rgba(244,239,223,.34),rgba(244,239,223,.18) 52%,rgba(244,239,223,.34)),
+    url("../Bataille%20%C3%A9pique%20pour%20la%20derni%C3%A8re%20guerre.png") center top/cover no-repeat;
+}
+html.light body .lang{
+  border-color:var(--lw-border2);
+  background:linear-gradient(180deg,var(--lw-surface),var(--lw-surface2));
+  color:var(--lw-text2);
+}
+html.light body .lang[aria-pressed="true"]{
+  border-color:#ffe3a0;
+  background:linear-gradient(180deg,#ffe28b,#e9a23c);
+  color:#2b1d0d;
+}
+html.light body .card{
+  border-color:var(--lw-border2);
+  background:linear-gradient(155deg,var(--lw-surface),var(--lw-surface2));
+  box-shadow:0 8px 22px rgba(35,52,59,.13),inset 0 1px 0 rgba(255,255,255,.6);
+}
+html.light body .card.canyon{--poll-accent:#147f9e;--poll-accent-rgb:20,127,158}
+html.light body .card.tdd{--poll-accent:#91530a;--poll-accent-rgb:145,83,10}
+html.light body .card.t1{--poll-accent:#247c45;--poll-accent-rgb:36,124,69}
+html.light body .card .art{
+  border-color:var(--lw-border);
+  background:radial-gradient(circle,rgba(var(--poll-accent-rgb),.12),transparent 70%);
+}
+html.light body .card p{color:var(--lw-text2)}
+html.light body .poll-stats-table{
+  border-color:var(--lw-border2);
+  background:linear-gradient(155deg,var(--lw-surface),var(--lw-surface2));
+}
+html.light body .poll-stats-table th,
+html.light body .poll-stats-table td{
+  border-color:var(--lw-border);
+  color:var(--lw-text2);
+}
+html.light body .poll-stats-table thead th{
+  border-bottom-color:var(--lw-border2);
+  background:linear-gradient(100deg,#eee4c9,var(--lw-surface2));
+  color:var(--lw-gold);
+}
+html.light body .poll-stats-row-name,
+html.light body .poll-stats-count{color:var(--lw-text)!important}
+html.light body .poll-stats-status-badge{
+  border-color:var(--lw-border2);
+  background:rgba(76,55,26,.04);
+  color:var(--lw-text2);
+}
+html.light body .poll-stats-status[data-status="open"] .poll-stats-status-badge{
+  border-color:rgba(36,124,69,.38);
+  background:rgba(36,124,69,.1);
+  color:#247c45;
+}
+html.light body .poll-stats-status[data-status="closed"] .poll-stats-status-badge{color:var(--lw-text2)}
+html.light body .poll-stats-status[data-status="error"] .poll-stats-status-badge{
+  border-color:rgba(181,61,48,.4);
+  background:rgba(181,61,48,.1);
+  color:#b53d30;
+}

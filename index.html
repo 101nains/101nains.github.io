@@ -131,18 +131,9 @@ function onSupabaseError(){
         </div>
       </div>
 
-  <!-- ONGLET TIRAGE -->
-  <div class="section" id="secTirage" style="margin-bottom:1rem">
-    <div class="section-header" data-section-toggle role="button" tabindex="0" aria-controls="tirageBody" aria-expanded="false" onclick="toggleSection('tirageBody','tirageToggle')" style="cursor:pointer;margin-bottom:0">
-      <div class="section-header-left">
-        <span class="section-title">🎲 Tirage du train</span>
-      </div>
-      <span class="section-toggle collapsed" id="tirageToggle" aria-hidden="true">▾</span>
-    </div>
-    <div class="section-body collapsed" id="tirageBody" aria-hidden="true" inert style="max-height:0">
-
-      <!-- PLANNING SEMAINE -->
-      <div class="planning-section" id="planningSection" style="margin-top:1rem">
+  <!-- PLANNING SEMAINE ET TIRAGES -->
+  <div id="secTirage" style="margin-bottom:1rem">
+      <div class="planning-section" id="planningSection">
         <div class="planning-header">
           <div class="section-header-left" data-section-toggle role="button" tabindex="0" aria-controls="planningBody" aria-expanded="false" onclick="toggleSection('planningBody','planningToggle')" style="display:flex;flex-direction:column;gap:6px;flex:1;cursor:pointer">
             <div class="planning-title">
@@ -174,8 +165,6 @@ function onSupabaseError(){
           </div>
         </div>
       </div>
-
-    </div>
   </div>
 
     <!-- HISTORIQUE DES TIRAGES -->

@@ -220,7 +220,6 @@ function setDashboardPage(pageId){
   if(description)description.textContent=page.description;
 
   if(pageId==='home'){
-    if(document.getElementById('tirageBody')?.getAttribute('aria-hidden')==='true')animateSectionBody('tirageBody',true);
     if(document.getElementById('planningBody')?.getAttribute('aria-hidden')==='true')animateSectionBody('planningBody',true);
   }
   if(pageChanged){
@@ -3827,12 +3826,6 @@ function animateSectionBody(bodyId,expanded){
 function toggleSection(bodyId,toggleId){
   const body=document.getElementById(bodyId);const toggle=document.getElementById(toggleId);if(!body||!toggle)return;
   const isCollapsed=body.getAttribute('aria-hidden')==='true';
-  if(isCollapsed){
-    // À l'ouverture du tirage du train, afficher directement les joueurs tirés pour la semaine.
-    if(bodyId==='tirageBody'){
-      animateSectionBody('planningBody',true);
-    }
-  }
   animateSectionBody(bodyId,isCollapsed);
   toggle.classList.toggle('collapsed',!isCollapsed);
 }
